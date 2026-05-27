@@ -351,7 +351,7 @@ export default function MyPage() {
 
         {/* 탭 네비게이션 — Creator 관리는 creator 전용 */}
         <nav className={styles.tabs}>
-          {TABS.filter(tab => tab.id !== 'creator' || user.role === 'creator').map(tab => (
+          {TABS.filter(tab => tab.id !== 'creator' || user.role === 'creator' || user.role === 'user').map(tab => (
             <button
               key={tab.id}
               className={`${styles.tabBtn} ${activeTab === tab.id ? styles.tabBtnActive : ''}`}
@@ -663,7 +663,7 @@ export default function MyPage() {
         )}
 
         {/* Creator 관리 탭 */}
-        {activeTab === 'creator' && user.role === 'creator' && (
+        {activeTab === 'creator' && (user.role === 'creator' || user.role === 'user') && (
           <section className={styles.tabContent}>
             <p className={styles.tabDesc}>Creator 신청 상태와 업로드한 음악을 관리하세요.</p>
 

@@ -290,6 +290,11 @@ export default function Navbar({ logoUrl = '' }) {
             + 업로드
           </Link>
         )}
+        {user?.role === 'user' && (
+          <Link to="/upload" className={`${styles.uploadBtn} ${pathname === '/upload' ? styles.uploadBtnActive : ''}`}>
+            + Creator 신청
+          </Link>
+        )}
 
         <div className={styles.authArea}>
           {authLoading ? null : user ? (
