@@ -1,0 +1,1623 @@
+﻿.page {
+  padding-top: calc(var(--nav-height) + 24px);
+  padding-bottom: calc(var(--player-height) + 40px);
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 36px 40px;
+}
+
+.heading {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.loading,
+.empty {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.errorMsg {
+  padding: 12px 16px;
+  background: rgba(230, 57, 70, 0.10);
+  border: 1px solid rgba(230, 57, 70, 0.30);
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* 접근 차단 박스 */
+.gateBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.8rem;
+  padding: 3.5rem 2rem;
+  background: var(--surface, #1e1e2e);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 16px;
+  margin-top: 2rem;
+}
+
+.gateTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.gateDesc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.gateActions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.gatePrimary {
+  padding: 0.65rem 1.4rem;
+  background: var(--accent, #7c6af7);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.gatePrimary:hover { opacity: 0.85; }
+
+/* 신청 목록 */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.artistName {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.userName {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(123, 47, 247, 0.04);
+  border-radius: 6px;
+  border-left: 3px solid var(--border);
+}
+
+.date,
+.reviewedAt {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.rejectReason {
+  font-size: 13px;
+  color: var(--danger, #f87171);
+  margin: 0;
+}
+
+/* 상태 배지 */
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge_pending {
+  background: rgba(251, 146, 60, 0.15);
+  color: #FB923C;
+}
+
+.badge_approved {
+  background: rgba(48, 209, 88, 0.15);
+  color: var(--success, #30d158);
+}
+
+.badge_rejected {
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--danger, #f87171);
+}
+
+/* 승인/반려 버튼 */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.approveBtn {
+  padding: 9px 20px;
+  background: var(--success, #30d158);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.approveBtn:hover { opacity: 0.85; }
+
+.rejectToggleBtn {
+  padding: 9px 20px;
+  background: transparent;
+  color: var(--danger, #f87171);
+  border: 1px solid var(--danger, #f87171);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.rejectToggleBtn:hover {
+  background: rgba(230, 57, 70, 0.10);
+}
+
+/* 반려 사유 입력 */
+.rejectBox {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.rejectInput {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.rejectInput:focus {
+  border-color: var(--danger, #f87171);
+}
+
+.rejectConfirmBtn {
+  padding: 9px 18px;
+  background: var(--danger, #f87171);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.rejectConfirmBtn:hover { opacity: 0.85; }
+
+/* 섹션 구분 */
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionHeading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 음원 목록 */
+.trackList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trackCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s;
+}
+
+.trackCard:hover {
+  border-color: var(--border-hover);
+}
+
+.trackCardDeleted {
+  opacity: 0.5;
+}
+
+.trackCover {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.trackCoverPlaceholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: rgba(123, 47, 247, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trackInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.trackTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.trackTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.deletedBadge {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 1px 8px;
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--danger, #f87171);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.trackDeletedInfo {
+  font-size: 11px;
+  color: var(--danger, #f87171);
+  margin: 2px 0 0 0;
+  opacity: 0.8;
+}
+
+.trackMeta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 3px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.trackGenreTag {
+  display: inline-block;
+  padding: 1px 7px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #9CA3AF;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.trackUploader {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 2px 0 0 0;
+}
+
+.trackActions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.trackEditBtn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.trackEditBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(123, 47, 247, 0.08);
+}
+
+.trackDeleteBtn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid rgba(230, 57, 70, 0.35);
+  border-radius: 8px;
+  color: var(--danger, #f87171);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.trackDeleteBtn:hover {
+  background: rgba(230, 57, 70, 0.10);
+}
+
+/* 수정 모달 */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.modalClose:hover { color: var(--text-primary); }
+
+.modalBody {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modalField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.modalLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.modalInput,
+.modalSelect,
+.modalTextarea {
+  background: var(--bg, #13131f);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.modalInput:focus,
+.modalSelect:focus,
+.modalTextarea:focus {
+  border-color: var(--accent);
+}
+
+.modalTextarea { resize: vertical; min-height: 72px; }
+
+.modalError {
+  padding: 10px 14px;
+  background: rgba(230, 57, 70, 0.10);
+  border: 1px solid rgba(230, 57, 70, 0.30);
+  border-radius: 8px;
+  color: var(--danger, #f87171);
+  font-size: 13px;
+  margin: 0;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 8px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* 삭제 확인 모달 텍스트 */
+.deleteConfirmText {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0 0 6px 0;
+  line-height: 1.5;
+}
+
+.deleteConfirmSub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 4px 0;
+  line-height: 1.5;
+}
+
+.modalDeleteBtn {
+  padding: 9px 22px;
+  background: var(--danger, #f87171);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.modalDeleteBtn:hover:not(:disabled) { opacity: 0.85; }
+.modalDeleteBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.modalSaveBtn {
+  padding: 9px 22px;
+  background: linear-gradient(135deg, #7B2FF7 0%, #EC1E79 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 8px 24px rgba(236, 30, 121, 0.20),
+    0 4px 16px rgba(123, 47, 247, 0.25);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s, box-shadow 0.2s, transform 0.12s, opacity 0.2s;
+}
+
+.modalSaveBtn:hover:not(:disabled) {
+  filter: brightness(1.10);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    0 12px 32px rgba(236, 30, 121, 0.30),
+    0 6px 22px rgba(123, 47, 247, 0.35),
+    0 3px 12px rgba(0, 0, 0, 0.28);
+}
+.modalSaveBtn:disabled { opacity: 0.48; cursor: not-allowed; filter: none; transform: none; }
+
+.modalCancelBtn {
+  padding: 9px 18px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modalCancelBtn:hover:not(:disabled) { background: rgba(123, 47, 247, 0.06); }
+.modalCancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 회원 관리 */
+.memberFilters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.filterBtn {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.filterBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.filterBtnActive {
+  background: rgba(123, 47, 247, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.memberList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.memberCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s;
+}
+
+.memberCard:hover {
+  border-color: var(--border-hover);
+}
+
+.memberCardInactive {
+  opacity: 0.55;
+}
+
+.memberAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.memberAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.memberAvatarInitial {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.memberInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.memberTopRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.memberLoginId {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.memberRoleBadge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.role_user {
+  background: rgba(123, 47, 247, 0.07);
+  color: var(--text-secondary);
+}
+
+.role_creator {
+  background: rgba(236, 30, 121, 0.10);
+  color: rgba(236, 72, 153, 0.95);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+}
+
+.role_admin {
+  background: rgba(167, 139, 250, 0.15);
+  color: #A78BFA;
+}
+
+.memberStatusBadge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.statusActive {
+  background: rgba(48, 209, 88, 0.12);
+  color: var(--success, #30d158);
+}
+
+.statusInactive {
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--danger, #f87171);
+}
+
+.memberMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.memberDot {
+  color: var(--text-tertiary);
+}
+
+.memberArtist {
+  color: var(--accent, #7c6af7);
+}
+
+.memberDates {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.memberDeactivatedInfo {
+  color: var(--danger, #f87171);
+  opacity: 0.85;
+}
+
+.memberActions {
+  flex-shrink: 0;
+}
+
+.deactivateBtn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid rgba(230, 57, 70, 0.35);
+  border-radius: 8px;
+  color: var(--danger, #f87171);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.deactivateBtn:hover {
+  background: rgba(230, 57, 70, 0.10);
+}
+
+.activateBtn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid rgba(48, 209, 88, 0.4);
+  border-radius: 8px;
+  color: var(--success, #30d158);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.activateBtn:hover {
+  background: rgba(48, 209, 88, 0.1);
+}
+
+/* ── 브랜딩 설정 섹션 ── */
+.brandCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brandSubLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 12px 0;
+}
+
+.brandLogoRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.brandLogoImg {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: 8px;
+  flex-shrink: 0;
+}
+
+.brandHeroBgImg {
+  width: 160px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.brandLogoPlaceholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.brandLogoFileArea {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.brandFileLabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  user-select: none;
+}
+
+.brandFileLabel:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.brandFileName {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.brandColorGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.brandColorItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.brandColorLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 0;
+}
+
+.brandColorSwatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  padding: 0;
+  background: none;
+  flex-shrink: 0;
+}
+
+.brandColorHex {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: monospace;
+  width: 58px;
+  flex-shrink: 0;
+}
+
+.brandActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.brandPreviewBtn {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.brandPreviewBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.brandPreviewBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.brandApplyBtn {
+  padding: 8px 22px;
+  background: linear-gradient(135deg, #7B2FF7 0%, #EC1E79 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 24px rgba(236, 30, 121, 0.20),
+    0 4px 16px rgba(123, 47, 247, 0.25);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s, box-shadow 0.2s, transform 0.12s, opacity 0.2s;
+}
+
+.brandApplyBtn:hover:not(:disabled) {
+  filter: brightness(1.10);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 12px 32px rgba(236, 30, 121, 0.30),
+    0 6px 22px rgba(123, 47, 247, 0.35),
+    0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.brandApplyBtn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+.brandSuccessMsg {
+  font-size: 13px;
+  color: var(--success);
+  margin: 0;
+}
+
+.brandErrorMsg {
+  font-size: 13px;
+  color: var(--danger);
+  margin: 0;
+}
+
+/* ── 관리자 재인증 게이트 ── */
+.reauthForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 20px;
+}
+
+.reauthInput {
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.reauthInput:focus {
+  border-color: var(--accent);
+}
+
+.reauthError {
+  font-size: 13px;
+  color: var(--danger);
+  margin: 0;
+}
+
+.reauthSubmitBtn {
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #7B2FF7 0%, #EC1E79 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 24px rgba(236, 30, 121, 0.20),
+    0 4px 16px rgba(123, 47, 247, 0.25);
+  cursor: pointer;
+  transition: filter 0.2s, box-shadow 0.2s, transform 0.12s, opacity 0.2s;
+}
+
+.reauthSubmitBtn:hover:not(:disabled) {
+  filter: brightness(1.10);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 12px 32px rgba(236, 30, 121, 0.30),
+    0 6px 22px rgba(123, 47, 247, 0.35),
+    0 3px 12px rgba(0, 0, 0, 0.26);
+}
+
+.reauthSubmitBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+/* ── 영구 삭제 버튼 ── */
+.trackHardDeleteBtn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger, #E63946);
+  background: rgba(230, 57, 70, 0.10);
+  border: 1px solid rgba(230, 57, 70, 0.35);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.trackHardDeleteBtn:hover {
+  background: rgba(230, 57, 70, 0.20);
+  border-color: rgba(230, 57, 70, 0.55);
+}
+
+/* ── 탭 네비게이션 ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.18s, border-color 0.18s;
+  margin-bottom: -1px;
+}
+
+.tabBtn:hover { color: var(--text-primary); }
+
+.tabBtnActive {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.tabBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tabContent {
+  padding-top: 4px;
+}
+
+.tabDesc {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0 0 20px 0;
+}
+
+/* ── 대시보드 통계 카드 ── */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.statCardAlert {
+  border-color: rgba(251, 146, 60, 0.35);
+  background: rgba(251, 146, 60, 0.06);
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.statCardAlert .statValue {
+  color: #FB923C;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* ── 삭제 로그 목록 ── */
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.logInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.logTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logMeta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.logReason {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 0;
+  font-style: italic;
+}
+
+.logRight {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.logBy {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.logDate {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* ── 영구 삭제 모달 ── */
+.hardDeleteWarning {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--danger, #E63946);
+  margin-bottom: 8px;
+}
+
+.modalHardDeleteBtn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: var(--danger, #E63946);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.modalHardDeleteBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.modalHardDeleteBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   서버 모니터링 탭
+   ============================================================ */
+
+.monHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.monTitle {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text-primary);
+}
+
+.monBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.monBadgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.monBadgeOnline {
+  background: rgba(0, 255, 100, 0.12);
+  border: 1px solid rgba(0, 255, 100, 0.35);
+  color: #00e85a;
+}
+
+.monBadgeDegraded {
+  background: rgba(255, 200, 0, 0.12);
+  border: 1px solid rgba(255, 200, 0, 0.35);
+  color: #ffc800;
+}
+
+.monBadgeError {
+  background: rgba(255, 70, 70, 0.12);
+  border: 1px solid rgba(255, 70, 70, 0.35);
+  color: #ff4646;
+}
+
+.monDesc {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.monMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.monUpdatedAt {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.monRefreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: 'Courier New', Courier, monospace;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.monRefreshBtn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.monRefreshBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.monAutoLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.monAutoDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e85a;
+}
+
+/* 2열 그리드 */
+.monGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* 카드 */
+.monCard {
+  background: #0b0b18;
+  border: 1px solid #1c1c30;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.monCardTitle {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #4a9eff;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1c1c30;
+}
+
+/* 키-값 행 */
+.monRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  gap: 8px;
+}
+
+.monRow:last-child {
+  border-bottom: none;
+}
+
+.monKey {
+  font-size: 11px;
+  color: #5a6470;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.monVal {
+  font-size: 11px;
+  color: #c8d0db;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: right;
+  word-break: break-all;
+}
+
+.monValGreen  { color: #00e85a !important; }
+.monValYellow { color: #ffc800 !important; }
+.monValRed    { color: #ff4646 !important; }
+.monValAccent { color: #a78bfa !important; }
+
+/* CPU 코어 그리드 */
+.monCoreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 6px;
+  margin: 4px 0 8px;
+}
+
+/* 메서드 / 상태코드 배지 그리드 */
+.monBadgeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.monBadgeItem {
+  background: #0d0d20;
+  border: 1px solid #1c1c30;
+  border-radius: 4px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.monBadgeKey {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  color: #5a6470;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.monBadgeVal {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  color: #c8d0db;
+}
+
+/* 서비스 체크 */
+.monServiceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 24px;
+}
+
+.monServiceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.monServiceRow:last-child {
+  border-bottom: none;
+}
+
+.monSvcOnline {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #00e85a;
+  background: rgba(0, 232, 90, 0.08);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 232, 90, 0.2);
+}
+
+.monSvcOk {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: #00e85a;
+}
+
+.monSvcMissing {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: #ff4646;
+}
+
+.monSvcVal {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  color: #a78bfa;
+}
+
+/* 최근 요청 로그 박스 */
+.monLogBox {
+  background: #05050f;
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.monLogEmpty {
+  color: #3a4050;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.monLogLine {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+  line-height: 1.5;
+}
+
+.monLogLine:last-child {
+  border-bottom: none;
+}
+
+.monLogTime   { color: #3a4050; flex-shrink: 0; }
+.monLogMethod { flex-shrink: 0; font-weight: 700; min-width: 52px; }
+.monLogGet    { color: #4a9eff; }
+.monLogPost   { color: #00e85a; }
+.monLogPatch  { color: #ffc800; }
+.monLogDelete { color: #ff4646; }
+.monLogOther  { color: #a78bfa; }
+.monLogPath   { color: #8892a0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.monLogStatus { flex-shrink: 0; font-weight: 700; min-width: 28px; text-align: right; }
+.monLogDur    { flex-shrink: 0; color: #3a4050; min-width: 48px; text-align: right; }
+

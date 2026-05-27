@@ -1,0 +1,731 @@
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-height);
+  background: rgba(8, 12, 20, 0.88);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 24px;
+  z-index: 100;
+}
+
+.logoArea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+
+.adminConsolePill {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(236, 72, 153, 0.95);
+  background: linear-gradient(135deg, rgba(123, 47, 247, 0.18) 0%, rgba(236, 30, 121, 0.10) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  letter-spacing: 0.2px;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+  white-space: nowrap;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 0 10px rgba(236, 30, 121, 0.12);
+}
+
+.adminConsolePill:hover {
+  background: linear-gradient(135deg, rgba(123, 47, 247, 0.28) 0%, rgba(236, 30, 121, 0.16) 100%);
+  border-color: rgba(167, 139, 250, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 14px rgba(236, 30, 121, 0.18),
+    0 0 18px rgba(123, 47, 247, 0.14);
+}
+
+.adminConsolePillActive {
+  background: linear-gradient(135deg, rgba(123, 47, 247, 0.34) 0%, rgba(236, 30, 121, 0.20) 100%);
+  border-color: rgba(167, 139, 250, 0.60);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 16px rgba(236, 30, 121, 0.22),
+    0 0 20px rgba(123, 47, 247, 0.16);
+}
+
+.logoImg {
+  height: 28px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* ── 검색바 ── */
+.searchWrap {
+  flex: 1;
+  max-width: 420px;
+  position: relative;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 0 14px;
+  height: 36px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.searchBox:focus-within {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.searchIcon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.searchInput::placeholder {
+  color: var(--text-tertiary);
+}
+
+.searchSpinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: navSpin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes navSpin {
+  to { transform: rotate(360deg); }
+}
+
+.searchClear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.searchClear:hover {
+  color: var(--text-secondary);
+}
+
+/* 드롭다운 */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: rgba(10, 14, 22, 0.97);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+
+.dropEmpty {
+  padding: 18px 16px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.dropSection {
+  padding: 8px 0 4px;
+}
+
+.dropSection + .dropSection {
+  border-top: 1px solid var(--border);
+}
+
+.dropSectionTitle {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-tertiary);
+  padding: 4px 16px 6px;
+}
+
+.dropItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 16px;
+  transition: background 0.15s;
+}
+
+.dropItem:hover {
+  background: rgba(123, 47, 247, 0.08);
+}
+
+/* Creator 항목 (button 전체가 클릭 대상) */
+.dropItem > button.dropInfo {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+}
+
+.dropCoverBtn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.dropCover {
+  width: 36px;
+  height: 36px;
+  border-radius: 5px;
+  object-fit: cover;
+  display: block;
+}
+
+.dropCoverOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.dropCoverBtn:hover .dropCoverOverlay {
+  opacity: 1;
+}
+
+.dropAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.dropInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.dropTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropSub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 1px;
+}
+
+.dropGenre {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #9CA3AF;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+.dropViewAll {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dropViewAll:hover {
+  background: rgba(123, 47, 247, 0.07);
+}
+
+/* ── 우측 메뉴 ── */
+.links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .searchWrap {
+    max-width: 180px;
+  }
+
+  .link {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .searchWrap {
+    max-width: 120px;
+  }
+
+  .uploadBtn {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+}
+
+.link {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s, background 0.2s;
+}
+
+.link:hover {
+  color: var(--text-primary);
+  background: rgba(123, 47, 247, 0.08);
+}
+
+.link.active {
+  color: var(--text-primary);
+  background: rgba(123, 47, 247, 0.10);
+}
+
+.uploadBtn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #7B2FF7 0%, #00C6FF 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 6px 18px rgba(0, 198, 255, 0.22),
+    0 4px 14px rgba(123, 47, 247, 0.22);
+  transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
+  margin-left: 8px;
+}
+
+.uploadBtn:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 28px rgba(0, 198, 255, 0.36),
+    0 5px 20px rgba(123, 47, 247, 0.34);
+}
+
+.uploadBtn:active {
+  transform: translateY(1px) scale(0.97);
+  filter: brightness(0.95);
+  box-shadow:
+    0 2px 8px rgba(0, 198, 255, 0.18),
+    0 1px 6px rgba(123, 47, 247, 0.18);
+  transition: transform 0.08s, filter 0.08s, box-shadow 0.08s;
+}
+
+.uploadBtnActive {
+  filter: brightness(1.06);
+  box-shadow:
+    0 0 16px rgba(0, 198, 255, 0.28),
+    0 0 20px rgba(123, 47, 247, 0.24);
+}
+
+.authArea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.authBtn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s, background 0.2s;
+}
+
+.authBtn:hover {
+  color: var(--text-primary);
+  background: rgba(123, 47, 247, 0.08);
+}
+
+.authBtnFill {
+  color: var(--accent);
+  background: rgba(123, 47, 247, 0.12);
+  border: 1px solid var(--accent);
+}
+
+.authBtnFill:hover {
+  color: #fff;
+  background: var(--accent);
+}
+
+.authBtnActive {
+  color: var(--text-primary);
+  background: rgba(123, 47, 247, 0.10);
+}
+
+.profileArea {
+  position: relative;
+}
+
+/* 프로필 전체 클릭 영역 */
+.profileToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: background 0.18s;
+}
+
+.profileToggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.avatarWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.navAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+  display: block;
+}
+
+/* 프로필 사진 없을 때 이니셜 원형 아바타 */
+.navAvatarInitial {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(123, 47, 247, 0.18);
+  border: 1.5px solid rgba(123, 47, 247, 0.50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.unreadBadge {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: #e05252;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+  border: 1.5px solid rgba(8, 12, 20, 0.9);
+  pointer-events: none;
+}
+
+/* ── 알림 드롭다운 ── */
+.notifDrop {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  background: rgba(10, 14, 22, 0.98);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+  z-index: 300;
+}
+
+.notifDropHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px 11px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notifDropTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+.notifDropMarkAll {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+
+.notifDropMarkAll:hover {
+  opacity: 0.75;
+}
+
+.notifDropMarkAll:disabled {
+  color: var(--text-tertiary);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.notifDropList {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.notifDropEmpty {
+  padding: 22px 16px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.notifDropItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.notifDropItem:last-child {
+  border-bottom: none;
+}
+
+.notifDropItem:hover {
+  background: rgba(123, 47, 247, 0.07);
+}
+
+.notifDropItemUnread {
+  background: rgba(123, 47, 247, 0.05);
+}
+
+.notifDropDot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 5px;
+}
+
+.notifDropTextWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.notifDropItemTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notifDropItemMsg {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notifDropItemDate {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.notifDropFooter {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.notifDropFooterBtn {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(8, 12, 24, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #AEB6C8;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.notifDropFooterBtn:hover {
+  background: rgba(20, 26, 50, 0.75);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #F4F6FF;
+}
+
+/* tertiary — 가장 약한 보조 (전체 알림 보기) */
+.notifDropFooterBtnGhost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.10);
+  color: #8F99AF;
+  font-weight: 500;
+}
+
+.notifDropFooterBtnGhost:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.20);
+  color: #AEB6C8;
+}
+
+.notifDropFooterBtnAlt {
+  background: linear-gradient(135deg, #7B2FF7 0%, #00C6FF 100%);
+  border-color: transparent;
+  color: #fff;
+  box-shadow:
+    0 4px 14px rgba(0, 198, 255, 0.20),
+    0 2px 10px rgba(123, 47, 247, 0.20);
+  transition: filter 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.notifDropFooterBtnAlt:hover {
+  background: linear-gradient(135deg, #7B2FF7 0%, #00C6FF 100%);
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  color: #fff;
+  box-shadow:
+    0 6px 20px rgba(0, 198, 255, 0.34),
+    0 4px 16px rgba(123, 47, 247, 0.30);
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.roleTag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(123, 47, 247, 0.18) 0%, rgba(236, 30, 121, 0.10) 100%);
+  color: rgba(236, 72, 153, 0.95);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 8px rgba(236, 30, 121, 0.12);
+}
+
+.logoutBtn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.logoutBtn:hover {
+  color: var(--text-primary);
+  background: rgba(123, 47, 247, 0.08);
+}

@@ -1,0 +1,357 @@
+﻿.card {
+  background: var(--bg-card);
+  border: 1.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
+  transition:
+    border-color 0.28s,
+    background 0.28s,
+    transform 0.32s cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 0.28s;
+  cursor: pointer;
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+  border-color: transparent;
+  transform: translateY(-4px);
+  box-shadow:
+    0 0 0 1.5px rgba(124, 58, 237, 0.72),
+    inset 0 -1.5px 0 0 rgba(124, 58, 237, 0.48),
+    0 8px 28px rgba(124, 58, 237, 0.28),
+    0 4px 18px rgba(96, 165, 250, 0.12),
+    0 20px 56px rgba(0, 0, 0, 0.42);
+}
+
+/* Now Playing — 다층 ring으로 pink→purple→cyan gradient border 표현 */
+.cardPlaying {
+  border-color: transparent;
+  animation: nowPlayingPulse 3.5s ease-in-out infinite;
+}
+
+/* Now Playing + Hover — gradient border 유지, lift 추가, pulse 정지 */
+.cardPlaying:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  background: var(--bg-card-hover);
+  box-shadow:
+    0 0 0 1.5px rgba(255, 79, 216, 0.92),
+    0 0 0 2.8px rgba(139, 92, 246, 0.58),
+    0 0 0 4px rgba(56, 189, 248, 0.30),
+    0 0 24px rgba(255, 79, 216, 0.28),
+    0 0 42px rgba(56, 189, 248, 0.16),
+    0 18px 52px rgba(0, 0, 0, 0.44);
+  animation: none;
+}
+
+@keyframes nowPlayingPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1.5px rgba(255, 79, 216, 0.72),
+      0 0 0 2.8px rgba(139, 92, 246, 0.40),
+      0 0 0 4px rgba(56, 189, 248, 0.18),
+      0 0 18px rgba(255, 79, 216, 0.16),
+      0 0 30px rgba(56, 189, 248, 0.09),
+      0 6px 26px rgba(0, 0, 0, 0.34);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1.5px rgba(255, 79, 216, 0.92),
+      0 0 0 2.8px rgba(139, 92, 246, 0.58),
+      0 0 0 4px rgba(56, 189, 248, 0.28),
+      0 0 26px rgba(255, 79, 216, 0.28),
+      0 0 46px rgba(56, 189, 248, 0.18),
+      0 6px 26px rgba(0, 0, 0, 0.34);
+  }
+}
+
+.playOverlayActive {
+  opacity: 0.6 !important;
+}
+
+
+.coverWrapper {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #0D1120;
+}
+
+/* Shine sweep on hover */
+.coverWrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 52%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.09) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.card:hover .coverWrapper::after {
+  animation: shineSweep 0.55s ease-in-out forwards;
+}
+
+@keyframes shineSweep {
+  from { left: -80%; opacity: 1; }
+  to   { left: 140%; opacity: 0.5; }
+}
+
+.cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease, filter 0.28s ease;
+}
+
+.card:hover .cover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+.playOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.36);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.coverWrapper:hover .playOverlay {
+  opacity: 1;
+}
+
+/* Circular glow ring behind play icon */
+.playOverlay::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(4, 4, 14, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  transition: box-shadow 0.22s;
+}
+
+.coverWrapper:hover .playOverlay::before {
+  box-shadow:
+    0 0 16px rgba(124, 58, 237, 0.62),
+    0 0 32px rgba(124, 58, 237, 0.22);
+}
+
+.playOverlay svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+}
+
+
+.info {
+  display: block;
+  padding: 11px 13px 8px;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.title:hover {
+  color: var(--accent);
+  transition: color 0.15s;
+}
+
+.artistRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.artist {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.artistLink {
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.artistLink:hover {
+  color: var(--accent);
+}
+
+.followBtn {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, #7B2FF7 0%, #00C6FF 100%);
+  color: #fff;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s, filter 0.2s;
+  white-space: nowrap;
+  box-shadow:
+    0 4px 14px rgba(0, 198, 255, 0.22),
+    0 2px 10px rgba(123, 47, 247, 0.22);
+}
+
+.followBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.13);
+  box-shadow:
+    0 6px 20px rgba(0, 198, 255, 0.38),
+    0 4px 16px rgba(123, 47, 247, 0.34),
+    0 0 0 1px rgba(0, 198, 255, 0.18);
+}
+
+.followBtn:active {
+  transform: translateY(1px) scale(0.96);
+  filter: brightness(0.92);
+  box-shadow:
+    0 2px 8px rgba(0, 198, 255, 0.18),
+    0 1px 6px rgba(123, 47, 247, 0.18);
+  transition: transform 0.08s, filter 0.08s, box-shadow 0.08s;
+}
+
+.followBtnActive {
+  background: rgba(20, 184, 166, 0.12);
+  color: #5eead4;
+  border-color: rgba(20, 184, 166, 0.30);
+  box-shadow: 0 0 8px rgba(20, 184, 166, 0.12);
+  filter: none;
+}
+
+.followBtnActive:hover {
+  color: #FCA5A5;
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.25);
+  box-shadow: none;
+}
+
+.genre {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #9CA3AF;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.genre:hover {
+  color: #C4B5FD;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(196, 181, 253, 0.20);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 13px 11px;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.metaActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.metaIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.15s;
+  text-decoration: none;
+}
+
+.metaIconBtn:hover {
+  color: var(--accent);
+  background: rgba(123, 47, 247, 0.10);
+}
+
+.likeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s, transform 0.15s;
+}
+
+.likeBtn:hover {
+  color: var(--danger);
+  transform: scale(1.15);
+}
+
+.likeBtnActive {
+  color: var(--danger);
+}
+
+/* Card hover: meta area gets slightly brighter */
+.card:hover .metaItem {
+  color: #AEB6C8;
+  transition: color 0.22s;
+}
+
+.card:hover .metaIconBtn {
+  color: rgba(185, 180, 210, 0.82);
+}
+
+.card:hover .likeBtn:not(.likeBtnActive) {
+  color: rgba(185, 180, 210, 0.75);
+}
+

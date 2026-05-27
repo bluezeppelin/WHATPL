@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "userId": "f813fa12-7dab-4f96-8d81-a8f207fe1418",
+    "type": "new_follower",
+    "title": "새 구독자",
+    "message": "testuser1님이 나를 구독했습니다.",
+    "link": "/my-sound?tab=follow",
+    "isRead": true,
+    "createdAt": "2026-05-27T07:32:26.830Z"
+  },
+  {
+    "id": 2,
+    "userId": "f813fa12-7dab-4f96-8d81-a8f207fe1418",
+    "type": "track_removed_by_admin",
+    "title": "음원 처리 알림",
+    "message": "'Escape Your Love'이 관리자에 의해 삭제 처리되었습니다.",
+    "link": "/mypage?tab=creator",
+    "isRead": true,
+    "createdAt": "2026-05-27T07:38:28.672Z"
+  },
+  {
+    "id": 3,
+    "userId": "564e6610-7edb-4440-ac8a-cd3cf9cb7ae0",
+    "type": "creator_request_approved",
+    "title": "크리에이터 신청 승인",
+    "message": "크리에이터 신청이 승인되었습니다. 이제 음원을 업로드할 수 있습니다.",
+    "link": "/upload",
+    "isRead": false,
+    "createdAt": "2026-05-27T07:45:32.975Z"
+  },
+  {
+    "id": 4,
+    "userId": "564e6610-7edb-4440-ac8a-cd3cf9cb7ae0",
+    "type": "track_removed_by_admin",
+    "title": "음원 처리 알림",
+    "message": "'Sentimental Jazzy Love'이 관리자에 의해 삭제 처리되었습니다.",
+    "link": "/mypage?tab=creator",
+    "isRead": false,
+    "createdAt": "2026-05-27T07:46:53.533Z"
+  },
+  {
+    "id": 5,
+    "userId": "bdedcd52-5c7a-4daa-bbe1-6e4f8a40af0e",
+    "type": "account_status_changed",
+    "title": "계정 상태 변경",
+    "message": "계정이 관리자에 의해 비활성화되었습니다.",
+    "link": "/mypage",
+    "isRead": false,
+    "createdAt": "2026-05-27T07:48:54.578Z"
+  }
+]

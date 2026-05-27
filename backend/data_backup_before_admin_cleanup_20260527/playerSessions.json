@@ -1,0 +1,76 @@
+[
+  {
+    "id": "2b50432a-5278-4b8c-ac96-b2b54ae35588",
+    "userId": "f813fa12-7dab-4f96-8d81-a8f207fe1418",
+    "trackId": "b47d639d-1da5-484d-adea-571cbbadd7d7",
+    "currentTime": 18.931051,
+    "queueTrackIds": [
+      "b47d639d-1da5-484d-adea-571cbbadd7d7",
+      "1fe29e95-6d4c-4fbe-870c-0619ea5f0381",
+      "b47d639d-1da5-484d-adea-571cbbadd7d7",
+      "b47d639d-1da5-484d-adea-571cbbadd7d7",
+      "b47d639d-1da5-484d-adea-571cbbadd7d7",
+      "b47d639d-1da5-484d-adea-571cbbadd7d7",
+      "1fe29e95-6d4c-4fbe-870c-0619ea5f0381",
+      "1fe29e95-6d4c-4fbe-870c-0619ea5f0381",
+      "b47d639d-1da5-484d-adea-571cbbadd7d7",
+      "1fe29e95-6d4c-4fbe-870c-0619ea5f0381"
+    ],
+    "currentIndex": 8,
+    "queueType": "allTracks",
+    "queueSourceId": null,
+    "repeatMode": "all",
+    "shuffle": false,
+    "createdAt": "2026-05-27T02:41:59.224Z",
+    "updatedAt": "2026-05-27T08:11:28.785Z"
+  },
+  {
+    "id": "38b4ad7b-716c-4535-ae9b-78d96a1f5cc7",
+    "userId": "49c5e3eb-f9b5-4094-b88a-8e4b8b3a5efb",
+    "trackId": "1fe29e95-6d4c-4fbe-870c-0619ea5f0381",
+    "currentTime": 0,
+    "queueTrackIds": [
+      "1fe29e95-6d4c-4fbe-870c-0619ea5f0381"
+    ],
+    "currentIndex": 0,
+    "queueType": "allTracks",
+    "queueSourceId": null,
+    "repeatMode": "none",
+    "shuffle": false,
+    "createdAt": "2026-05-27T03:33:54.943Z",
+    "updatedAt": "2026-05-27T03:33:54.943Z"
+  },
+  {
+    "id": "2b4fb7b0-e307-4a20-acac-1327f2944c89",
+    "userId": "564e6610-7edb-4440-ac8a-cd3cf9cb7ae0",
+    "trackId": "ebfad41e-ec95-44b3-8b39-8e3c9772fcab",
+    "currentTime": 0,
+    "queueTrackIds": [
+      "ebfad41e-ec95-44b3-8b39-8e3c9772fcab"
+    ],
+    "currentIndex": 0,
+    "queueType": "allTracks",
+    "queueSourceId": null,
+    "repeatMode": "none",
+    "shuffle": false,
+    "createdAt": "2026-05-27T07:45:58.213Z",
+    "updatedAt": "2026-05-27T07:47:21.897Z"
+  },
+  {
+    "id": "58ff3471-a083-4821-9a7a-7a80ab2f4233",
+    "userId": "bdedcd52-5c7a-4daa-bbe1-6e4f8a40af0e",
+    "trackId": "b47d639d-1da5-484d-adea-571cbbadd7d7",
+    "currentTime": 2.672073,
+    "queueTrackIds": [
+      "b47d639d-1da5-484d-adea-571cbbadd7d7",
+      "1fe29e95-6d4c-4fbe-870c-0619ea5f0381"
+    ],
+    "currentIndex": 0,
+    "queueType": "allTracks",
+    "queueSourceId": null,
+    "repeatMode": "none",
+    "shuffle": false,
+    "createdAt": "2026-05-27T07:49:01.835Z",
+    "updatedAt": "2026-05-27T07:49:20.793Z"
+  }
+]

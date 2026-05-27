@@ -1,0 +1,564 @@
+/* ═══════════════════════════════════════════
+   PLAYER BAR
+   ═══════════════════════════════════════════ */
+.bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--player-height);
+  background:
+    radial-gradient(circle at 16% 30%, rgba(var(--cover-rgb, 168, 85, 247), 0.28) 0%, transparent 42%),
+    radial-gradient(circle at 84% 22%, rgba(var(--cover-rgb, 168, 85, 247), 0.18) 0%, transparent 40%),
+    linear-gradient(
+      135deg,
+      rgba(var(--cover-rgb, 168, 85, 247), 0.18) 0%,
+      rgba(8, 8, 18, 0.94) 48%,
+      rgba(3, 3, 8, 0.98) 100%
+    );
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  box-shadow:
+    0 -8px 30px rgba(var(--cover-rgb, 168, 85, 247), 0.24),
+    0 -20px 60px rgba(var(--cover-rgb, 168, 85, 247), 0.12),
+    0 -32px 80px rgba(0, 0, 0, 0.60);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  z-index: 200;
+  overflow: visible;
+}
+
+.bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 65% at 50% 0%, rgba(var(--cover-rgb, 168, 85, 247), 0.12) 0%, transparent 62%),
+    linear-gradient(90deg, rgba(var(--cover-rgb, 168, 85, 247), 0.08) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS BORDER
+   bar의 최상단 경계선 자체가 progress bar
+   시간 레이블은 경계선 바로 아래에 표시
+   ═══════════════════════════════════════════ */
+.progressBorder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.10);
+  cursor: pointer;
+  z-index: 10;
+  overflow: visible;
+}
+
+/* 넓은 클릭 영역 */
+.progressBorder::before {
+  content: "";
+  position: absolute;
+  inset: -8px 0 -4px 0;
+  cursor: pointer;
+}
+
+.progressBorderFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #7B2FF7 0%,
+    #d44fff 50%,
+    rgba(var(--cover-rgb, 0, 198, 255), 1) 100%
+  );
+  border-radius: 0 3px 3px 0;
+  pointer-events: none;
+  transition: width 0.1s linear;
+  box-shadow:
+    0 0 8px rgba(196, 77, 255, 0.65),
+    0 0 16px rgba(var(--cover-rgb, 0, 198, 255), 0.36),
+    0 0 2px rgba(255, 255, 255, 0.18);
+}
+
+.progressBorderThumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0.50;
+  pointer-events: none;
+  transition: opacity 0.18s, width 0.15s, height 0.15s;
+  box-shadow:
+    0 0 7px rgba(var(--cover-rgb, 168, 85, 247), 0.85),
+    0 0 0 1.5px rgba(var(--cover-rgb, 168, 85, 247), 0.60);
+}
+
+.progressBorder:hover .progressBorderThumb {
+  opacity: 1;
+  width: 12px;
+  height: 12px;
+}
+
+.timeLeft {
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.80);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+.timeRight {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.80);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+/* ═══════════════════════════════════════════
+   ALBUM CARD STACK
+   ═══════════════════════════════════════════ */
+.albumStack {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  z-index: 1;
+  min-height: 0;
+}
+
+.card {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  top: 50%;
+  left: 50%;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.38s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.32s ease;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* CENTER — 현재곡 */
+.card_center {
+  transform: translate(-50%, -50%) scale(1);
+  z-index: 30;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.88),
+    0 0 0 1.5px rgba(255, 255, 255, 0.10),
+    0 0 0 2.5px rgba(var(--cover-rgb, 168, 85, 247), 0.62),
+    0 0 22px rgba(var(--cover-rgb, 168, 85, 247), 0.34);
+}
+
+/* LEFT — 이전곡 */
+.card_left {
+  transform: translate(calc(-50% - 88px), -50%) scale(0.84) rotate(-4deg);
+  z-index: 5;
+  opacity: 0.70;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.80);
+}
+
+/* FAR LEFT — 이전이전곡 */
+.card_farLeft {
+  transform: translate(calc(-50% - 150px), -50%) scale(0.68) rotate(-7deg);
+  z-index: 3;
+  opacity: 0.44;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.70);
+}
+
+/* FAR FAR LEFT — 이전이전이전곡 */
+.card_farfarLeft {
+  transform: translate(calc(-50% - 200px), -50%) scale(0.52) rotate(-10deg);
+  z-index: 1;
+  opacity: 0.18;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.60);
+}
+
+/* RIGHT — 다음곡 */
+.card_right {
+  transform: translate(calc(-50% + 88px), -50%) scale(0.84) rotate(4deg);
+  z-index: 5;
+  opacity: 0.70;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.80);
+}
+
+/* FAR RIGHT — 다음다음곡 */
+.card_farRight {
+  transform: translate(calc(-50% + 150px), -50%) scale(0.68) rotate(7deg);
+  z-index: 3;
+  opacity: 0.44;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.70);
+}
+
+/* FAR FAR RIGHT — 다음다음다음곡 */
+.card_farfarRight {
+  transform: translate(calc(-50% + 200px), -50%) scale(0.52) rotate(10deg);
+  z-index: 1;
+  opacity: 0.18;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.60);
+}
+
+/* 현재곡 카드 하단 텍스트 오버레이 */
+.cardOverlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.28) 52%, transparent 100%);
+  padding: 22px 10px 7px;
+  pointer-events: none;
+}
+
+.cardTitle {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.cardArtist {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+/* Ghost card — 대기 슬롯 */
+.cardGhost {
+  background:
+    radial-gradient(circle at 28% 24%, rgba(168, 85, 247, 0.18) 0%, transparent 46%),
+    radial-gradient(circle at 74% 70%, rgba(34, 211, 238, 0.12) 0%, transparent 44%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.048) 0%, rgba(255, 255, 255, 0.014) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.062);
+  opacity: 0.40;
+  filter: grayscale(0.15);
+}
+
+.ghostInner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+/* ═══════════════════════════════════════════
+   카드 내부 컨트롤 버튼 (overlay)
+
+   - .card pointer-events: none이어도
+     자식 pointer-events: all이면 클릭 가능
+   - 카드의 scale/rotate 변환에 자연스럽게 따라감
+   ═══════════════════════════════════════════ */
+.cardCtrl {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.90);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: all;
+  z-index: 20;
+  transition: background 0.18s, box-shadow 0.18s, border-color 0.18s, opacity 0.18s;
+}
+
+/* center 카드 — 재생/일시정지 */
+.cardCtrlCenter {
+  width: 42px;
+  height: 42px;
+  background: rgba(4, 4, 14, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.52),
+    0 0 20px rgba(var(--cover-rgb, 168, 85, 247), 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+.cardCtrlCenter:hover:not(:disabled) {
+  background: rgba(var(--cover-rgb, 168, 85, 247), 0.78);
+  border-color: rgba(var(--cover-rgb, 168, 85, 247), 0.65);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.58),
+    0 0 20px rgba(var(--cover-rgb, 168, 85, 247), 0.44),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.cardCtrlCenter:active:not(:disabled) {
+  transform: translate(-50%, -50%) scale(0.92);
+}
+
+.cardCtrlCenter:disabled {
+  opacity: 0.25;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* left / right 카드 — 이전곡 / 다음곡 */
+.cardCtrlSide {
+  width: 32px;
+  height: 32px;
+  background: rgba(3, 5, 12, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.50),
+    0 0 10px rgba(var(--cover-rgb, 168, 85, 247), 0.18);
+}
+
+.cardCtrlSide:hover:not(:disabled) {
+  background: rgba(var(--cover-rgb, 168, 85, 247), 0.55);
+  border-color: rgba(var(--cover-rgb, 168, 85, 247), 0.55);
+  color: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 5px 18px rgba(0, 0, 0, 0.50),
+    0 0 14px rgba(var(--cover-rgb, 168, 85, 247), 0.32);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.cardCtrlSide:active:not(:disabled) {
+  transform: translate(-50%, -50%) scale(0.92);
+}
+
+.cardCtrlSide:disabled {
+  opacity: 0.22;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   보조 버튼 — 셔플 / 반복 (카드 스택 옆)
+   farfarLeft / farfarRight 카드 바로 바깥에 배치
+   ═══════════════════════════════════════════ */
+.auxBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(5, 8, 18, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  pointer-events: all;
+  transition: color 0.18s, background 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.15s;
+}
+
+.auxBtn:hover {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(var(--cover-rgb, 168, 85, 247), 0.30);
+  border-color: rgba(var(--cover-rgb, 168, 85, 247), 0.50);
+  box-shadow: 0 0 14px rgba(var(--cover-rgb, 168, 85, 247), 0.36);
+  transform: translateY(-50%) scale(1.04);
+}
+
+/* farfarLeft 카드 center: 50% - 200px, 카드 반폭 62.4px → 바깥 끝: 50% - 262px */
+.auxBtnLeft  { left: calc(50% - 265px); }
+/* farfarRight 카드 center: 50% + 200px, 카드 반폭 62.4px → 바깥 끝: 50% + 262px */
+.auxBtnRight { right: calc(50% - 265px); }
+
+.auxBtnActive {
+  color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(var(--cover-rgb, 168, 85, 247), 0.65) !important;
+  box-shadow: 0 0 14px rgba(var(--cover-rgb, 168, 85, 247), 0.45) !important;
+}
+
+.auxBtn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.auxBtnRepeatWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+}
+
+.auxBtnRepeatOne {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  font-size: 8px;
+  font-weight: 800;
+  color: rgba(var(--cover-rgb, 168, 85, 247), 1);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* 좌: 곡 정보 */
+.trackInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 300px;
+  flex-shrink: 0;
+  align-self: center;
+  padding-left: 28px;
+  min-width: 0;
+}
+
+.cover {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(var(--cover-rgb, 168, 85, 247), 0.62);
+  box-shadow:
+    0 0 12px rgba(var(--cover-rgb, 168, 85, 247), 0.40),
+    0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+.text { min-width: 0; }
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+}
+
+.artist {
+  font-size: 12px;
+  color: #AEB6C8;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptyHint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  min-width: 200px;
+  min-height: 44px;
+  font-style: normal;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: #F4F6FF;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(135deg, rgba(123, 47, 247, 0.22) 0%, rgba(47, 128, 255, 0.16) 100%);
+  box-shadow:
+    0 0 0 1px rgba(123, 47, 247, 0.20),
+    0 8px 24px rgba(123, 47, 247, 0.18),
+    0 0 24px rgba(47, 128, 255, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* 우: 큐 + 볼륨 */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  align-self: center;
+  padding-right: 28px;
+  width: 305px;
+}
+
+.iconBtn {
+  color: rgba(175, 170, 205, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: color 0.18s;
+}
+
+.iconBtn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.iconBtn:hover { color: rgba(235, 232, 255, 0.96); }
+
+.iconBtnActive {
+  color: rgba(var(--cover-rgb, 168, 85, 247), 1) !important;
+  filter: drop-shadow(0 0 5px rgba(var(--cover-rgb, 168, 85, 247), 0.85));
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  width: 170px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.14);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgba(var(--cover-rgb, 168, 85, 247), 1);
+  cursor: pointer;
+  box-shadow:
+    0 0 8px rgba(var(--cover-rgb, 168, 85, 247), 0.72),
+    0 0 0 1.5px rgba(255, 255, 255, 0.16);
+}
+
+.volumeSlider:hover { background: rgba(255, 255, 255, 0.22); }

@@ -1,0 +1,97 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── backgrounds ── */
+  --bg-primary:    #080C14;
+  --bg-secondary:  #0D1120;
+  --bg-card:       #0D1120;
+  --bg-card-hover: #121828;
+  --bg-elevated:   #121828;
+
+  /* ── aliases (older components / Login / MyPage 등 fallback용) ── */
+  --bg:             #080C14;
+  --surface:        #0D1120;
+  --surface-hover:  #121828;
+  --surface-active: #1A2235;
+
+  /* ── borders ── */
+  --border:       rgba(167, 139, 250, 0.26);
+  --border-hover: rgba(236, 72, 153, 0.48);
+
+  /* ── text ── */
+  --text-primary:   #FAF7F2;
+  --text-secondary: #AEB6C8;
+  --text-tertiary:  #8F99AF;
+  --text:           #FAF7F2;
+  --text-muted:     #8F99AF;
+
+  /* ── brand accent ── */
+  --accent:         #7B2FF7;
+  --accent-hover:   #EC4899;
+  --accent-pressed: #5B1FD7;
+  --accent-glow:    rgba(123, 47, 247, 0.20);
+  --highlight:      #EC4899;
+
+  /* ── dynamic brand (overridden by JS via applyTheme) ── */
+  --color-main:  #7c3aed;
+  --color-sub-1: #a78bfa;
+  --color-sub-2: #312e81;
+  --color-sub-3: #111827;
+
+  /* ── semantic ── */
+  --success:  #7CB342;
+  --danger:   #E63946;
+  --syrup:    #5B1FD7;
+  --divider:  #1A2235;
+
+  /* ── layout ── */
+  --player-height: 160px;
+  --nav-height:    64px;
+  --radius:        12px;
+  --radius-sm:     8px;
+  --radius-lg:     16px;
+}
+
+html, body {
+  background-color: #05050A;
+  background-image:
+    linear-gradient(rgba(5,5,18,0.42) 0%, rgba(3,3,14,0.58) 100%),
+    url('/images/smoke-2026.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+  min-height: 100vh;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; border: none; background: none; }
+input, textarea, select { font-family: inherit; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.35); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(236, 72, 153, 0.55); }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  border: 0;
+}

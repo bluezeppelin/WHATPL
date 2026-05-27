@@ -1,0 +1,12 @@
+{
+  "siteName": "WHATPL",
+  "logoUrl": "http://localhost:5000/uploads/site/logo-1779811688882.png",
+  "theme": {
+    "mainColor": "#7B2FF7",
+    "subColor1": "#EC4899",
+    "subColor2": "#A78BFA",
+    "subColor3": "#F472B6"
+  },
+  "updatedAt": "2026-05-27T03:04:21.875Z",
+  "heroBackgroundUrl": "http://localhost:5000/uploads/site/hero-bg-1779851061867.png"
+}

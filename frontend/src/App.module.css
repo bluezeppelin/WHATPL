@@ -1,0 +1,15 @@
+.centerBackdrop {
+  position: fixed;
+  top: var(--nav-height);
+  bottom: var(--player-height);
+  left: 36px;
+  right: 36px;
+  background: rgba(3, 4, 12, 0.50);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.38);
+  z-index: -1;
+  pointer-events: none;
+}
