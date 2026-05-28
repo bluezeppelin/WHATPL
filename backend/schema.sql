@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS player_sessions (
   id              VARCHAR(36)  NOT NULL PRIMARY KEY,
   user_id         VARCHAR(36)  NOT NULL UNIQUE,
   track_id        VARCHAR(36),
-  current_time    FLOAT        NOT NULL DEFAULT 0,
+  position_sec    FLOAT        NOT NULL DEFAULT 0,
   current_index   INT          NOT NULL DEFAULT -1,
   queue_type      VARCHAR(50)  DEFAULT 'allTracks',
   queue_source_id VARCHAR(36),

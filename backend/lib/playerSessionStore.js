@@ -14,7 +14,7 @@ async function getByUser(userId) {
   session.queueTrackIds = queue.map(r => r.track_id);
   session.userId = session.user_id;
   session.trackId = session.track_id;
-  session.currentTime = session.current_time;
+  session.currentTime = session.position_sec;
   session.currentIndex = session.current_index;
   session.queueType = session.queue_type;
   session.queueSourceId = session.queue_source_id;
@@ -29,7 +29,7 @@ async function upsert(userId, fields) {
 
   if (existing) {
     const colMap = {
-      trackId: 'track_id', currentTime: 'current_time', currentIndex: 'current_index',
+      trackId: 'track_id', currentTime: 'position_sec', currentIndex: 'current_index',
       queueType: 'queue_type', queueSourceId: 'queue_source_id',
       repeatMode: 'repeat_mode', shuffle: 'shuffle',
     };
@@ -47,7 +47,7 @@ async function upsert(userId, fields) {
   } else {
     await db.execute(
       `INSERT INTO player_sessions
-         (id, user_id, track_id, current_time, current_index, queue_type, queue_source_id, repeat_mode, shuffle)
+         (id, user_id, track_id, position_sec, current_index, queue_type, queue_source_id, repeat_mode, shuffle)
        VALUES (?,?,?,?,?,?,?,?,?)`,
       [
         id, userId,
