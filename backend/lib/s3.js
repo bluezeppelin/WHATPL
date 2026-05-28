@@ -4,13 +4,18 @@ const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION,
-  credentials: {
+// credentials 명시 안 함 → AWS SDK가 자동 chain 사용:
+//   1) 환경변수 (AWS_ACCESS_KEY_ID/SECRET) — 로컬 개발용
+//   2) ~/.aws/credentials
+//   3) EC2 IAM Role (메타데이터 서비스) — 운영 환경용
+const s3Config = { region: process.env.AWS_REGION };
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  s3Config.credentials = {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-});
+  };
+}
+const s3 = new S3Client(s3Config);
 
 const BUCKET = process.env.S3_BUCKET_NAME;
 const CLOUDFRONT = process.env.CLOUDFRONT_DOMAIN;
