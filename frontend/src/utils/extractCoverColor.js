@@ -13,6 +13,12 @@
 export async function extractCoverColor(coverUrl) {
   if (!coverUrl || coverUrl.startsWith('data:')) return null;
 
+  // 캐시 분리용 쿼리 파라미터.
+  // 일반 <img> 태그가 crossorigin 없이 먼저 캐싱한 응답을 재사용하면
+  // canvas가 tainted 되어 extraction이 실패함. URL을 다르게 만들어
+  // 별도 캐시 엔트리에 CORS 헤더가 포함된 응답을 저장하도록 강제.
+  const corsUrl = coverUrl + (coverUrl.includes('?') ? '&' : '?') + '_cors=1';
+
   return new Promise((resolve) => {
     const img = new Image();
     // crossOrigin 설정 없이 canvas에 drawImage하면 tainted canvas 오류 발생
@@ -50,6 +56,6 @@ export async function extractCoverColor(coverUrl) {
       }
     };
     img.onerror = () => resolve(null);
-    img.src = coverUrl;
+    img.src = corsUrl;
   });
 }
