@@ -126,9 +126,6 @@ export default function MyPage() {
       genre: track.genre || '',
       description: track.description || '',
       coverUrl: track.coverUrl || '',
-      album: track.album || '',
-      trackNumber: track.trackNumber || '',
-      releaseYear: track.releaseYear || '',
     });
     setEditTrackError('');
   }
@@ -264,6 +261,11 @@ export default function MyPage() {
     setDeleteLoading(true);
     setDeleteError('');
     try {
+      if (user?.role === 'admin') {
+        setDeleteError('관리자 계정은 회원탈퇴할 수 없습니다.');
+        setDeleteLoading(false);
+        return;
+      }
       await deleteAccount(deletePassword);
       setShowDeleteModal(false);
       setDeleteDone(true);
@@ -591,16 +593,18 @@ export default function MyPage() {
               </form>
             </div>
 
-            {/* 회원 탈퇴 */}
-            <div className={styles.dangerZone}>
-              <div className={styles.dangerZoneHeader}>
-                <h2 className={styles.dangerZoneTitle}>회원 탈퇴</h2>
-                <p className={styles.dangerZoneDesc}>탈퇴 시 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.</p>
+            {/* 회원 탈퇴: 운영 관리자 계정은 보호 */}
+            {user?.role !== 'admin' && (
+              <div className={styles.dangerZone}>
+                <div className={styles.dangerZoneHeader}>
+                  <h2 className={styles.dangerZoneTitle}>회원 탈퇴</h2>
+                  <p className={styles.dangerZoneDesc}>탈퇴 시 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.</p>
+                </div>
+                <button className={styles.dangerBtn} onClick={() => setShowDeleteModal(true)}>
+                  회원 탈퇴
+                </button>
               </div>
-              <button className={styles.dangerBtn} onClick={() => setShowDeleteModal(true)}>
-                회원 탈퇴
-              </button>
-            </div>
+            )}
 
             {showDeleteModal && (
               <div className={styles.modalOverlay} onClick={closeDeleteModal}>
@@ -933,18 +937,6 @@ export default function MyPage() {
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
-              </div>
-              <div className={styles.modalField}>
-                <label className={styles.modalLabel}>앨범</label>
-                <input className={styles.modalInput} value={editTrackForm.album} onChange={e => setEditTrackForm(f => ({ ...f, album: e.target.value }))} maxLength={100} />
-              </div>
-              <div className={styles.modalField}>
-                <label className={styles.modalLabel}>발매년도</label>
-                <input className={styles.modalInput} value={editTrackForm.releaseYear} onChange={e => setEditTrackForm(f => ({ ...f, releaseYear: e.target.value }))} maxLength={4} placeholder="예: 2026" />
-              </div>
-              <div className={styles.modalField}>
-                <label className={styles.modalLabel}>트랙 번호</label>
-                <input className={styles.modalInput} value={editTrackForm.trackNumber} onChange={e => setEditTrackForm(f => ({ ...f, trackNumber: e.target.value }))} maxLength={10} placeholder="예: 1" />
               </div>
               <div className={styles.modalField}>
                 <label className={styles.modalLabel}>커버 이미지 URL</label>

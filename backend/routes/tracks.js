@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { upload, getFileUrl, deleteFromS3 } = require('../lib/s3');
 const store = require('../lib/store');
-const { removeTrackFromAll } = require('../lib/playlistStore');
 const { requireAuth } = require('../middleware/authMiddleware');
 const recentlyPlayedStore = require('../lib/recentlyPlayedStore');
 const { getFollowersByArtistName } = require('../lib/followedArtistStore');
 const notificationStore = require('../lib/notificationStore');
 const { getAllLikeCounts } = require('../lib/likedTrackStore');
+const { cleanupTrackForSoftDelete } = require('../lib/trackReferenceCleanup');
 
 function requireUploader(req, res, next) {
   if (req.user.role !== 'creator') {
@@ -17,81 +17,102 @@ function requireUploader(req, res, next) {
 }
 
 // 트랙 목록 조회
-router.get('/', (req, res) => {
-  const { genre, search } = req.query;
-  let tracks = store.getAllTracks();
+router.get('/', async (req, res) => {
+  try {
+    const { genre, search } = req.query;
+    let tracks = await store.getAllTracks();
 
-  if (genre) {
-    tracks = tracks.filter(t => t.genre.toLowerCase() === genre.toLowerCase());
-  }
-  if (search) {
-    const q = search.toLowerCase();
-    tracks = tracks.filter(t =>
-      t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)
-    );
-  }
+    if (genre) {
+      tracks = tracks.filter(t => t.genre.toLowerCase() === genre.toLowerCase());
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      tracks = tracks.filter(t =>
+        t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q)
+      );
+    }
 
-  res.json(tracks);
+    res.json(tracks);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
 });
 
 // 최근 N일 인기 트랙 — /:id보다 반드시 먼저 정의해야 라우팅 충돌 없음
 // GET /api/tracks/trending?range=7d&limit=8
-router.get('/trending', (req, res) => {
-  const days  = parseInt(req.query.range) || 7;  // "7d" → 7
-  const limit = parseInt(req.query.limit) || 8;
+router.get('/trending', async (req, res) => {
+  try {
+    const days  = parseInt(req.query.range) || 7;
+    const limit = parseInt(req.query.limit) || 8;
 
-  // 최근 days일 집계 (MySQL 전환 시 getTrendingTrackCounts만 교체)
-  const trendingCounts = recentlyPlayedStore.getTrendingTrackCounts(days);
+    const trendingCounts = await recentlyPlayedStore.getTrendingTrackCounts(days);
 
-  let tracks;
-  let fallback = false;
+    let tracks;
+    let fallback = false;
 
-  if (trendingCounts.length > 0) {
-    const activeTracks = store.getAllTracks(); // deleted/suspended 자동 제외
-    const trackMap = new Map(activeTracks.map(t => [t.id, t]));
+    if (trendingCounts.length > 0) {
+      const activeTracks = await store.getAllTracks();
+      const trackMap = new Map(activeTracks.map(t => [t.id, t]));
 
-    tracks = trendingCounts
-      .map(({ trackId, count }) => {
-        const track = trackMap.get(trackId);
-        if (!track) return null; // 하드삭제된 트랙 제외
-        return { ...track, recentPlayCount: count };
-      })
-      .filter(Boolean)
-      .slice(0, limit);
+      tracks = trendingCounts
+        .map(({ trackId, count }) => {
+          const track = trackMap.get(trackId);
+          if (!track) return null;
+          return { ...track, recentPlayCount: count };
+        })
+        .filter(Boolean)
+        .slice(0, limit);
+    }
+
+    if (!tracks || tracks.length === 0) {
+      fallback = true;
+      const all = await store.getAllTracks();
+      tracks = all
+        .sort((a, b) => (b.plays || 0) - (a.plays || 0))
+        .slice(0, limit)
+        .map(t => ({ ...t, recentPlayCount: null }));
+    }
+
+    res.json({ tracks, meta: { range: `${days}d`, fallback } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
   }
-
-  // fallback: 최근 재생 기록이 없으면 누적 plays 기준으로 반환
-  if (!tracks || tracks.length === 0) {
-    fallback = true;
-    tracks = store.getAllTracks()
-      .sort((a, b) => (b.plays || 0) - (a.plays || 0))
-      .slice(0, limit)
-      .map(t => ({ ...t, recentPlayCount: null }));
-  }
-
-  res.json({ tracks, meta: { range: `${days}d`, fallback } });
 });
 
 // 좋아요 누적순 정렬 — /:id보다 먼저 정의
 // GET /api/tracks/top-liked?limit=8
-router.get('/top-liked', (req, res) => {
-  const limit = parseInt(req.query.limit) || 8;
-  const counts = getAllLikeCounts();
-  const activeTracks = store.getAllTracks(); // deleted/suspended 자동 제외
+router.get('/top-liked', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 8;
+    const counts = await getAllLikeCounts();
+    const activeTracks = await store.getAllTracks();
 
-  const tracks = activeTracks
-    .map(t => ({ ...t, likeCount: counts[t.id] || 0 }))
-    .sort((a, b) => (b.likeCount - a.likeCount) || (new Date(b.createdAt) - new Date(a.createdAt)))
-    .slice(0, limit);
+    const tracks = activeTracks
+      .map(t => ({ ...t, likeCount: counts[t.id] || 0 }))
+      .sort((a, b) => (b.likeCount - a.likeCount) || (new Date(b.createdAt) - new Date(a.createdAt)))
+      .slice(0, limit);
 
-  res.json({ tracks });
+    res.json({ tracks });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
 });
 
-// 단일 트랙 조회
-router.get('/:id', (req, res) => {
-  const track = store.getTrackById(req.params.id);
-  if (!track) return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
-  res.json(track);
+// 단일 트랙 조회 — 공개 API에서는 active 트랙만 노출
+router.get('/:id', async (req, res) => {
+  try {
+    const track = await store.getTrackById(req.params.id);
+    if (!track || track.status !== 'active') {
+      return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
+    }
+    res.json(track);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
 });
 
 // 트랙 업로드
@@ -125,7 +146,7 @@ router.post(
       const audioUrl = getFileUrl(audioFile.key);
       const coverUrl = coverFile ? getFileUrl(coverFile.key) : null;
 
-      const track = store.createTrack({
+      const track = await store.createTrack({
         title: title.trim(),
         artist: artistName,
         genre: genre?.trim(),
@@ -142,9 +163,9 @@ router.post(
 
       // 업로드 성공 후 구독자 알림 (실패해도 업로드 자체에 영향 없음)
       try {
-        const followers = getFollowersByArtistName(track.artist);
+        const followers = await getFollowersByArtistName(track.artist);
         if (followers.length > 0) {
-          notificationStore.createBulkNotifications(
+          await notificationStore.createBulkNotifications(
             followers.map(f => f.userId),
             {
               type: 'creator_new_track',
@@ -170,40 +191,44 @@ router.patch(
   requireAuth,
   upload.fields([{ name: 'cover', maxCount: 1 }]),
   async (req, res) => {
-    const existing = store.getTrackById(req.params.id);
-    if (!existing) return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
+    try {
+      const existing = await store.getTrackById(req.params.id);
+      if (!existing) return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
 
-    const { role, id: userId } = req.user;
-    if (role === 'user') {
-      return res.status(403).json({ error: '권한이 없습니다.' });
-    }
-    if (role === 'creator' && existing.uploadedByUserId !== userId) {
-      return res.status(403).json({ error: '본인이 업로드한 트랙만 수정할 수 있습니다.' });
-    }
-
-    const { title, artist, genre, description } = req.body;
-    if (title !== undefined && !title.trim()) {
-      return res.status(400).json({ error: '제목은 비워둘 수 없습니다.' });
-    }
-
-    const updates = {};
-    if (title !== undefined)       updates.title       = title.trim();
-    if (artist !== undefined)      updates.artist      = artist.trim() || '알 수 없는 아티스트';
-    if (genre !== undefined)       updates.genre       = genre.trim();
-    if (description !== undefined) updates.description = description.trim();
-
-    const coverFile = req.files?.cover?.[0];
-    if (coverFile) {
-      // 기존 커버 파일 삭제
-      if (existing.coverKey) {
-        try { await deleteFromS3(existing.coverKey); } catch {}
+      const { role, id: userId } = req.user;
+      if (role === 'user') {
+        return res.status(403).json({ error: '권한이 없습니다.' });
       }
-      updates.coverUrl = getFileUrl(coverFile.key);
-      updates.coverKey = coverFile.key;
-    }
+      if (role === 'creator' && existing.uploadedByUserId !== userId) {
+        return res.status(403).json({ error: '본인이 업로드한 트랙만 수정할 수 있습니다.' });
+      }
 
-    const updated = store.updateTrack(req.params.id, updates);
-    res.json(updated);
+      const { title, artist, genre, description } = req.body;
+      if (title !== undefined && !title.trim()) {
+        return res.status(400).json({ error: '제목은 비워둘 수 없습니다.' });
+      }
+
+      const updates = {};
+      if (title !== undefined)       updates.title       = title.trim();
+      if (artist !== undefined)      updates.artist      = artist.trim() || '알 수 없는 아티스트';
+      if (genre !== undefined)       updates.genre       = genre.trim();
+      if (description !== undefined) updates.description = description.trim();
+
+      const coverFile = req.files?.cover?.[0];
+      if (coverFile) {
+        if (existing.coverKey) {
+          try { await deleteFromS3(existing.coverKey); } catch {}
+        }
+        updates.coverUrl = getFileUrl(coverFile.key);
+        updates.coverKey = coverFile.key;
+      }
+
+      const updated = await store.updateTrack(req.params.id, updates);
+      res.json(updated);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: '서버 오류' });
+    }
   }
 );
 
@@ -219,41 +244,46 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000).unref?.();
 
-router.post('/:id/play', requireAuth, (req, res) => {
-  const track = store.getTrackById(req.params.id);
-  if (!track) return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
+router.post('/:id/play', requireAuth, async (req, res) => {
+  try {
+    const track = await store.getTrackById(req.params.id);
+    if (!track) return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
+    if (track.status !== 'active') {
+      return res.status(410).json({ error: '재생할 수 없는 트랙입니다.' });
+    }
 
-  const key = `${req.user.id}:${req.params.id}`;
-  const last = playThrottle.get(key) || 0;
-  const now = Date.now();
-  if (now - last < PLAY_THROTTLE_MS) {
-    return res.json({ plays: track.plays, throttled: true });
+    const key = `${req.user.id}:${req.params.id}`;
+    const last = playThrottle.get(key) || 0;
+    const now = Date.now();
+    if (now - last < PLAY_THROTTLE_MS) {
+      return res.json({ plays: track.plays, throttled: true });
+    }
+    playThrottle.set(key, now);
+
+    await store.incrementPlays(req.params.id);
+    res.json({ plays: track.plays + 1 });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
   }
-  playThrottle.set(key, now);
-
-  store.incrementPlays(req.params.id);
-  res.json({ plays: track.plays + 1 });
 });
 
 // 트랙 삭제
 router.delete('/:id', requireAuth, async (req, res) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: '관리자만 트랙을 삭제할 수 있습니다.' });
-  }
-  const track = store.deleteTrack(req.params.id);
-  if (!track) return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
-
-  // 모든 플레이리스트에서 해당 트랙 제거
-  removeTrackFromAll(track.id);
-
   try {
-    if (track.audioKey) await deleteFromS3(track.audioKey);
-    if (track.coverKey) await deleteFromS3(track.coverKey);
-  } catch (err) {
-    console.error('S3 삭제 오류:', err);
-  }
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: '관리자만 트랙을 삭제할 수 있습니다.' });
+    }
+    const track = await store.softDeleteTrack(req.params.id, req.user.loginId, '관리자 삭제');
+    if (!track) return res.status(404).json({ error: '트랙을 찾을 수 없습니다.' });
 
-  res.json({ message: '삭제되었습니다.' });
+    await cleanupTrackForSoftDelete(track.id);
+
+    res.json({ message: '삭제되었습니다.', track });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: '서버 오류' });
+  }
 });
 
 module.exports = router;

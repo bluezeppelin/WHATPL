@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = '/api/followed-artists';
+const BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/followed-artists';
 
 function authHeader() {
   const token = localStorage.getItem('token');

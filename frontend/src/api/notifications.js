@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = '/api/notifications';
+const BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/notifications';
 
 function authHeader() {
   const token = localStorage.getItem('token');

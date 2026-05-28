@@ -1,37 +1,34 @@
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
+const db = require('./db');
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'hardDeleteLogs.json');
-
-function load() {
-  try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); }
-  catch { return []; }
-}
-
-function save(logs) {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  fs.writeFileSync(DB_PATH, JSON.stringify(logs, null, 2), 'utf8');
-}
-
-function addLog({ trackId, title, artist, deletedBy, reason }) {
-  const logs = load();
-  const entry = {
-    id: uuidv4(),
-    trackId,
-    title: title || '',
-    artist: artist || '',
-    deletedBy,
-    deletedAt: new Date().toISOString(),
-    reason: reason || 'hard delete by admin',
+function rowToLog(row) {
+  return {
+    id: row.id,
+    trackId: row.track_id,
+    title: row.title,
+    artist: row.artist,
+    deletedBy: row.deleted_by,
+    reason: row.reason,
+    deletedAt: row.deleted_at,
   };
-  logs.unshift(entry);
-  save(logs);
-  return entry;
 }
 
-function getAll() {
-  return load();
+async function addLog({ trackId, title, artist, deletedBy, reason }) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO hard_delete_logs (id, track_id, title, artist, deleted_by, reason, deleted_at)
+     VALUES (?,?,?,?,?,?,NOW())`,
+    [id, trackId || null, title || '', artist || '', deletedBy, reason || 'hard delete by admin']
+  );
+  const [rows] = await db.execute(`SELECT * FROM hard_delete_logs WHERE id = ?`, [id]);
+  return rows.length ? rowToLog(rows[0]) : null;
+}
+
+async function getAll() {
+  const [rows] = await db.execute(
+    `SELECT * FROM hard_delete_logs ORDER BY deleted_at DESC`
+  );
+  return rows.map(rowToLog);
 }
 
 module.exports = { addLog, getAll };

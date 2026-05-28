@@ -1,7 +1,4 @@
-const fs = require('fs');
-const path = require('path');
-
-const DB_PATH = path.join(__dirname, '..', 'data', 'siteSettings.json');
+const db = require('./db');
 
 const DEFAULT_SETTINGS = {
   siteName: 'WHATPL',
@@ -16,64 +13,50 @@ const DEFAULT_SETTINGS = {
   updatedAt: null,
 };
 
-function load() {
-  try {
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  } catch {
-    return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-  }
-}
-
-function save(settings) {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  fs.writeFileSync(DB_PATH, JSON.stringify(settings, null, 2), 'utf8');
-}
-
 function validateHexColor(value) {
   return typeof value === 'string' && /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value.trim());
 }
 
-function getSiteSettings() {
-  const s = load();
+function rowToSettings(row) {
+  if (!row) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
   return {
-    siteName: s.siteName ?? DEFAULT_SETTINGS.siteName,
-    logoUrl: s.logoUrl ?? '',
-    heroBackgroundUrl: s.heroBackgroundUrl ?? '',
+    siteName: row.site_name ?? DEFAULT_SETTINGS.siteName,
+    logoUrl: row.logo_url ?? '',
+    heroBackgroundUrl: row.hero_background_url ?? '',
     theme: {
-      mainColor: s.theme?.mainColor ?? DEFAULT_SETTINGS.theme.mainColor,
-      subColor1: s.theme?.subColor1 ?? DEFAULT_SETTINGS.theme.subColor1,
-      subColor2: s.theme?.subColor2 ?? DEFAULT_SETTINGS.theme.subColor2,
-      subColor3: s.theme?.subColor3 ?? DEFAULT_SETTINGS.theme.subColor3,
+      mainColor: row.main_color ?? DEFAULT_SETTINGS.theme.mainColor,
+      subColor1: row.sub_color1 ?? DEFAULT_SETTINGS.theme.subColor1,
+      subColor2: row.sub_color2 ?? DEFAULT_SETTINGS.theme.subColor2,
+      subColor3: row.sub_color3 ?? DEFAULT_SETTINGS.theme.subColor3,
     },
-    updatedAt: s.updatedAt ?? null,
+    updatedAt: row.updated_at ?? null,
   };
 }
 
-function updateTheme(theme) {
-  const current = load();
-  if (!current.theme) current.theme = { ...DEFAULT_SETTINGS.theme };
-  if (theme.mainColor !== undefined) current.theme.mainColor = theme.mainColor;
-  if (theme.subColor1 !== undefined) current.theme.subColor1 = theme.subColor1;
-  if (theme.subColor2 !== undefined) current.theme.subColor2 = theme.subColor2;
-  if (theme.subColor3 !== undefined) current.theme.subColor3 = theme.subColor3;
-  current.updatedAt = new Date().toISOString();
-  save(current);
+async function getSiteSettings() {
+  const [rows] = await db.execute(`SELECT * FROM site_settings WHERE id = 1`);
+  return rowToSettings(rows[0]);
+}
+
+async function updateTheme(theme) {
+  const setClauses = [], values = [];
+  if (theme.mainColor !== undefined) { setClauses.push('main_color = ?');  values.push(theme.mainColor); }
+  if (theme.subColor1 !== undefined) { setClauses.push('sub_color1 = ?');  values.push(theme.subColor1); }
+  if (theme.subColor2 !== undefined) { setClauses.push('sub_color2 = ?');  values.push(theme.subColor2); }
+  if (theme.subColor3 !== undefined) { setClauses.push('sub_color3 = ?');  values.push(theme.subColor3); }
+  if (setClauses.length) {
+    await db.execute(`UPDATE site_settings SET ${setClauses.join(', ')} WHERE id = 1`, values);
+  }
   return getSiteSettings();
 }
 
-function updateLogo(logoUrl) {
-  const current = load();
-  current.logoUrl = logoUrl;
-  current.updatedAt = new Date().toISOString();
-  save(current);
+async function updateLogo(logoUrl) {
+  await db.execute(`UPDATE site_settings SET logo_url = ? WHERE id = 1`, [logoUrl]);
   return getSiteSettings();
 }
 
-function updateHeroBackground(heroBackgroundUrl) {
-  const current = load();
-  current.heroBackgroundUrl = heroBackgroundUrl;
-  current.updatedAt = new Date().toISOString();
-  save(current);
+async function updateHeroBackground(heroBackgroundUrl) {
+  await db.execute(`UPDATE site_settings SET hero_background_url = ? WHERE id = 1`, [heroBackgroundUrl]);
   return getSiteSettings();
 }
 

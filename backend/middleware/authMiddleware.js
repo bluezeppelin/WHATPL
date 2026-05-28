@@ -6,7 +6,7 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET 환경변수가 설정되지 않았습니다. backend/.env 파일에 JWT_SECRET를 추가하세요.');
 }
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: '인증이 필요합니다.' });
@@ -15,7 +15,7 @@ function requireAuth(req, res, next) {
   const token = authHeader.slice(7);
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    const user = findById(payload.id);
+    const user = await findById(payload.id);
     if (!user) {
       return res.status(401).json({ error: '존재하지 않는 사용자입니다.' });
     }
@@ -24,7 +24,7 @@ function requireAuth(req, res, next) {
     }
     req.user = sanitize(user);
     next();
-  } catch {
+  } catch (err) {
     return res.status(401).json({ error: '유효하지 않은 토큰입니다.' });
   }
 }

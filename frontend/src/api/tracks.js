@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+const api = axios.create({ baseURL: (import.meta.env.VITE_API_BASE_URL || '') + '/api' });
 
 export const getTracks = (params) => api.get('/tracks', { params }).then(r => r.data);
 export const getTrack = (id) => api.get(`/tracks/${id}`).then(r => r.data);

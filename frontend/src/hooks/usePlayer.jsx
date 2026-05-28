@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useRef, useCallback, useEffect } from 'react';
 import { incrementPlay } from '../api/tracks';
-import { getPlaylist, addTrackToPlaylist } from '../api/playlists';
+import { getPlaylist, syncQueueToPlaylist } from '../api/playlists';
 import { addRecentlyPlayed } from '../api/recentlyPlayed';
 import { getMyPlayerSession, savePlayerSession } from '../api/playerSession';
 
@@ -106,7 +106,7 @@ export function PlayerProvider({ children }) {
     bumpKey();
     incrementPlay(track.id).catch(() => {});
     addRecentlyPlayed(track.id).catch(() => {});
-    addTrackToPlaylist('0', track.id).catch(() => {});
+    syncQueueToPlaylist(newTracks.map(t => t.id)).catch(() => {});
   }, [currentPlaylist, bumpKey]);
 
   // 플레이리스트 전체 재생 (처음부터)

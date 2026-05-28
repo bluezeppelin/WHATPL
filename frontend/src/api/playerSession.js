@@ -1,4 +1,4 @@
-const BASE = '/api/player-session';
+const BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/player-session';
 
 function authHeaders() {
   const token = localStorage.getItem('token');

@@ -246,3 +246,26 @@ CDN       →  CloudFront (선택)
 | admin_wonjun | 최원준 |
 
 > admin 계정은 음원 업로드가 불가합니다. 관리자 콘솔(`/admin`)만 사용 가능합니다.
+
+---
+
+## SQL/RDS 배포 직전 필수 작업
+
+1. RDS MySQL에 `backend/schema.sql`을 먼저 실행합니다.
+2. 기존 DB가 이전 SQL 스키마로 이미 만들어져 있다면 `backend/migrations/001_sql_transition_fixes.sql`을 검토 후 실행합니다. 새 DB라면 실행하지 않아도 됩니다.
+3. `backend/.env`에 DB/RDS/S3/CORS/JWT 환경변수를 설정합니다.
+4. admin 초기 계정을 생성합니다.
+
+```bash
+cd backend
+npm run seed:admins
+```
+
+`seed:admins` 실행 전 `ADMIN_INITIAL_PASSWORD` 또는 admin별 `ADMIN_HYUNSU_PASSWORD`, `ADMIN_JUYEON_PASSWORD`, `ADMIN_INHO_PASSWORD`, `ADMIN_WONJUN_PASSWORD`를 설정해야 합니다. 초기 비밀번호는 배포 후 반드시 변경하세요.
+
+5. 프론트 배포 전 `frontend/.env.production`의 `VITE_API_BASE_URL`을 실제 백엔드 API 주소로 변경합니다.
+
+```env
+VITE_API_BASE_URL=https://api.whatpl.com
+```
+

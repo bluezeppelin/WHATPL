@@ -700,6 +700,723 @@ module.exports = {
 > **나머지 store 파일들** (`userStore.js`, `playlistStore.js`, `notificationStore.js` 등)도  
 > 같은 패턴으로 JSON 읽기/쓰기 → `db.execute()` 쿼리로 교체합니다.
 
+---
+
+### 6-3-1. userStore.js (DB 버전)
+
+```js
+// backend/lib/userStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+function rowToUser(row) {
+  return {
+    id: row.id,
+    loginId: row.login_id,
+    passwordHash: row.password_hash,
+    email: row.email,
+    name: row.name,
+    birthDate: row.birth_date,
+    phone: row.phone,
+    profileImageUrl: row.profile_image_url,
+    favoriteGenre: row.favorite_genre,
+    artistName: row.artist_name,
+    role: row.role,
+    status: row.status,
+    termsAgreed: !!row.terms_agreed,
+    privacyAgreed: !!row.privacy_agreed,
+    agreedAt: row.agreed_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    deactivatedAt: row.deactivated_at,
+    deactivatedBy: row.deactivated_by,
+  };
+}
+
+function sanitize(user) {
+  if (!user) return null;
+  const { passwordHash, ...rest } = user;
+  return rest;
+}
+
+async function findById(id) {
+  const [rows] = await db.execute(`SELECT * FROM users WHERE id = ?`, [id]);
+  return rows.length ? rowToUser(rows[0]) : null;
+}
+
+async function findByLoginId(loginId) {
+  const [rows] = await db.execute(`SELECT * FROM users WHERE login_id = ?`, [loginId]);
+  return rows.length ? rowToUser(rows[0]) : null;
+}
+
+async function findByEmail(email) {
+  const [rows] = await db.execute(`SELECT * FROM users WHERE email = ?`, [email]);
+  return rows.length ? rowToUser(rows[0]) : null;
+}
+
+async function findByArtistName(artistName) {
+  const [rows] = await db.execute(`SELECT * FROM users WHERE artist_name = ?`, [artistName]);
+  return rows.length ? rowToUser(rows[0]) : null;
+}
+
+async function getAllUsers({ role, status } = {}) {
+  let sql = `SELECT * FROM users WHERE 1=1`;
+  const params = [];
+  if (role)   { sql += ` AND role = ?`;   params.push(role); }
+  if (status) { sql += ` AND status = ?`; params.push(status); }
+  sql += ` ORDER BY created_at DESC`;
+  const [rows] = await db.execute(sql, params);
+  return rows.map(rowToUser);
+}
+
+async function createUser({ loginId, passwordHash, email, name, birthDate, phone,
+                            favoriteGenre, artistName, role, termsAgreed, privacyAgreed, agreedAt }) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO users
+       (id, login_id, password_hash, email, name, birth_date, phone,
+        favorite_genre, artist_name, role, terms_agreed, privacy_agreed, agreed_at)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    [id, loginId, passwordHash, email, name || null, birthDate || null, phone || null,
+     favoriteGenre || null, artistName || null, role || 'user',
+     termsAgreed ? 1 : 0, privacyAgreed ? 1 : 0, agreedAt || null]
+  );
+  return findById(id);
+}
+
+async function updateUser(id, updates) {
+  const colMap = {
+    name: 'name', email: 'email', phone: 'phone', birthDate: 'birth_date',
+    favoriteGenre: 'favorite_genre', artistName: 'artist_name',
+    profileImageUrl: 'profile_image_url', role: 'role', status: 'status',
+    passwordHash: 'password_hash', deactivatedAt: 'deactivated_at', deactivatedBy: 'deactivated_by',
+  };
+  const setClauses = [], values = [];
+  for (const [jsKey, col] of Object.entries(colMap)) {
+    if (updates[jsKey] !== undefined) { setClauses.push(`${col} = ?`); values.push(updates[jsKey]); }
+  }
+  if (!setClauses.length) return findById(id);
+  values.push(id);
+  await db.execute(`UPDATE users SET ${setClauses.join(', ')} WHERE id = ?`, values);
+  return findById(id);
+}
+
+async function isLoginIdTaken(loginId) {
+  const [rows] = await db.execute(`SELECT id FROM users WHERE login_id = ?`, [loginId]);
+  return rows.length > 0;
+}
+
+async function isEmailTakenByOtherUser(email, excludeId) {
+  const [rows] = await db.execute(`SELECT id FROM users WHERE email = ? AND id != ?`, [email, excludeId]);
+  return rows.length > 0;
+}
+
+async function isArtistNameTakenByOtherUser(artistName, excludeId) {
+  const [rows] = await db.execute(`SELECT id FROM users WHERE artist_name = ? AND id != ?`, [artistName, excludeId]);
+  return rows.length > 0;
+}
+
+module.exports = {
+  findById, findByLoginId, findByEmail, findByArtistName,
+  getAllUsers, createUser, updateUser, sanitize,
+  isLoginIdTaken, isEmailTakenByOtherUser, isArtistNameTakenByOtherUser,
+};
+```
+
+---
+
+### 6-3-2. playlistStore.js (DB 버전)
+
+```js
+// backend/lib/playlistStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+async function getPlaylistById(id) {
+  const [rows] = await db.execute(`SELECT * FROM playlists WHERE id = ?`, [id]);
+  if (!rows.length) return null;
+  const pl = rows[0];
+  const [tracks] = await db.execute(
+    `SELECT track_id FROM playlist_tracks WHERE playlist_id = ? ORDER BY position ASC`, [id]
+  );
+  pl.trackIds = tracks.map(r => r.track_id);
+  return pl;
+}
+
+async function getPlaylistsByUserId(userId) {
+  const [playlists] = await db.execute(
+    `SELECT * FROM playlists WHERE user_id = ? ORDER BY created_at ASC`, [userId]
+  );
+  for (const pl of playlists) {
+    const [tracks] = await db.execute(
+      `SELECT track_id FROM playlist_tracks WHERE playlist_id = ? ORDER BY position ASC`, [pl.id]
+    );
+    pl.trackIds = tracks.map(r => r.track_id);
+  }
+  return playlists;
+}
+
+async function getDefaultPlaylistByUserId(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM playlists WHERE user_id = ? AND is_default = 1`, [userId]
+  );
+  if (!rows.length) return null;
+  return getPlaylistById(rows[0].id);
+}
+
+async function ensureDefaultPlaylist(userId) {
+  const existing = await getDefaultPlaylistByUserId(userId);
+  if (existing) return existing;
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO playlists (id, user_id, name, is_default) VALUES (?, ?, '좋아하는 음악', 1)`,
+    [id, userId]
+  );
+  return getPlaylistById(id);
+}
+
+async function createPlaylist(userId, name) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO playlists (id, user_id, name, is_default) VALUES (?, ?, ?, 0)`,
+    [id, userId, name]
+  );
+  return getPlaylistById(id);
+}
+
+async function addTrackToPlaylist(playlistId, trackId) {
+  const [existing] = await db.execute(
+    `SELECT id FROM playlist_tracks WHERE playlist_id = ? AND track_id = ?`, [playlistId, trackId]
+  );
+  if (existing.length) return getPlaylistById(playlistId);
+  const [maxPos] = await db.execute(
+    `SELECT MAX(position) as maxPos FROM playlist_tracks WHERE playlist_id = ?`, [playlistId]
+  );
+  const position = (maxPos[0].maxPos ?? -1) + 1;
+  await db.execute(
+    `INSERT INTO playlist_tracks (playlist_id, track_id, position) VALUES (?, ?, ?)`,
+    [playlistId, trackId, position]
+  );
+  return getPlaylistById(playlistId);
+}
+
+async function removeTrackFromPlaylist(playlistId, trackId) {
+  await db.execute(
+    `DELETE FROM playlist_tracks WHERE playlist_id = ? AND track_id = ?`, [playlistId, trackId]
+  );
+  return getPlaylistById(playlistId);
+}
+
+async function updatePlaylistName(id, name) {
+  await db.execute(`UPDATE playlists SET name = ? WHERE id = ?`, [name, id]);
+  return getPlaylistById(id);
+}
+
+async function deletePlaylist(id) {
+  await db.execute(`DELETE FROM playlists WHERE id = ?`, [id]);
+}
+
+module.exports = {
+  getPlaylistById, getPlaylistsByUserId, getDefaultPlaylistByUserId,
+  ensureDefaultPlaylist, createPlaylist,
+  addTrackToPlaylist, removeTrackFromPlaylist, updatePlaylistName, deletePlaylist,
+};
+```
+
+---
+
+### 6-3-3. likedTrackStore.js (DB 버전)
+
+```js
+// backend/lib/likedTrackStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+async function getLikedTrackIdsByUser(userId) {
+  const [rows] = await db.execute(
+    `SELECT track_id FROM liked_tracks WHERE user_id = ? ORDER BY created_at DESC`, [userId]
+  );
+  return rows.map(r => r.track_id);
+}
+
+async function isLiked(userId, trackId) {
+  const [rows] = await db.execute(
+    `SELECT id FROM liked_tracks WHERE user_id = ? AND track_id = ?`, [userId, trackId]
+  );
+  return rows.length > 0;
+}
+
+async function likeTrack(userId, trackId) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT IGNORE INTO liked_tracks (id, user_id, track_id) VALUES (?, ?, ?)`,
+    [id, userId, trackId]
+  );
+  await db.execute(`UPDATE tracks SET likes = likes + 1 WHERE id = ?`, [trackId]);
+}
+
+async function unlikeTrack(userId, trackId) {
+  const [result] = await db.execute(
+    `DELETE FROM liked_tracks WHERE user_id = ? AND track_id = ?`, [userId, trackId]
+  );
+  if (result.affectedRows > 0) {
+    await db.execute(`UPDATE tracks SET likes = GREATEST(likes - 1, 0) WHERE id = ?`, [trackId]);
+  }
+}
+
+module.exports = { getLikedTrackIdsByUser, isLiked, likeTrack, unlikeTrack };
+```
+
+---
+
+### 6-3-4. followedArtistStore.js (DB 버전)
+
+```js
+// backend/lib/followedArtistStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+async function findByUserAndArtist(userId, artistName) {
+  const [rows] = await db.execute(
+    `SELECT * FROM followed_artists WHERE user_id = ? AND LOWER(artist_name) = LOWER(?)`,
+    [userId, artistName]
+  );
+  return rows.length ? rows[0] : null;
+}
+
+async function getFollowedByUser(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM followed_artists WHERE user_id = ? ORDER BY created_at DESC`, [userId]
+  );
+  return rows;
+}
+
+async function getFollowersByArtistName(artistName) {
+  const [rows] = await db.execute(
+    `SELECT * FROM followed_artists WHERE LOWER(artist_name) = LOWER(?)`, [artistName]
+  );
+  return rows;
+}
+
+async function addFollow({ id, userId, artistName, createdAt }) {
+  await db.execute(
+    `INSERT IGNORE INTO followed_artists (id, user_id, artist_name) VALUES (?, ?, ?)`,
+    [id || uuidv4(), userId, artistName]
+  );
+  return findByUserAndArtist(userId, artistName);
+}
+
+async function removeFollow(userId, artistName) {
+  await db.execute(
+    `DELETE FROM followed_artists WHERE user_id = ? AND LOWER(artist_name) = LOWER(?)`,
+    [userId, artistName]
+  );
+}
+
+module.exports = { findByUserAndArtist, getFollowedByUser, getFollowersByArtistName, addFollow, removeFollow };
+```
+
+---
+
+### 6-3-5. notificationStore.js (DB 버전)
+
+```js
+// backend/lib/notificationStore.js
+const db = require('./db');
+
+async function getByUserId(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC`, [userId]
+  );
+  return rows;
+}
+
+async function createNotification(userId, { type, title, message, link }) {
+  await db.execute(
+    `INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)`,
+    [userId, type, title || null, message || null, link || null]
+  );
+}
+
+async function markAllRead(userId) {
+  await db.execute(`UPDATE notifications SET is_read = 1 WHERE user_id = ?`, [userId]);
+}
+
+async function getUnreadCount(userId) {
+  const [rows] = await db.execute(
+    `SELECT COUNT(*) as cnt FROM notifications WHERE user_id = ? AND is_read = 0`, [userId]
+  );
+  return rows[0].cnt;
+}
+
+module.exports = { getByUserId, createNotification, markAllRead, getUnreadCount };
+```
+
+---
+
+### 6-3-6. recentlyPlayedStore.js (DB 버전)
+
+```js
+// backend/lib/recentlyPlayedStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+const MAX_HISTORY = 50;
+
+async function getByUserId(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM recently_played WHERE user_id = ? ORDER BY played_at DESC LIMIT ?`,
+    [userId, MAX_HISTORY]
+  );
+  return rows;
+}
+
+async function addRecentlyPlayed(userId, trackId) {
+  // 동일 트랙이 이미 있으면 삭제 후 재삽입 (최신 순 유지)
+  await db.execute(
+    `DELETE FROM recently_played WHERE user_id = ? AND track_id = ?`, [userId, trackId]
+  );
+  await db.execute(
+    `INSERT INTO recently_played (id, user_id, track_id, played_at) VALUES (?, ?, ?, NOW())`,
+    [uuidv4(), userId, trackId]
+  );
+  // MAX_HISTORY 초과 항목 삭제
+  await db.execute(
+    `DELETE FROM recently_played
+     WHERE user_id = ?
+       AND id NOT IN (
+         SELECT id FROM (
+           SELECT id FROM recently_played WHERE user_id = ? ORDER BY played_at DESC LIMIT ?
+         ) sub
+       )`,
+    [userId, userId, MAX_HISTORY]
+  );
+}
+
+module.exports = { getByUserId, addRecentlyPlayed };
+```
+
+---
+
+### 6-3-7. playerSessionStore.js (DB 버전)
+
+```js
+// backend/lib/playerSessionStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+async function getByUser(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM player_sessions WHERE user_id = ?`, [userId]
+  );
+  if (!rows.length) return null;
+  const session = rows[0];
+  const [queue] = await db.execute(
+    `SELECT track_id FROM player_queue WHERE session_id = ? ORDER BY position ASC`,
+    [session.id]
+  );
+  session.queueTrackIds = queue.map(r => r.track_id);
+  return session;
+}
+
+async function upsert(userId, fields) {
+  const existing = await getByUser(userId);
+  const id = existing ? existing.id : uuidv4();
+
+  if (existing) {
+    const colMap = {
+      trackId: 'track_id', currentTime: 'current_time', currentIndex: 'current_index',
+      queueType: 'queue_type', queueSourceId: 'queue_source_id',
+      repeatMode: 'repeat_mode', shuffle: 'shuffle',
+    };
+    const setClauses = [], values = [];
+    for (const [jsKey, col] of Object.entries(colMap)) {
+      if (fields[jsKey] !== undefined) {
+        setClauses.push(`${col} = ?`);
+        values.push(jsKey === 'shuffle' ? (fields[jsKey] ? 1 : 0) : fields[jsKey]);
+      }
+    }
+    if (setClauses.length) {
+      values.push(id);
+      await db.execute(`UPDATE player_sessions SET ${setClauses.join(', ')} WHERE id = ?`, values);
+    }
+  } else {
+    await db.execute(
+      `INSERT INTO player_sessions
+         (id, user_id, track_id, current_time, current_index, queue_type, queue_source_id, repeat_mode, shuffle)
+       VALUES (?,?,?,?,?,?,?,?,?)`,
+      [id, userId,
+       fields.trackId || null, fields.currentTime || 0, fields.currentIndex || 0,
+       fields.queueType || null, fields.queueSourceId || null,
+       fields.repeatMode || 'none', fields.shuffle ? 1 : 0]
+    );
+  }
+
+  // queueTrackIds가 전달된 경우 player_queue 전체 교체
+  if (Array.isArray(fields.queueTrackIds)) {
+    await db.execute(`DELETE FROM player_queue WHERE session_id = ?`, [id]);
+    for (let i = 0; i < fields.queueTrackIds.length; i++) {
+      await db.execute(
+        `INSERT INTO player_queue (session_id, track_id, position) VALUES (?, ?, ?)`,
+        [id, fields.queueTrackIds[i], i]
+      );
+    }
+  }
+
+  return getByUser(userId);
+}
+
+async function removeTrackFromSessions(trackId) {
+  // 현재 재생 트랙이 해당 트랙이면 null로 초기화
+  await db.execute(
+    `UPDATE player_sessions SET track_id = NULL WHERE track_id = ?`, [trackId]
+  );
+  // 큐에서 해당 트랙 제거
+  await db.execute(`DELETE FROM player_queue WHERE track_id = ?`, [trackId]);
+}
+
+module.exports = { upsert, getByUser, removeTrackFromSessions };
+```
+
+---
+
+### 6-3-8. creatorRequestStore.js (DB 버전)
+
+```js
+// backend/lib/creatorRequestStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+function rowToRequest(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    loginId: row.login_id,
+    name: row.name,
+    artistName: row.artist_name,
+    message: row.message,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    reviewedAt: row.reviewed_at,
+    reviewedBy: row.reviewed_by,
+  };
+}
+
+async function findPendingByUserId(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM creator_requests WHERE user_id = ? AND status = 'pending'`, [userId]
+  );
+  return rows.length ? rowToRequest(rows[0]) : null;
+}
+
+async function getLatestByUserId(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM creator_requests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`, [userId]
+  );
+  return rows.length ? rowToRequest(rows[0]) : null;
+}
+
+async function createRequest({ id, userId, loginId, name, artistName, message }) {
+  const reqId = id || uuidv4();
+  await db.execute(
+    `INSERT INTO creator_requests (id, user_id, login_id, name, artist_name, message, status)
+     VALUES (?,?,?,?,?,?,'pending')`,
+    [reqId, userId, loginId || null, name || null, artistName || null, message || null]
+  );
+  return findById(reqId);
+}
+
+async function getAllRequests() {
+  const [rows] = await db.execute(
+    `SELECT * FROM creator_requests ORDER BY created_at DESC`
+  );
+  return rows.map(rowToRequest);
+}
+
+async function findById(id) {
+  const [rows] = await db.execute(`SELECT * FROM creator_requests WHERE id = ?`, [id]);
+  return rows.length ? rowToRequest(rows[0]) : null;
+}
+
+async function updateRequest(id, updates) {
+  const colMap = {
+    status: 'status', reviewedAt: 'reviewed_at', reviewedBy: 'reviewed_by',
+  };
+  const setClauses = [], values = [];
+  for (const [jsKey, col] of Object.entries(colMap)) {
+    if (updates[jsKey] !== undefined) { setClauses.push(`${col} = ?`); values.push(updates[jsKey]); }
+  }
+  if (!setClauses.length) return findById(id);
+  values.push(id);
+  await db.execute(`UPDATE creator_requests SET ${setClauses.join(', ')} WHERE id = ?`, values);
+  return findById(id);
+}
+
+module.exports = { findPendingByUserId, getLatestByUserId, createRequest, getAllRequests, findById, updateRequest };
+```
+
+---
+
+### 6-3-9. trackDeleteRequestStore.js (DB 버전)
+
+```js
+// backend/lib/trackDeleteRequestStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+function rowToReq(row) {
+  return {
+    id: row.id,
+    trackId: row.track_id,
+    creatorUserId: row.creator_user_id,
+    creatorLoginId: row.creator_login_id,
+    artistName: row.artist_name,
+    trackTitle: row.track_title,
+    reason: row.reason,
+    status: row.status,
+    reviewedBy: row.reviewed_by,
+    reviewedAt: row.reviewed_at,
+    rejectReason: row.reject_reason,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+async function getAll(status) {
+  let sql = `SELECT * FROM track_delete_requests`;
+  const params = [];
+  if (status) { sql += ` WHERE status = ?`; params.push(status); }
+  sql += ` ORDER BY created_at DESC`;
+  const [rows] = await db.execute(sql, params);
+  return rows.map(rowToReq);
+}
+
+async function findPendingByTrackId(trackId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM track_delete_requests WHERE track_id = ? AND status = 'pending'`, [trackId]
+  );
+  return rows.length ? rowToReq(rows[0]) : null;
+}
+
+async function getByCreatorUserId(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM track_delete_requests WHERE creator_user_id = ? ORDER BY created_at DESC`, [userId]
+  );
+  return rows.map(rowToReq);
+}
+
+async function create({ trackId, creatorUserId, creatorLoginId, artistName, trackTitle, reason }) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO track_delete_requests
+       (id, track_id, creator_user_id, creator_login_id, artist_name, track_title, reason, status)
+     VALUES (?,?,?,?,?,?,?,'pending')`,
+    [id, trackId, creatorUserId, creatorLoginId || null, artistName || '', trackTitle, reason || '']
+  );
+  return findById(id);
+}
+
+async function findById(id) {
+  const [rows] = await db.execute(`SELECT * FROM track_delete_requests WHERE id = ?`, [id]);
+  return rows.length ? rowToReq(rows[0]) : null;
+}
+
+async function update(id, fields) {
+  const colMap = {
+    status: 'status', reviewedBy: 'reviewed_by',
+    reviewedAt: 'reviewed_at', rejectReason: 'reject_reason',
+  };
+  const setClauses = [], values = [];
+  for (const [jsKey, col] of Object.entries(colMap)) {
+    if (fields[jsKey] !== undefined) { setClauses.push(`${col} = ?`); values.push(fields[jsKey]); }
+  }
+  if (!setClauses.length) return findById(id);
+  values.push(id);
+  await db.execute(`UPDATE track_delete_requests SET ${setClauses.join(', ')} WHERE id = ?`, values);
+  return findById(id);
+}
+
+async function removeByTrackId(trackId) {
+  await db.execute(`DELETE FROM track_delete_requests WHERE track_id = ?`, [trackId]);
+}
+
+module.exports = { getAll, findPendingByTrackId, getByCreatorUserId, create, findById, update, removeByTrackId };
+```
+
+---
+
+### 6-3-10. hardDeleteLogStore.js (DB 버전)
+
+```js
+// backend/lib/hardDeleteLogStore.js
+const db = require('./db');
+const { v4: uuidv4 } = require('uuid');
+
+async function addLog({ trackId, title, artist, deletedBy, reason }) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO hard_delete_logs (id, track_id, title, artist, deleted_by, reason, deleted_at)
+     VALUES (?,?,?,?,?,?,NOW())`,
+    [id, trackId || null, title || '', artist || '', deletedBy, reason || 'hard delete by admin']
+  );
+  const [rows] = await db.execute(`SELECT * FROM hard_delete_logs WHERE id = ?`, [id]);
+  return rows[0];
+}
+
+async function getAll() {
+  const [rows] = await db.execute(
+    `SELECT * FROM hard_delete_logs ORDER BY deleted_at DESC`
+  );
+  return rows;
+}
+
+module.exports = { addLog, getAll };
+```
+
+---
+
+### 6-3-11. siteSettingsStore.js (DB 버전)
+
+```js
+// backend/lib/siteSettingsStore.js
+const db = require('./db');
+
+async function getSettings() {
+  const [rows] = await db.execute(`SELECT * FROM site_settings WHERE id = 1`);
+  return rows.length ? rows[0] : null;
+}
+
+async function updateSettings(updates) {
+  const colMap = {
+    siteName: 'site_name', logoUrl: 'logo_url',
+    heroBackgroundUrl: 'hero_background_url',
+    mainColor: 'main_color', subColor1: 'sub_color1',
+    subColor2: 'sub_color2', subColor3: 'sub_color3',
+  };
+  const setClauses = [], values = [];
+  for (const [jsKey, col] of Object.entries(colMap)) {
+    if (updates[jsKey] !== undefined) { setClauses.push(`${col} = ?`); values.push(updates[jsKey]); }
+  }
+  if (!setClauses.length) return getSettings();
+  await db.execute(`UPDATE site_settings SET ${setClauses.join(', ')} WHERE id = 1`, values);
+  return getSettings();
+}
+
+module.exports = { getSettings, updateSettings };
+```
+
+---
+
+### 6-3-12. likes 카운트 초기 동기화 (데이터 마이그레이션 시 1회 실행)
+
+JSON 데이터를 MySQL로 이전한 직후 `tracks.likes` 값을 `liked_tracks` 테이블 기준으로 맞춥니다.
+
+```sql
+UPDATE tracks t
+SET likes = (SELECT COUNT(*) FROM liked_tracks WHERE track_id = t.id);
+```
+
 ### 6-4. routes에서 async/await 추가
 
 store 함수들이 async로 바뀌므로 routes에서 `await` 추가가 필요합니다.

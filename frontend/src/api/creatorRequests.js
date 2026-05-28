@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = '/api/creator-requests';
+const BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/creator-requests';
 
 function authHeader() {
   const token = localStorage.getItem('token');

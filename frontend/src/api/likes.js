@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = '/api/likes';
+const BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/likes';
 
 function authHeader() {
   const token = localStorage.getItem('token');

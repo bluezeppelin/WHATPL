@@ -1,130 +1,113 @@
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
+const db = require('./db');
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'tracks.json');
-
-// data 폴더 없으면 생성
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-
-function load() {
-  try {
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  } catch {
-    return [];
-  }
-}
-
-function save(tracks) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(tracks, null, 2), 'utf8');
-}
-
-function getAllTracks() {
-  const tracks = load();
-  return tracks
-    .filter(t => t.status !== 'deleted' && t.status !== 'suspended')
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-}
-
-function getAllTracksIncludingDeleted() {
-  const tracks = load();
-  return tracks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-}
-
-function getTrackById(id) {
-  return load().find(t => t.id === id) || null;
-}
-
-function createTrack({ title, artist, genre, description, audioUrl, audioKey, coverUrl, coverKey, duration, uploadedByUserId }) {
-  const tracks = load();
-  const track = {
-    id: uuidv4(),
-    title,
-    artist: artist || '알 수 없는 아티스트',
-    genre: genre || '',
-    description: description || '',
-    audioUrl,
-    audioKey,
-    coverUrl,
-    coverKey,
-    duration: duration || 0,
-    plays: 0,
-    likes: 0,
-    uploadedByUserId: uploadedByUserId || null,
-    createdAt: new Date().toISOString(),
+function rowToTrack(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    artist: row.artist,
+    genre: row.genre,
+    description: row.description,
+    audioUrl: row.audio_url,
+    audioKey: row.audio_key,
+    coverUrl: row.cover_url,
+    coverKey: row.cover_key,
+    duration: row.duration,
+    plays: row.plays,
+    likes: row.likes,
+    uploadedByUserId: row.uploaded_by_user_id,
+    status: row.status,
+    createdAt: row.created_at,
+    deletedAt: row.deleted_at,
+    deletedBy: row.deleted_by,
+    deleteReason: row.delete_reason,
+    suspendedAt: row.suspended_at,
+    suspendedBy: row.suspended_by,
   };
-  tracks.push(track);
-  save(tracks);
-  return track;
 }
 
-function incrementPlays(id) {
-  const tracks = load();
-  const track = tracks.find(t => t.id === id);
-  if (track) {
-    track.plays += 1;
-    save(tracks);
+async function getAllTracks() {
+  const [rows] = await db.execute(
+    `SELECT * FROM tracks WHERE status NOT IN ('deleted','suspended') ORDER BY created_at DESC`
+  );
+  return rows.map(rowToTrack);
+}
+
+async function getAllTracksIncludingDeleted() {
+  const [rows] = await db.execute(`SELECT * FROM tracks ORDER BY created_at DESC`);
+  return rows.map(rowToTrack);
+}
+
+async function getTrackById(id) {
+  const [rows] = await db.execute(`SELECT * FROM tracks WHERE id = ?`, [id]);
+  return rows.length ? rowToTrack(rows[0]) : null;
+}
+
+async function createTrack({ title, artist, genre, description, audioUrl, audioKey, coverUrl, coverKey, duration, uploadedByUserId }) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO tracks
+       (id, title, artist, genre, description, audio_url, audio_key, cover_url, cover_key,
+        duration, plays, likes, uploaded_by_user_id, status, created_at)
+     VALUES (?,?,?,?,?,?,?,?,?,?,0,0,?,'active',NOW())`,
+    [id, title, artist || '알 수 없는 아티스트', genre || '', description || '',
+     audioUrl, audioKey, coverUrl || null, coverKey || null, duration || 0, uploadedByUserId || null]
+  );
+  return getTrackById(id);
+}
+
+async function updateTrack(id, fields) {
+  const colMap = {
+    title: 'title', artist: 'artist', genre: 'genre', description: 'description',
+    coverUrl: 'cover_url', coverKey: 'cover_key',
+  };
+  const setClauses = [], values = [];
+  for (const [jsKey, col] of Object.entries(colMap)) {
+    if (fields[jsKey] !== undefined) { setClauses.push(`${col} = ?`); values.push(fields[jsKey]); }
   }
+  if (!setClauses.length) return getTrackById(id);
+  values.push(id);
+  await db.execute(`UPDATE tracks SET ${setClauses.join(', ')} WHERE id = ?`, values);
+  return getTrackById(id);
 }
 
-function updateTrack(id, fields) {
-  const tracks = load();
-  const track = tracks.find(t => t.id === id);
+async function incrementPlays(id) {
+  await db.execute(`UPDATE tracks SET plays = plays + 1 WHERE id = ?`, [id]);
+}
+
+async function deleteTrack(id) {
+  const track = await getTrackById(id);
   if (!track) return null;
-  const allowed = ['title', 'artist', 'genre', 'description', 'coverUrl', 'coverKey', 'album', 'trackNumber', 'releaseYear'];
-  allowed.forEach(key => {
-    if (fields[key] !== undefined) track[key] = fields[key];
-  });
-  save(tracks);
+  await db.execute(`DELETE FROM tracks WHERE id = ?`, [id]);
   return track;
 }
 
-function deleteTrack(id) {
-  const tracks = load();
-  const idx = tracks.findIndex(t => t.id === id);
-  if (idx === -1) return null;
-  const [removed] = tracks.splice(idx, 1);
-  save(tracks);
-  return removed;
+async function softDeleteTrack(id, deletedBy, deleteReason) {
+  await db.execute(
+    `UPDATE tracks SET status='deleted', deleted_at=NOW(), deleted_by=?, delete_reason=? WHERE id=?`,
+    [deletedBy || null, deleteReason || '', id]
+  );
+  return getTrackById(id);
 }
 
-function softDeleteTrack(id, deletedBy, deleteReason) {
-  const tracks = load();
-  const track = tracks.find(t => t.id === id);
-  if (!track) return null;
-  track.status = 'deleted';
-  track.deletedAt = new Date().toISOString();
-  track.deletedBy = deletedBy || null;
-  track.deleteReason = deleteReason || '';
-  save(tracks);
-  return track;
+async function suspendTracksByUser(userId, suspendedBy) {
+  await db.execute(
+    `UPDATE tracks SET status='suspended', suspended_at=NOW(), suspended_by=?
+     WHERE uploaded_by_user_id=? AND status NOT IN ('deleted','suspended')`,
+    [suspendedBy, userId]
+  );
 }
 
-// 계정 비활성화 시 해당 유저의 활성 트랙을 suspended로 전환
-function suspendTracksByUser(userId, suspendedBy) {
-  const tracks = load();
-  const now = new Date().toISOString();
-  tracks.forEach(t => {
-    if (t.uploadedByUserId === userId && t.status !== 'deleted' && t.status !== 'suspended') {
-      t.status = 'suspended';
-      t.suspendedAt = now;
-      t.suspendedBy = suspendedBy;
-    }
-  });
-  save(tracks);
+async function restoreTracksByUser(userId) {
+  await db.execute(
+    `UPDATE tracks SET status='active', suspended_at=NULL, suspended_by=NULL
+     WHERE uploaded_by_user_id=? AND status='suspended'`,
+    [userId]
+  );
 }
 
-// 계정 활성화 시 suspended 트랙만 복구 (admin이 삭제한 deleted 트랙은 유지)
-function restoreTracksByUser(userId) {
-  const tracks = load();
-  tracks.forEach(t => {
-    if (t.uploadedByUserId === userId && t.status === 'suspended') {
-      delete t.status;
-      delete t.suspendedAt;
-      delete t.suspendedBy;
-    }
-  });
-  save(tracks);
-}
-
-module.exports = { getAllTracks, getAllTracksIncludingDeleted, getTrackById, createTrack, updateTrack, incrementPlays, deleteTrack, softDeleteTrack, suspendTracksByUser, restoreTracksByUser };
+module.exports = {
+  getAllTracks, getAllTracksIncludingDeleted, getTrackById,
+  createTrack, updateTrack, incrementPlays,
+  deleteTrack, softDeleteTrack, suspendTracksByUser, restoreTracksByUser,
+};

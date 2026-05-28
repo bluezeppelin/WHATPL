@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE = '/api/auth';
+const BASE = (import.meta.env.VITE_API_BASE_URL || '') + '/api/auth';
 
 export async function checkLoginId(loginId) {
   const { data } = await axios.get(`${BASE}/check-id`, { params: { loginId } });

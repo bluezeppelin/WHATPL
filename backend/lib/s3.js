@@ -1,34 +1,31 @@
 const multer = require('multer');
+const multerS3 = require('multer-s3');
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
-const fs = require('fs');
 
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
-const AUDIO_DIR = path.join(UPLOADS_DIR, 'audio');
-const COVERS_DIR = path.join(UPLOADS_DIR, 'covers');
-const PROFILES_DIR = path.join(UPLOADS_DIR, 'profiles');
-
-// 업로드 폴더 자동 생성
-[UPLOADS_DIR, AUDIO_DIR, COVERS_DIR, PROFILES_DIR].forEach(dir => {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-});
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, file.fieldname === 'audio' ? AUDIO_DIR : COVERS_DIR);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const folder = file.fieldname === 'audio' ? 'audio' : 'covers';
-    const filename = uuidv4() + ext;
-    // key 형식을 S3와 동일하게 맞춰 routes/tracks.js 코드 재사용
-    file.key = `${folder}/${filename}`;
-    cb(null, filename);
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
+
+const BUCKET = process.env.S3_BUCKET_NAME;
+const CLOUDFRONT = process.env.CLOUDFRONT_DOMAIN;
 
 const upload = multer({
-  storage,
+  storage: multerS3({
+    s3,
+    bucket: BUCKET,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const folder = file.fieldname === 'audio' ? 'audio' : 'covers';
+      cb(null, `${folder}/${uuidv4()}${ext}`);
+    },
+  }),
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.fieldname === 'audio') {
@@ -43,20 +40,14 @@ const upload = multer({
   },
 });
 
-function getFileUrl(key) {
-  // 로컬 정적 파일 URL로 변환
-  return `http://localhost:${process.env.PORT || 5000}/uploads/${key}`;
-}
-
-async function deleteFromS3(key) {
-  const filePath = path.join(UPLOADS_DIR, key.replace(/\//g, path.sep));
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-}
-
 const uploadProfile = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, PROFILES_DIR),
-    filename: (req, file, cb) => cb(null, uuidv4() + path.extname(file.originalname)),
+  storage: multerS3({
+    s3,
+    bucket: BUCKET,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: (req, file, cb) => {
+      cb(null, `profiles/${uuidv4()}${path.extname(file.originalname)}`);
+    },
   }),
   limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
@@ -65,4 +56,29 @@ const uploadProfile = multer({
   },
 });
 
-module.exports = { upload, uploadProfile, getFileUrl, deleteFromS3 };
+const uploadSite = multer({
+  storage: multerS3({
+    s3,
+    bucket: BUCKET,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: (req, file, cb) => {
+      cb(null, `site/${uuidv4()}${path.extname(file.originalname)}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'];
+    cb(null, allowed.includes(file.mimetype));
+  },
+});
+
+function getFileUrl(key) {
+  if (CLOUDFRONT) return `https://${CLOUDFRONT}/${key}`;
+  return `https://${BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+}
+
+async function deleteFromS3(key) {
+  await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
+}
+
+module.exports = { upload, uploadProfile, uploadSite, getFileUrl, deleteFromS3 };

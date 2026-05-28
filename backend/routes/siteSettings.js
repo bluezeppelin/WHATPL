@@ -3,9 +3,9 @@ const router = express.Router();
 const { getSiteSettings } = require('../lib/siteSettingsStore');
 
 // GET /api/site-settings — 인증 불필요, 누구나 접근 가능
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    res.json(getSiteSettings());
+    res.json(await getSiteSettings());
   } catch {
     res.json({
       siteName: 'WHATPL',

@@ -1,51 +1,60 @@
-const fs = require('fs');
-const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const db = require('./db');
 
-const DATA_PATH = path.join(__dirname, '../data/likedTracks.json');
+function rowToLike(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    trackId: row.track_id,
+    createdAt: row.created_at,
+  };
+}
 
-function readLikes() {
-  if (!fs.existsSync(DATA_PATH)) {
-    fs.writeFileSync(DATA_PATH, '[]', 'utf-8');
+async function findByUserAndTrack(userId, trackId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM liked_tracks WHERE user_id = ? AND track_id = ?`, [userId, trackId]
+  );
+  return rows.length ? rowToLike(rows[0]) : null;
+}
+
+async function getLikedByUser(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM liked_tracks WHERE user_id = ? ORDER BY created_at DESC`, [userId]
+  );
+  return rows.map(rowToLike);
+}
+
+async function addLike(data) {
+  const id = data.id || uuidv4();
+  const [result] = await db.execute(
+    `INSERT IGNORE INTO liked_tracks (id, user_id, track_id) VALUES (?, ?, ?)`,
+    [id, data.userId, data.trackId]
+  );
+  if (result.affectedRows > 0) {
+    await db.execute(`UPDATE tracks SET likes = likes + 1 WHERE id = ?`, [data.trackId]);
   }
-  return JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
+  return { ...data, inserted: result.affectedRows > 0 };
 }
 
-function writeLikes(likes) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(likes, null, 2), 'utf-8');
+async function removeLike(userId, trackId) {
+  const [result] = await db.execute(
+    `DELETE FROM liked_tracks WHERE user_id = ? AND track_id = ?`, [userId, trackId]
+  );
+  if (result.affectedRows > 0) {
+    await db.execute(`UPDATE tracks SET likes = GREATEST(likes - 1, 0) WHERE id = ?`, [trackId]);
+  }
 }
 
-function findByUserAndTrack(userId, trackId) {
-  return readLikes().find(l => l.userId === userId && l.trackId === trackId) || null;
+async function removeByTrackId(trackId) {
+  await db.execute(`DELETE FROM liked_tracks WHERE track_id = ?`, [trackId]);
 }
 
-function getLikedByUser(userId) {
-  return readLikes().filter(l => l.userId === userId);
-}
-
-function addLike(data) {
-  const likes = readLikes();
-  likes.push(data);
-  writeLikes(likes);
-  return data;
-}
-
-function removeLike(userId, trackId) {
-  const likes = readLikes();
-  const filtered = likes.filter(l => !(l.userId === userId && l.trackId === trackId));
-  writeLikes(filtered);
-}
-
-function removeByTrackId(trackId) {
-  const likes = readLikes();
-  writeLikes(likes.filter(l => l.trackId !== trackId));
-}
-
-// 트랙별 누적 좋아요 수 집계 — { trackId: count }
-function getAllLikeCounts() {
+async function getAllLikeCounts() {
+  const [rows] = await db.execute(
+    `SELECT track_id, COUNT(*) as cnt FROM liked_tracks GROUP BY track_id`
+  );
   const counts = {};
-  for (const like of readLikes()) {
-    counts[like.trackId] = (counts[like.trackId] || 0) + 1;
-  }
+  for (const row of rows) counts[row.track_id] = row.cnt;
   return counts;
 }
 

@@ -1,44 +1,51 @@
-const fs = require('fs');
-const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const db = require('./db');
 
-const DATA_PATH = path.join(__dirname, '../data/followedArtists.json');
-
-function readFollows() {
-  if (!fs.existsSync(DATA_PATH)) {
-    fs.writeFileSync(DATA_PATH, '[]', 'utf-8');
-  }
-  return JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
+function rowToFollow(row) {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    artistName: row.artist_name,
+    createdAt: row.created_at,
+  };
 }
 
-function writeFollows(data) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf-8');
+async function findByUserAndArtist(userId, artistName) {
+  const [rows] = await db.execute(
+    `SELECT * FROM followed_artists WHERE user_id = ? AND LOWER(artist_name) = LOWER(?)`,
+    [userId, artistName]
+  );
+  return rows.length ? rowToFollow(rows[0]) : null;
 }
 
-function findByUserAndArtist(userId, artistName) {
-  const normalized = artistName.toLowerCase();
-  return readFollows().find(f => f.userId === userId && f.artistName.toLowerCase() === normalized) || null;
+async function getFollowedByUser(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM followed_artists WHERE user_id = ? ORDER BY created_at DESC`, [userId]
+  );
+  return rows.map(rowToFollow);
 }
 
-function getFollowedByUser(userId) {
-  return readFollows().filter(f => f.userId === userId);
+async function getFollowersByArtistName(artistName) {
+  const [rows] = await db.execute(
+    `SELECT * FROM followed_artists WHERE LOWER(artist_name) = LOWER(?)`, [artistName]
+  );
+  return rows.map(rowToFollow);
 }
 
-function getFollowersByArtistName(artistName) {
-  const normalized = artistName.toLowerCase();
-  return readFollows().filter(f => f.artistName.toLowerCase() === normalized);
+async function addFollow(data) {
+  const id = data.id || uuidv4();
+  await db.execute(
+    `INSERT IGNORE INTO followed_artists (id, user_id, artist_name) VALUES (?, ?, ?)`,
+    [id, data.userId, data.artistName]
+  );
+  return findByUserAndArtist(data.userId, data.artistName); // returns rowToFollow-mapped object
 }
 
-function addFollow(data) {
-  const follows = readFollows();
-  follows.push(data);
-  writeFollows(follows);
-  return data;
-}
-
-function removeFollow(userId, artistName) {
-  const normalized = artistName.toLowerCase();
-  const follows = readFollows();
-  writeFollows(follows.filter(f => !(f.userId === userId && f.artistName.toLowerCase() === normalized)));
+async function removeFollow(userId, artistName) {
+  await db.execute(
+    `DELETE FROM followed_artists WHERE user_id = ? AND LOWER(artist_name) = LOWER(?)`,
+    [userId, artistName]
+  );
 }
 
 module.exports = { findByUserAndArtist, getFollowedByUser, getFollowersByArtistName, addFollow, removeFollow };

@@ -4,3 +4,11 @@ dist/
 .DS_Store
 *.log
 backend/data/
+
+# generated/local artifacts
+backend/uploads/
+backend/data_backup*/
+backend/uploads_backup*/
+backend/*backup*/
+frontend/dist/
+.claude/

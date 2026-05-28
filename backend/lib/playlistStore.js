@@ -1,141 +1,156 @@
 const { v4: uuidv4 } = require('uuid');
-const fs = require('fs');
-const path = require('path');
+const db = require('./db');
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'playlists.json');
+async function getPlaylistById(id) {
+  const [rows] = await db.execute(`SELECT * FROM playlists WHERE id = ?`, [id]);
+  if (!rows.length) return null;
+  const pl = rows[0];
+  const [tracks] = await db.execute(
+    `SELECT id, track_id FROM playlist_tracks WHERE playlist_id = ? ORDER BY position ASC, id ASC`, [id]
+  );
+  pl.playlistTrackIds = tracks.map(r => r.id);
+  pl.trackIds = tracks.map(r => r.track_id);
+  pl.isDefault = !!pl.is_default;
+  pl.userId = pl.user_id;
+  pl.createdAt = pl.created_at;
+  return pl;
+}
 
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-
-function load() {
-  try {
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-  } catch {
-    return [];
+async function getAllPlaylists() {
+  const [playlists] = await db.execute(`SELECT * FROM playlists ORDER BY created_at ASC`);
+  for (const pl of playlists) {
+    const [tracks] = await db.execute(
+      `SELECT id, track_id FROM playlist_tracks WHERE playlist_id = ? ORDER BY position ASC, id ASC`, [pl.id]
+    );
+    pl.playlistTrackIds = tracks.map(r => r.id);
+    pl.trackIds = tracks.map(r => r.track_id);
+    pl.isDefault = !!pl.is_default;
+    pl.userId = pl.user_id;
+    pl.createdAt = pl.created_at;
   }
+  return playlists;
 }
 
-function save(playlists) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(playlists, null, 2), 'utf8');
+async function getPlaylistsByUserId(userId) {
+  const [playlists] = await db.execute(
+    `SELECT * FROM playlists WHERE user_id = ? ORDER BY created_at ASC`, [userId]
+  );
+  for (const pl of playlists) {
+    const [tracks] = await db.execute(
+      `SELECT id, track_id FROM playlist_tracks WHERE playlist_id = ? ORDER BY position ASC, id ASC`, [pl.id]
+    );
+    pl.playlistTrackIds = tracks.map(r => r.id);
+    pl.trackIds = tracks.map(r => r.track_id);
+    pl.isDefault = !!pl.is_default;
+    pl.userId = pl.user_id;
+    pl.createdAt = pl.created_at;
+  }
+  return playlists;
 }
 
-function getAllPlaylists() {
-  return load().map(p => ({ ...p }));
+async function getDefaultPlaylistByUserId(userId) {
+  const [rows] = await db.execute(
+    `SELECT * FROM playlists WHERE user_id = ? AND is_default = 1`, [userId]
+  );
+  if (!rows.length) return null;
+  return getPlaylistById(rows[0].id);
 }
 
-// 사용자별 기본 재생목록 보장 (없으면 생성)
-function ensureDefaultPlaylist(userId) {
-  const playlists = load();
-  const existing = playlists.find(p => p.userId === userId && p.isDefault === true);
-  if (existing) return { ...existing };
-  const p = {
-    id: uuidv4(),
-    userId,
-    name: '기본 재생목록',
-    trackIds: [],
-    createdAt: new Date().toISOString(),
-    isDefault: true,
-  };
-  playlists.push(p);
-  save(playlists);
-  return { ...p };
-}
-
-function getDefaultPlaylistByUserId(userId) {
-  return load().find(p => p.userId === userId && p.isDefault === true) || null;
-}
-
-function getPlaylistsByUserId(userId) {
-  return load().filter(p => p.userId === userId).map(p => ({ ...p }));
-}
-
-function getPlaylistById(id) {
-  return load().find(p => p.id === id) || null;
+async function ensureDefaultPlaylist(userId) {
+  const existing = await getDefaultPlaylistByUserId(userId);
+  if (existing) return existing;
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO playlists (id, user_id, name, is_default) VALUES (?, ?, '기본 재생목록', 1)`,
+    [id, userId]
+  );
+  return getPlaylistById(id);
 }
 
 function isOwnedBy(playlist, userId) {
-  return playlist.userId === userId;
+  return (playlist.userId || playlist.user_id) === userId;
 }
 
-function createPlaylist(name, userId) {
-  const playlists = load();
-  const p = {
-    id: uuidv4(),
-    userId: userId || null,
-    name: name.trim(),
-    trackIds: [],
-    createdAt: new Date().toISOString(),
-    isDefault: false,
-  };
-  playlists.push(p);
-  save(playlists);
-  return p;
+async function createPlaylist(name, userId) {
+  const id = uuidv4();
+  await db.execute(
+    `INSERT INTO playlists (id, user_id, name, is_default) VALUES (?, ?, ?, 0)`,
+    [id, userId || null, name.trim()]
+  );
+  return getPlaylistById(id);
 }
 
-function renamePlaylist(id, name) {
-  const playlists = load();
-  const p = playlists.find(x => x.id === id);
-  if (!p) return null;
-  p.name = name.trim();
-  save(playlists);
-  return p;
+async function renamePlaylist(id, name) {
+  await db.execute(`UPDATE playlists SET name = ? WHERE id = ?`, [name.trim(), id]);
+  return getPlaylistById(id);
 }
 
-function deletePlaylist(id) {
-  const playlists = load();
-  const idx = playlists.findIndex(p => p.id === id);
-  if (idx === -1 || playlists[idx].isDefault) return null;
-  const [removed] = playlists.splice(idx, 1);
-  save(playlists);
-  return removed;
+async function deletePlaylist(id) {
+  const pl = await getPlaylistById(id);
+  if (!pl || pl.isDefault) return null;
+  await db.execute(`DELETE FROM playlists WHERE id = ?`, [id]);
+  return pl;
 }
 
-function addTrack(playlistId, trackId) {
-  const playlists = load();
-  const p = playlists.find(x => x.id === playlistId);
-  if (!p) return null;
-  if (p.trackIds.includes(trackId)) return { ...p, alreadyExists: true };
-  p.trackIds.push(trackId);
-  save(playlists);
-  return p;
+async function normalizePositions(playlistId) {
+  const [rows] = await db.execute(
+    `SELECT id FROM playlist_tracks WHERE playlist_id = ? ORDER BY position ASC, id ASC`, [playlistId]
+  );
+  for (let i = 0; i < rows.length; i++) {
+    await db.execute(`UPDATE playlist_tracks SET position = ? WHERE id = ?`, [i, rows[i].id]);
+  }
 }
 
-function removeTrackAt(playlistId, index) {
-  const playlists = load();
-  const p = playlists.find(x => x.id === playlistId);
-  if (!p || index < 0 || index >= p.trackIds.length) return null;
-  p.trackIds.splice(index, 1);
-  save(playlists);
-  return p;
+async function addTrack(playlistId, trackId) {
+  const pl = await getPlaylistById(playlistId);
+  if (!pl) return null;
+  const [maxPos] = await db.execute(
+    `SELECT MAX(position) as maxPos FROM playlist_tracks WHERE playlist_id = ?`, [playlistId]
+  );
+  const position = (maxPos[0].maxPos ?? -1) + 1;
+  await db.execute(
+    `INSERT INTO playlist_tracks (id, playlist_id, track_id, position) VALUES (?, ?, ?, ?)`,
+    [uuidv4(), playlistId, trackId, position]
+  );
+  return getPlaylistById(playlistId);
 }
 
-// trackId 기준 첫 번째 항목 제거 (인덱스 경쟁 조건 방지)
-function removeTrackFirstById(playlistId, trackId) {
-  const playlists = load();
-  const p = playlists.find(x => x.id === playlistId);
-  if (!p) return null;
-  const idx = p.trackIds.indexOf(trackId);
-  if (idx === -1) return null;
-  p.trackIds.splice(idx, 1);
-  save(playlists);
-  return p;
+async function removeTrackAt(playlistId, index) {
+  const pl = await getPlaylistById(playlistId);
+  if (!pl || index < 0 || index >= pl.playlistTrackIds.length) return null;
+  await db.execute(`DELETE FROM playlist_tracks WHERE id = ?`, [pl.playlistTrackIds[index]]);
+  await normalizePositions(playlistId);
+  return getPlaylistById(playlistId);
 }
 
-function setTracks(playlistId, trackIds) {
-  const playlists = load();
-  const p = playlists.find(x => x.id === playlistId);
-  if (!p) return null;
-  p.trackIds = [...trackIds];
-  save(playlists);
-  return p;
+async function removeTrackFirstById(playlistId, trackId) {
+  const [rows] = await db.execute(
+    `SELECT id FROM playlist_tracks WHERE playlist_id = ? AND track_id = ? ORDER BY position ASC, id ASC LIMIT 1`,
+    [playlistId, trackId]
+  );
+  if (!rows.length) return null;
+  await db.execute(`DELETE FROM playlist_tracks WHERE id = ?`, [rows[0].id]);
+  await normalizePositions(playlistId);
+  return getPlaylistById(playlistId);
 }
 
-// 모든 플레이리스트에서 특정 트랙 ID 전부 제거 (트랙 삭제 시 호출)
-function removeTrackFromAll(trackId) {
-  const playlists = load();
-  playlists.forEach(p => {
-    p.trackIds = p.trackIds.filter(id => id !== trackId);
-  });
-  save(playlists);
+async function setTracks(playlistId, trackIds) {
+  await db.execute(`DELETE FROM playlist_tracks WHERE playlist_id = ?`, [playlistId]);
+  for (let i = 0; i < trackIds.length; i++) {
+    await db.execute(
+      `INSERT INTO playlist_tracks (id, playlist_id, track_id, position) VALUES (?, ?, ?, ?)`,
+      [uuidv4(), playlistId, trackIds[i], i]
+    );
+  }
+  return getPlaylistById(playlistId);
 }
 
-module.exports = { getAllPlaylists, ensureDefaultPlaylist, getDefaultPlaylistByUserId, getPlaylistsByUserId, getPlaylistById, isOwnedBy, createPlaylist, renamePlaylist, deletePlaylist, addTrack, removeTrackAt, removeTrackFirstById, removeTrackFromAll, setTracks };
+async function removeTrackFromAll(trackId) {
+  await db.execute(`DELETE FROM playlist_tracks WHERE track_id = ?`, [trackId]);
+}
+
+module.exports = {
+  getAllPlaylists, getPlaylistById, getPlaylistsByUserId, getDefaultPlaylistByUserId,
+  ensureDefaultPlaylist, isOwnedBy, createPlaylist, renamePlaylist, deletePlaylist,
+  addTrack, removeTrackAt, removeTrackFirstById, setTracks, removeTrackFromAll,
+};
