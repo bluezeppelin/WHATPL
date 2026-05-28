@@ -12,7 +12,7 @@ async function addOrUpdate(userId, trackId) {
     `INSERT INTO recently_played (id, user_id, track_id, played_at) VALUES (?, ?, ?, NOW())`,
     [id, userId, trackId]
   );
-  // MAX_HISTORY 초과 항목 삭제
+  // MAX_HISTORY 초과 항목 삭제 (LIMIT은 인라인 — mysql2 prepared statement LIMIT 파라미터 미지원 회피)
   await db.execute(
     `DELETE FROM recently_played
      WHERE user_id = ?
@@ -21,10 +21,10 @@ async function addOrUpdate(userId, trackId) {
            SELECT id FROM recently_played
            WHERE user_id = ?
            ORDER BY played_at DESC
-           LIMIT ?
+           LIMIT ${MAX_HISTORY}
          ) sub
        )`,
-    [userId, userId, MAX_HISTORY]
+    [userId, userId]
   );
   const [rows] = await db.execute(
     `SELECT * FROM recently_played WHERE user_id = ? AND track_id = ?`, [userId, trackId]
@@ -43,8 +43,8 @@ function rowToRecord(row) {
 
 async function getByUser(userId) {
   const [rows] = await db.execute(
-    `SELECT * FROM recently_played WHERE user_id = ? ORDER BY played_at DESC LIMIT ?`,
-    [userId, MAX_HISTORY]
+    `SELECT * FROM recently_played WHERE user_id = ? ORDER BY played_at DESC LIMIT ${MAX_HISTORY}`,
+    [userId]
   );
   return rows.map(rowToRecord);
 }
