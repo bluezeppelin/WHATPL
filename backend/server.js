@@ -16,6 +16,7 @@ const siteSettingsRoutes = require('./routes/siteSettings');
 const creatorRoutes = require('./routes/creators');
 const searchRoutes = require('./routes/search');
 const notificationRoutes = require('./routes/notifications');
+const imageProxyRoutes = require('./routes/imageProxy');
 
 const statsMiddleware = require('./middleware/statsMiddleware');
 
@@ -54,6 +55,7 @@ app.use('/api/player-session', playerSessionRoutes);
 app.use('/api/creators', creatorRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/image-proxy', imageProxyRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 

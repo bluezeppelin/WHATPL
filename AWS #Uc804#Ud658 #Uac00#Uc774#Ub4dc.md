@@ -124,7 +124,16 @@ AWS 콘솔 → S3 → 버킷 만들기
 
 > CloudFront를 사용할 경우 버킷을 비공개로 두고 CloudFront OAC 방식을 사용합니다. (9장 참고)
 
-### 3-3. CORS 설정
+### 3-3. CORS 설정 ⚠️ 필수 (PlayerBar 커버 색 추출)
+
+> **이 설정을 빠뜨리면 재생바가 앨범 커버 색으로 바뀌지 않습니다.**
+> PlayerBar는 현재 곡 커버를 canvas로 읽어 대표 색을 추출하는데, 커버가
+> S3(=다른 출처)에 있으면 브라우저가 CORS 헤더를 요구합니다. 버킷에 CORS가
+> 없으면 이미지 로드가 CORS 실패로 처리돼 색 추출이 조용히 실패하고, 바는
+> 기본 보라색으로 표시됩니다. (커버 `<img>` 자체는 정상 표시되므로 헷갈리기 쉬움)
+>
+> 백엔드에 동일 출처 프록시(`/api/image-proxy`) 폴백이 있어 CORS 없이도
+> 동작하긴 하지만, **직접 추출이 더 빠르고 EC2 대역폭을 아끼므로 CORS 설정을 권장**합니다.
 
 `S3 콘솔 → 버킷 → 권한 → CORS(Cross-origin 리소스 공유)`:
 
@@ -141,6 +150,27 @@ AWS 콘솔 → S3 → 버킷 만들기
   }
 ]
 ```
+
+> ⚠️ `AllowedOrigins`에는 **실제로 브라우저가 접속하는 프론트엔드 주소**를 정확히
+> 넣어야 합니다. CloudFront 도메인, S3 정적 호스팅 URL, `http`/`https`,
+> `www` 유무가 다르면 CORS가 동작하지 않습니다. 와일드카드로 빠르게 확인하려면
+> 임시로 `"AllowedOrigins": ["*"]`를 쓸 수 있으나 운영에서는 도메인을 명시하세요.
+
+**AWS CLI로 적용 (콘솔 대신):**
+
+```bash
+# 위 JSON을 cors.json 파일로 저장한 뒤
+aws s3api put-bucket-cors \
+  --bucket whatpl-media \
+  --cors-configuration file://cors.json
+
+# 적용 확인
+aws s3api get-bucket-cors --bucket whatpl-media
+```
+
+> CloudFront를 거쳐 커버를 서빙한다면, CloudFront 동작(Behavior)에서 `Origin`,
+> `Access-Control-Request-*` 헤더를 오리진으로 전달(forward)하고 CORS 응답이
+> 캐시되도록 설정해야 합니다. (관리형 `CORS-S3Origin` Origin request policy 사용)
 
 ### 3-4. 폴더 구조 (S3 prefix)
 

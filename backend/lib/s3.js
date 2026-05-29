@@ -1,6 +1,6 @@
 const multer = require('multer');
 const multerS3 = require('multer-s3');
-const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 
@@ -86,4 +86,36 @@ async function deleteFromS3(key) {
   await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }
 
-module.exports = { upload, uploadProfile, uploadSite, getFileUrl, deleteFromS3 };
+// 외부 커버 URL(CloudFront/S3)에서 우리 버킷 객체 key만 안전하게 추출.
+// 우리 버킷/배포 도메인이 아니면 null → 임의 URL 프록시(SSRF) 차단.
+function keyFromUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return null;
+  let url;
+  try { url = new URL(rawUrl); } catch { return null; }
+  // _cors=1 등 쿼리스트링은 pathname에 포함되지 않으므로 자동 제거됨
+  const objectKey = decodeURIComponent(url.pathname.replace(/^\/+/, ''));
+  if (!objectKey) return null;
+
+  if (CLOUDFRONT && url.host === CLOUDFRONT) return objectKey;
+
+  const region = process.env.AWS_REGION;
+  // virtual-hosted style: bucket.s3.region.amazonaws.com/key
+  if (url.host === `${BUCKET}.s3.${region}.amazonaws.com`) return objectKey;
+  if (url.host === `${BUCKET}.s3.amazonaws.com`) return objectKey;
+  // path style: s3.region.amazonaws.com/bucket/key
+  if ((url.host === `s3.${region}.amazonaws.com` || url.host === 's3.amazonaws.com')
+      && objectKey.startsWith(`${BUCKET}/`)) {
+    return objectKey.slice(BUCKET.length + 1);
+  }
+  return null;
+}
+
+// 커버 색 추출 프록시용: 우리 버킷 객체를 스트림으로 반환. 허용되지 않은 URL이면 null.
+async function getObjectByUrl(rawUrl) {
+  const key = keyFromUrl(rawUrl);
+  if (!key) return null;
+  const out = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+  return { body: out.Body, contentType: out.ContentType, contentLength: out.ContentLength };
+}
+
+module.exports = { upload, uploadProfile, uploadSite, getFileUrl, deleteFromS3, getObjectByUrl };
