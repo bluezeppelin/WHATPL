@@ -1,4 +1,4 @@
 export const GENRES = [
   'Pop', 'Hip-Hop', 'R&B', 'Electronic', 'Rock/Metal',
-  'Indie', 'Lo-Fi', 'Acoustic', 'Jazz', 'Other',
+  'Lo-Fi', 'Acoustic', 'Jazz', 'Blues', 'Classical', 'Other',
 ];

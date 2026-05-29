@@ -11,7 +11,7 @@ import { usePlayer } from '../hooks/usePlayer';
 import TrackCard from '../components/TrackCard';
 import styles from './Home.module.css';
 
-const SIDEBAR_GENRES = ['Hip-Hop', 'R&B', 'Electronic', 'Rock/Metal', 'Indie', 'Lo-Fi', 'Acoustic', 'Jazz'];
+const SIDEBAR_GENRES = ['Hip-Hop', 'R&B', 'Electronic', 'Rock/Metal', 'Lo-Fi', 'Acoustic', 'Jazz', 'Blues', 'Classical'];
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%231a1510'/%3E%3Ccircle cx='40' cy='30' r='14' fill='%23c89f62'/%3E%3Cellipse cx='40' cy='66' rx='24' ry='18' fill='%23c89f62'/%3E%3C/svg%3E";
 const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a1a2e'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%23c89f62' stroke-width='3' fill='none'/%3E%3Ccircle cx='100' cy='100' r='12' fill='%23c89f62'/%3E%3C/svg%3E";
 
