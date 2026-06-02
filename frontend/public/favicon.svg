@@ -1,13 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#0d0d1a"/>
-  <text
-    x="16"
-    y="23"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="20"
-    font-weight="700"
-    fill="#c89f62"
-    text-anchor="middle"
-    letter-spacing="-1"
-  >W</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#ff00aa"/>
+      <stop offset="50%" stop-color="#8822ff"/>
+      <stop offset="100%" stop-color="#00ccff"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#grad)" d="
+    M50,5
+    C57,2 65,1 72,7
+    C79,13 83,6 90,12
+    C97,18 94,27 95,35
+    C96,43 98,50 95,57
+    C92,64 96,70 91,76
+    C86,82 78,80 73,86
+    C68,92 67,98 60,98
+    C53,98 50,93 43,95
+    C36,97 31,96 25,91
+    C19,86 17,89 12,83
+    C7,77 9,70 7,63
+    C5,56 2,51 5,44
+    C8,37 5,30 9,24
+    C13,18 10,10 18,6
+    C26,2 33,5 39,3
+    C44,1 47,7 50,5
+    Z
+  "/>
+  <polygon points="40,33 40,67 68,50" fill="black" opacity="0.78"/>
 </svg>
