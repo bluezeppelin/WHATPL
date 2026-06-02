@@ -155,11 +155,10 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
       <div className={styles.meta}>
         <span className={styles.metaItem}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+            <path d="M12 3a9 9 0 0 0-9 9v5a2 2 0 0 0 2 2h2v-6H5v-1a7 7 0 0 1 14 0v1h-2v6h2a2 2 0 0 0 2-2v-5a9 9 0 0 0-9-9z"/>
           </svg>
           {formatPlays(track.plays)}
         </span>
-        <span className={styles.metaItem}>{formatDuration(track.duration)}</span>
 
         <div className={styles.metaActions}>
           {/* 플레이리스트 추가 */}
