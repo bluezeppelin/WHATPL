@@ -3,6 +3,7 @@ import { usePlayer } from '../hooks/usePlayer';
 import { useAuth } from '../context/AuthContext';
 import NowPlayingPanel from './NowPlayingPanel';
 import { extractCoverColor } from '../utils/extractCoverColor';
+import { getTrackLikeStatus, likeTrack, unlikeTrack } from '../api/likes';
 import styles from './PlayerBar.module.css';
 
 const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a1a2e'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%23c89f62' stroke-width='3' fill='none'/%3E%3Ccircle cx='100' cy='100' r='12' fill='%23c89f62'/%3E%3C/svg%3E";
@@ -128,6 +129,9 @@ export default function PlayerBar() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [coverColor, setCoverColor] = useState(null);
   const [hasCheckedSession, setHasCheckedSession] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likeLoading, setLikeLoading] = useState(false);
   const progressRef = useRef(null);
 
   // 카드 스택 아이템 빌드 — 7개 슬롯
@@ -246,6 +250,35 @@ export default function PlayerBar() {
     return () => { cancelled = true; };
   }, [currentTrack?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (!currentTrack) { setIsLiked(false); setLikeCount(0); return; }
+    setLikeCount(currentTrack.likes ?? 0);
+    if (!user) { setIsLiked(false); return; }
+    let cancelled = false;
+    getTrackLikeStatus(currentTrack.id)
+      .then(data => { if (!cancelled) setIsLiked(data.liked); })
+      .catch(() => { if (!cancelled) setIsLiked(false); });
+    return () => { cancelled = true; };
+  }, [currentTrack?.id, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLike = async () => {
+    if (!user || !currentTrack || likeLoading) return;
+    setLikeLoading(true);
+    const prevLiked = isLiked;
+    const prevCount = likeCount;
+    setIsLiked(!prevLiked);
+    setLikeCount(prevCount + (prevLiked ? -1 : 1));
+    try {
+      if (prevLiked) await unlikeTrack(currentTrack.id);
+      else await likeTrack(currentTrack.id);
+    } catch {
+      setIsLiked(prevLiked);
+      setLikeCount(prevCount);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
+
   const seek = (e) => {
     if (!progressRef.current || !audioRef.current || !currentTrack) return;
     const rect = progressRef.current.getBoundingClientRect();
@@ -309,6 +342,15 @@ export default function PlayerBar() {
                 <p className={styles.title}>{currentTrack.title}</p>
                 <p className={styles.artist}>{currentTrack.artist}</p>
               </div>
+              <button
+                className={`${styles.likeBtn} ${isLiked ? styles.likeBtnActive : ''}`}
+                onClick={handleLike}
+                disabled={!user || likeLoading}
+                title={isLiked ? '좋아요 취소' : '좋아요'}
+              >
+                <span className={styles.likeHeart}>{isLiked ? '♥' : '♡'}</span>
+                <span className={styles.likeCount}>{likeCount}</span>
+              </button>
             </>
           ) : hasCheckedSession ? (
             <div className={styles.text}>

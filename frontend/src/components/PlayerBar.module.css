@@ -479,6 +479,43 @@
   text-overflow: ellipsis;
 }
 
+.likeBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  flex-shrink: 0;
+  opacity: 0.85;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.likeBtn:hover:not(:disabled) { opacity: 1; transform: scale(1.1); }
+.likeBtn:disabled { cursor: default; opacity: 0.45; }
+
+.likeHeart {
+  font-size: 22px;
+  line-height: 1;
+  color: rgba(var(--cover-rgb, 168, 85, 247), 0.75);
+  transition: color 0.2s;
+}
+.likeBtnActive .likeHeart {
+  color: rgb(var(--cover-rgb, 168, 85, 247));
+  text-shadow: 0 0 8px rgba(var(--cover-rgb, 168, 85, 247), 0.70);
+}
+
+.likeCount {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(var(--cover-rgb, 168, 85, 247), 0.80);
+  line-height: 1;
+}
+.likeBtnActive .likeCount {
+  color: rgb(var(--cover-rgb, 168, 85, 247));
+}
+
 .emptyHint {
   display: inline-flex;
   align-items: center;
