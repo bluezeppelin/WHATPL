@@ -236,6 +236,8 @@
   padding-right: 6px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  user-select: none;
 }
 
 .trackRow > * {

@@ -1,4 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+function useDragScroll() {
+  const isDragging = useRef(false);
+  const dragMoved = useRef(false);
+  const startX = useRef(0);
+  const startScrollLeft = useRef(0);
+
+  return {
+    onMouseDown(e) {
+      isDragging.current = true;
+      dragMoved.current = false;
+      startX.current = e.pageX;
+      startScrollLeft.current = e.currentTarget.scrollLeft;
+      e.currentTarget.style.cursor = 'grabbing';
+    },
+    onMouseMove(e) {
+      if (!isDragging.current) return;
+      const dx = e.pageX - startX.current;
+      if (Math.abs(dx) > 5) dragMoved.current = true;
+      e.currentTarget.scrollLeft = startScrollLeft.current - dx;
+    },
+    onMouseUp(e) {
+      isDragging.current = false;
+      e.currentTarget.style.cursor = 'grab';
+    },
+    onMouseLeave(e) {
+      isDragging.current = false;
+      e.currentTarget.style.cursor = 'grab';
+    },
+    onClickCapture(e) {
+      if (dragMoved.current) {
+        e.stopPropagation();
+        dragMoved.current = false;
+      }
+    },
+  };
+}
 import { useNavigate } from 'react-router-dom';
 import { getTracks, getTrendingTracks, getTopLikedTracks } from '../api/tracks';
 import { getCreators } from '../api/creators';
@@ -19,6 +56,9 @@ export default function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { playToDefault } = usePlayer();
+  const newDrag = useDragScroll();
+  const trendDrag = useDragScroll();
+  const likedDrag = useDragScroll();
 
   const [tracks, setTracks] = useState([]);
   const [trendingTracks, setTrendingTracks] = useState([]);
@@ -164,7 +204,7 @@ export default function Home() {
                       더보기 →
                     </button>
                   </div>
-                  <div className={styles.trackRow}>
+                  <div className={styles.trackRow} {...newDrag}>
                     {newTracks.map(track => (
                       <TrackCard key={track.id} {...cardProps(track)} />
                     ))}
@@ -184,7 +224,7 @@ export default function Home() {
                       더보기 →
                     </button>
                   </div>
-                  <div className={styles.trackRow}>
+                  <div className={styles.trackRow} {...trendDrag}>
                     {trendingTracks.map(track => (
                       <TrackCard key={track.id} {...cardProps(track)} />
                     ))}
@@ -204,7 +244,7 @@ export default function Home() {
                       더보기 →
                     </button>
                   </div>
-                  <div className={styles.trackRow}>
+                  <div className={styles.trackRow} {...likedDrag}>
                     {topLikedTracks.map(track => (
                       <TrackCard key={track.id} {...cardProps(track)} />
                     ))}
