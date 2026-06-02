@@ -253,25 +253,25 @@
    사이드 위젯 — glass card
    ══════════════════════════════════════════ */
 .widget {
-  background: rgba(5, 8, 20, 0.70);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 8, 22, 0.52);
+  border: 1px solid rgba(124, 58, 237, 0.18);
   border-radius: var(--radius);
-  padding: 18px 16px;
+  padding: 20px 16px;
   position: relative;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.055),
-    0 4px 24px rgba(0, 0, 0, 0.30);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 28px rgba(0, 0, 0, 0.30);
   transition: border-color 0.28s, box-shadow 0.28s;
 }
 
 .widget:hover {
-  border-color: rgba(124, 58, 237, 0.30);
+  border-color: rgba(124, 58, 237, 0.38);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 0 22px rgba(124, 58, 237, 0.13),
-    0 4px 24px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 24px rgba(124, 58, 237, 0.14),
+    0 4px 28px rgba(0, 0, 0, 0.34);
 }
 
 .widgetTitle {
@@ -310,7 +310,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .creatorItem {
@@ -318,29 +318,29 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  padding: 6px 8px;
+  padding: 7px 8px;
   border-radius: var(--radius-sm);
-  transition: background 0.15s;
+  transition: background 0.18s;
   margin: 0 -8px;
 }
 
 .creatorItem:hover {
-  background: rgba(124, 58, 237, 0.09);
+  background: rgba(124, 58, 237, 0.10);
 }
 
 .creatorAvatar {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.10);
+  border: 1.5px solid rgba(124, 58, 237, 0.22);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .creatorItem:hover .creatorAvatar {
-  border-color: rgba(168, 85, 247, 0.65);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.45);
+  border-color: rgba(168, 85, 247, 0.70);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.40);
 }
 
 .creatorInfo {
@@ -351,7 +351,7 @@
 .creatorName {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(230, 225, 242, 0.90);
+  color: rgba(235, 230, 248, 0.92);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -359,37 +359,38 @@
 
 .creatorMeta {
   font-size: 11px;
-  color: #9FA8BC;
-  margin-top: 1px;
+  color: #A8B2C8;
+  margin-top: 2px;
 }
 
 /* ── 장르 바로가기 ── */
 .genreGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
 }
 
 .genreChip {
-  padding: 4px 12px;
+  padding: 5px 13px;
   border-radius: 14px;
   font-size: 11px;
   font-weight: 500;
-  color: #AEB6C8;
-  background: rgba(8, 10, 24, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: #B4BDD0;
+  background: rgba(8, 10, 26, 0.55);
+  border: 1px solid rgba(124, 58, 237, 0.18);
   cursor: pointer;
-  transition: color 0.18s, background 0.18s, border-color 0.18s, box-shadow 0.18s;
+  transition: color 0.18s, background 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.15s;
   white-space: nowrap;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .genreChip:hover {
-  color: #e879f9;
-  border-color: rgba(168, 85, 247, 0.55);
-  background: rgba(124, 58, 237, 0.13);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.25);
+  color: #d8b4fe;
+  border-color: rgba(168, 85, 247, 0.58);
+  background: rgba(124, 58, 237, 0.14);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.22);
+  transform: translateY(-1px);
 }
 
 /* ── 최근 들은 곡 ── */
@@ -397,31 +398,44 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .recentItem {
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 5px 8px;
+  margin: 0 -8px;
+  border-radius: var(--radius-sm);
+  transition: background 0.18s;
+}
+
+.recentItem:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.recentItem:hover .recentCoverBtn {
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
 }
 
 .recentCoverBtn {
   position: relative;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   flex-shrink: 0;
-  border: none;
+  border: 1px solid rgba(124, 58, 237, 0.20);
   padding: 0;
   background: none;
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   overflow: hidden;
+  transition: box-shadow 0.18s;
 }
 
 .recentCover {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   object-fit: cover;
   display: block;
 }
@@ -452,9 +466,9 @@
 }
 
 .recentTitle {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: rgba(230, 225, 242, 0.88);
+  color: rgba(238, 233, 252, 0.92);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -463,8 +477,8 @@
 
 .recentArtist {
   font-size: 11px;
-  color: #9FA8BC;
-  margin-top: 1px;
+  color: #A0AABB;
+  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
