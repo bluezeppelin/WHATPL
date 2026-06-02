@@ -155,7 +155,7 @@
   left: 50%;
   border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.38s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.32s ease;
+  transition: transform 0.38s cubic-bezier(0.34, 1.4, 0.64, 1);
   pointer-events: none;
   user-select: none;
   will-change: transform;
@@ -183,7 +183,6 @@
 .card_left {
   transform: translate(calc(-50% - 88px), -50%) scale(0.84) rotate(-4deg);
   z-index: 5;
-  opacity: 0.70;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.80);
 }
 
@@ -191,7 +190,6 @@
 .card_farLeft {
   transform: translate(calc(-50% - 150px), -50%) scale(0.68) rotate(-7deg);
   z-index: 3;
-  opacity: 0.44;
   box-shadow: 0 5px 18px rgba(0, 0, 0, 0.70);
 }
 
@@ -199,7 +197,6 @@
 .card_farfarLeft {
   transform: translate(calc(-50% - 200px), -50%) scale(0.52) rotate(-10deg);
   z-index: 1;
-  opacity: 0.18;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.60);
 }
 
@@ -207,7 +204,6 @@
 .card_right {
   transform: translate(calc(-50% + 88px), -50%) scale(0.84) rotate(4deg);
   z-index: 5;
-  opacity: 0.70;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.80);
 }
 
@@ -215,7 +211,6 @@
 .card_farRight {
   transform: translate(calc(-50% + 150px), -50%) scale(0.68) rotate(7deg);
   z-index: 3;
-  opacity: 0.44;
   box-shadow: 0 5px 18px rgba(0, 0, 0, 0.70);
 }
 
@@ -223,7 +218,6 @@
 .card_farfarRight {
   transform: translate(calc(-50% + 200px), -50%) scale(0.52) rotate(10deg);
   z-index: 1;
-  opacity: 0.18;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.60);
 }
 
