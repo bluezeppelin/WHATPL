@@ -93,21 +93,38 @@ function GhostCard({ position, ctrlType, ctrlProps }) {
 }
 
 /* ─── 앨범 카드 (컨트롤 overlay 포함) ─── */
-function AlbumCard({ item, ctrlType, ctrlProps }) {
+function AlbumCard({ item, ctrlType, ctrlProps, isPlaying }) {
   const { type, track, position } = item;
 
   if (type === 'ghost') {
     return <GhostCard position={position} ctrlType={ctrlType} ctrlProps={ctrlProps} />;
   }
 
+  const isCenter = position === 'center';
+
   return (
     <div className={`${styles.card} ${styles[`card_${position}`]}`}>
-      <img
-        src={track.coverUrl || DEFAULT_COVER}
-        alt={track.title}
-        className={styles.cardImg}
-        onError={e => { e.currentTarget.src = DEFAULT_COVER; }}
-      />
+      {isCenter ? (
+        <>
+          <div className={`${styles.discRotate} ${isPlaying ? styles.discSpinning : ''}`}>
+            <img
+              src={track.coverUrl || DEFAULT_COVER}
+              alt={track.title}
+              className={styles.cardImg}
+              onError={e => { e.currentTarget.src = DEFAULT_COVER; }}
+            />
+          </div>
+          <div className={styles.discFace} aria-hidden="true" />
+          <div className={styles.discHole} aria-hidden="true" />
+        </>
+      ) : (
+        <img
+          src={track.coverUrl || DEFAULT_COVER}
+          alt={track.title}
+          className={styles.cardImg}
+          onError={e => { e.currentTarget.src = DEFAULT_COVER; }}
+        />
+      )}
       <CardControl ctrlType={ctrlType} ctrlProps={ctrlProps} />
     </div>
   );
@@ -382,6 +399,7 @@ export default function PlayerBar() {
                 item={item}
                 ctrlType={ctrl.ctrlType}
                 ctrlProps={ctrl.ctrlProps}
+                isPlaying={isPlaying}
               />
             );
           })}
