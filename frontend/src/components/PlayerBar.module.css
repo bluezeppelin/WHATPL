@@ -544,8 +544,8 @@
   transition: color 0.2s, text-shadow 0.2s;
 }
 .likeBtnActive .likeHeart {
-  color: rgb(var(--cover-rgb, 168, 85, 247));
-  text-shadow: 0 0 8px rgba(var(--cover-rgb, 168, 85, 247), 0.70);
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.60);
 }
 
 .likeCount {
@@ -555,7 +555,7 @@
   line-height: 1;
 }
 .likeBtnActive .likeCount {
-  color: rgb(var(--cover-rgb, 168, 85, 247));
+  color: rgba(255, 255, 255, 1);
 }
 
 .emptyHint {
