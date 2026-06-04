@@ -778,9 +778,11 @@
   background: rgba(123, 47, 247, 0.12);
 }
 
-.langFlagEmoji {
-  font-size: 17px;
-  line-height: 1;
+.langFlagImg {
+  width: 20px;
+  height: 14px;
+  object-fit: cover;
+  border-radius: 2px;
   display: block;
 }
 
@@ -828,9 +830,11 @@
   background: rgba(123, 47, 247, 0.10);
 }
 
-.langDropFlag {
-  font-size: 16px;
-  line-height: 1;
+.langDropFlagImg {
+  width: 22px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 2px;
   flex-shrink: 0;
 }
 

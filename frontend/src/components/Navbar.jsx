@@ -177,7 +177,7 @@ export default function Navbar({ logoUrl = '' }) {
     };
   }, [langDropOpen]);
 
-  const LANG_FLAGS = { ko: '🇰🇷', en: '🇺🇸', ja: '🇯🇵' };
+  const LANG_FLAGS = { ko: '/flags/ko.svg', en: '/flags/en.svg', ja: '/flags/ja.svg' };
   const LANG_LABELS = { ko: '한국어', en: 'English', ja: '日本語' };
 
   function handleKeyDown(e) {
@@ -320,7 +320,7 @@ export default function Navbar({ logoUrl = '' }) {
             onClick={() => setLangDropOpen(o => !o)}
             aria-label="언어 선택"
           >
-            <span className={styles.langFlagEmoji}>{LANG_FLAGS[currentLang]}</span>
+            <img src={LANG_FLAGS[currentLang]} alt={currentLang} className={styles.langFlagImg} />
           </button>
           {langDropOpen && (
             <div className={styles.langDrop}>
@@ -330,7 +330,7 @@ export default function Navbar({ logoUrl = '' }) {
                   className={`${styles.langDropItem} ${currentLang === lang ? styles.langDropItemActive : ''}`}
                   onClick={() => handleLangChange(lang)}
                 >
-                  <span className={styles.langDropFlag}>{LANG_FLAGS[lang]}</span>
+                  <img src={LANG_FLAGS[lang]} alt={lang} className={styles.langDropFlagImg} />
                   <span className={styles.langDropLabel}>{LANG_LABELS[lang]}</span>
                 </button>
               ))}
