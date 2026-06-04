@@ -8,9 +8,9 @@ export default function About() {
   const { user } = useAuth();
 
   const INTRO_CARDS = [
-    { key: 'intro_card1', title: t('about.intro_card1_title') },
-    { key: 'intro_card2', title: t('about.intro_card2_title') },
-    { key: 'intro_card3', title: t('about.intro_card3_title') },
+    { key: '1', title: t('about.intro_card1_title'), desc: t('about.intro_card1_desc') },
+    { key: '2', title: t('about.intro_card2_title'), desc: t('about.intro_card2_desc') },
+    { key: '3', title: t('about.intro_card3_title'), desc: t('about.intro_card3_desc') },
   ];
 
   return (
@@ -26,9 +26,11 @@ export default function About() {
             {INTRO_CARDS.map(card => (
               <div key={card.key} className={styles.introCard}>
                 <p className={styles.introCardTitle}>{card.title}</p>
+                <p className={styles.introCardDesc}>{card.desc}</p>
               </div>
             ))}
           </div>
+          <p className={styles.introClosure}>{t('about.intro_closure')}</p>
         </section>
 
         <section className={styles.section}>
@@ -36,9 +38,11 @@ export default function About() {
           <div className={styles.memberGrid}>
             <div className={styles.memberCard}>
               <div className={styles.cardLabel}>{t('about.member_general')}</div>
+              <p className={styles.cardDesc}>{t('about.member_general_desc')}</p>
             </div>
             <div className={styles.memberCard}>
               <div className={`${styles.cardLabel} ${styles.cardLabelCreator}`}>{t('about.member_creator')}</div>
+              <p className={styles.cardDesc}>{t('about.member_creator_desc')}</p>
             </div>
           </div>
         </section>
