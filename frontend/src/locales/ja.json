@@ -465,8 +465,11 @@
     "info_total_plays": "総再生数",
     "not_found": "トラックが見つかりません。",
     "back_button": "← 戻る",
+    "delete_modal_title": "トラックを削除しますか？",
+    "delete_modal_body": "を削除処理します。削除されたトラックは管理者コンソールから復元または完全削除できます。",
     "delete_modal_cancel": "キャンセル",
-    "delete_modal_confirm": "削除"
+    "delete_modal_confirm": "削除",
+    "deleting": "削除中..."
   },
   "creator": {
     "subscribe_button": "フォロー",

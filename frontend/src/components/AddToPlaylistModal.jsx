@@ -99,8 +99,8 @@ export default function AddToPlaylistModal({ track, onClose }) {
                           </svg>
                       }
                     </span>
-                    <span className={styles.plName}>{pl.name}</span>
-                    <span className={styles.plCount}>{pl.trackIds.length}곡</span>
+                    <span className={styles.plName}>{(pl.isDefault || pl.id === '0') ? t('playlist.default_label') : pl.name}</span>
+                    <span className={styles.plCount}>{t('common.n_tracks', { count: pl.trackIds.length })}</span>
                   </button>
                 </li>
               );

@@ -108,8 +108,7 @@ export default function TrackDetail() {
         <div className={styles.modal} onClick={e => e.stopPropagation()}>
           <h3 className={styles.modalTitle}>{t('track.delete_modal_title')}</h3>
           <p className={styles.modalDesc}>
-            "<strong>{track.title}</strong>"을(를) 삭제 처리합니다.<br />
-            삭제된 트랙은 관리자 콘솔에서 복구하거나 영구 삭제할 수 있습니다.
+            "<strong>{track.title}</strong>" {t('track.delete_modal_body')}
           </p>
           {deleteError && <p className={styles.modalError}>{deleteError}</p>}
           <div className={styles.modalActions}>
@@ -117,7 +116,7 @@ export default function TrackDetail() {
               {t('track.delete_modal_cancel')}
             </button>
             <button type="button" className={styles.modalConfirmBtn} onClick={handleConfirmDelete} disabled={deleteLoading}>
-              {deleteLoading ? '삭제 중...' : t('track.delete_modal_confirm')}
+              {deleteLoading ? t('track.deleting') : t('track.delete_modal_confirm')}
             </button>
           </div>
         </div>

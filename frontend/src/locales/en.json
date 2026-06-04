@@ -465,8 +465,11 @@
     "info_total_plays": "Total Plays",
     "not_found": "Track not found.",
     "back_button": "← Back",
+    "delete_modal_title": "Delete this track?",
+    "delete_modal_body": "will be deleted. It can be recovered or permanently removed from the admin console.",
     "delete_modal_cancel": "Cancel",
-    "delete_modal_confirm": "Delete"
+    "delete_modal_confirm": "Delete",
+    "deleting": "Deleting..."
   },
   "creator": {
     "subscribe_button": "Follow",
