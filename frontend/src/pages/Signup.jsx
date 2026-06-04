@@ -17,50 +17,55 @@ const CURRENT_YEAR = new Date().getFullYear();
 const YEARS = Array.from({ length: 101 }, (_, i) => String(CURRENT_YEAR - i));
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
 
-const TERMS_TEXT = `WHATPL은 사용자가 저작권 문제가 없는 음악을 감상하고, Creator로 전환하여 직접 제작한 트랙을 업로드할 수 있는 음악 공유 서비스입니다.
-
-회원은 서비스 이용 시 다음 사항을 준수해야 합니다.
-
-1. 타인의 저작권을 침해하는 음원, 이미지, 설명을 업로드할 수 없습니다.
-2. 본인이 직접 제작했거나 사용 권한이 있는 음원만 업로드해야 합니다.
-3. 부적절한 제목, 설명, 이미지, 음원 또는 타인을 불쾌하게 하는 콘텐츠를 업로드할 수 없습니다.
-4. 다른 회원의 계정, 음원, 플레이리스트 기능을 악용하거나 서비스 운영을 방해해서는 안 됩니다.
-5. 관리자는 운영 정책에 따라 부적절한 음원을 삭제 처리하거나 계정을 비활성화할 수 있습니다.
-6. Creator 신청, 음원 삭제 요청, 계정 관리 등은 관리자 검토를 거쳐 처리될 수 있습니다.
-7. 회원은 자신의 계정 정보를 관리할 책임이 있으며, 비밀번호 변경 시 현재 비밀번호 확인이 필요합니다.
-8. WHATPL은 안정적인 서비스 운영을 위해 필요한 경우 콘텐츠 노출, 계정 상태, 업로드 권한을 제한할 수 있습니다.
-
-회원은 위 내용을 확인하고 WHATPL 서비스 이용약관에 동의합니다.`;
-
-const PRIVACY_TEXT = `WHATPL은 회원가입, 로그인, 계정 관리, Creator 신청, 음악 업로드 및 서비스 제공을 위해 필요한 개인정보를 수집합니다.
-
-1. 수집 항목
-아이디, 비밀번호, 이름, 이메일, 생년월일, 휴대폰 번호, 좋아하는 장르, 크리에이터명, 프로필 이미지
-
-2. 수집 목적
-- 회원 식별 및 로그인
-- 계정 정보 관리 및 아이디 찾기, 비밀번호 초기화
-- Creator 신청 및 승인 관리
-- 음원 업로드 및 플레이리스트, 좋아요, 구독 등 개인화 기능 제공
-- 서비스 운영 및 부정 이용 방지
-
-3. 보관 및 이용
-수집된 개인정보는 WHATPL 서비스 제공과 계정 관리를 위해 사용되며, 서비스 운영에 필요한 범위 내에서 보관됩니다.
-
-4. 비밀번호 처리
-비밀번호는 평문으로 저장하지 않고 암호화된 형태로 저장됩니다.
-
-5. 개인정보 표시 제한
-관리자 페이지와 서비스 화면에서는 필요한 정보만 표시하며, 비밀번호와 같은 민감정보는 화면에 노출하지 않습니다.
-
-6. 프로필 이미지
-회원이 프로필 이미지를 업로드한 경우, 해당 이미지는 서비스 내 사용자 식별 및 프로필 표시를 위해 사용될 수 있습니다.
-
-회원은 위 개인정보 수집 및 이용에 동의합니다.`;
 
 export default function Signup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const TERMS_TEXT = [
+    t('terms.s1_title'), '\n', t('terms.s1_body'), '\n\n',
+    t('terms.s2_title'), '\n',
+    '1. ' + t('terms.s2_item1'), '\n',
+    '2. ' + t('terms.s2_item2'), '\n',
+    '3. ' + t('terms.s2_item3'), '\n',
+    '4. ' + t('terms.s2_item4'), '\n\n',
+    t('terms.s3_title'), '\n',
+    '1. ' + t('terms.s3_item1'), '\n',
+    '2. ' + t('terms.s3_item2'), '\n',
+    '3. ' + t('terms.s3_item3'), '\n',
+    '4. ' + t('terms.s3_item4'), '\n\n',
+    t('terms.s4_title'), '\n',
+    '1. ' + t('terms.s4_item1'), '\n',
+    '2. ' + t('terms.s4_item2'), '\n',
+    '3. ' + t('terms.s4_item3'), '\n\n',
+    t('terms.s5_title'), '\n',
+    '1. ' + t('terms.s5_item1'), '\n',
+    '2. ' + t('terms.s5_item2'), '\n',
+    '3. ' + t('terms.s5_item3'), '\n',
+    '4. ' + t('terms.s5_item4'), '\n\n',
+    t('terms.s6_title'), '\n', t('terms.s6_body'),
+  ].join('');
+
+  const PRIVACY_TEXT = [
+    t('privacy.s1_title'), '\n', t('privacy.s1_intro'), '\n\n',
+    t('privacy.s2_title'), '\n',
+    '1. ' + t('privacy.s2_item1'), '\n',
+    '2. ' + t('privacy.s2_item2'), '\n',
+    '3. ' + t('privacy.s2_item3'), '\n',
+    '4. ' + t('privacy.s2_item4'), '\n',
+    '5. ' + t('privacy.s2_item5'), '\n',
+    '6. ' + t('privacy.s2_item6'), '\n',
+    '7. ' + t('privacy.s2_item7'), '\n\n',
+    t('privacy.s3_title'), '\n', t('privacy.s3_body'), '\n\n',
+    t('privacy.s4_title'), '\n',
+    '1. ' + t('privacy.s4_item1'), '\n',
+    '2. ' + t('privacy.s4_item2'), '\n',
+    '3. ' + t('privacy.s4_item3'), '\n\n',
+    t('privacy.s5_title'), '\n',
+    '1. ' + t('privacy.s5_item1'), '\n',
+    '2. ' + t('privacy.s5_item2'), '\n\n',
+    t('privacy.s6_title'), '\n', t('privacy.s6_body'),
+  ].join('');
+
   const [form, setForm] = useState(INITIAL_FORM);
   const [idStatus, setIdStatus] = useState(null);
   const [artistNameStatus, setArtistNameStatus] = useState(null);

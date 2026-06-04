@@ -266,7 +266,7 @@ export default function MyPage() {
 
   async function handleDeleteAccount(e) {
     e.preventDefault();
-    if (deleteConfirm !== '회원탈퇴') {
+    if (deleteConfirm !== user.loginId) {
       setDeleteError(t('mypage.error_delete_confirm_text'));
       return;
     }
@@ -657,7 +657,7 @@ export default function MyPage() {
                       <button
                         type="submit"
                         className={styles.dangerConfirmBtn}
-                        disabled={deleteLoading || !deletePassword || deleteConfirm !== '회원탈퇴'}
+                        disabled={deleteLoading || !deletePassword || deleteConfirm !== user.loginId}
                       >
                         {deleteLoading ? t('mypage.delete_confirm_button_loading') : t('mypage.delete_confirm_button')}
                       </button>
