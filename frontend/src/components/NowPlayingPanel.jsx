@@ -116,7 +116,7 @@ export default function NowPlayingPanel({ open, onClose }) {
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <h2 className={styles.heading}>{t('nowplaying.heading')}</h2>
-            <span className={styles.playlistName}>{(currentPlaylist.isDefault || currentPlaylist.id === '0') ? t('playlist.default_label') : name}</span>
+            <span className={styles.playlistName}>{(currentPlaylist.isDefault || currentPlaylist.id === '0' || name === '기본 재생목록') ? t('playlist.default_label') : name}</span>
           </div>
           <div className={styles.headerRight}>
             <span className={styles.count}>{t('common.n_tracks', { count: tracks.length })}</span>
