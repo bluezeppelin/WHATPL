@@ -54,7 +54,12 @@ function MonBar({ label, pct, variant }) {
 }
 
 function StatusBadge({ status }) {
-  const map = { pending: '대기중', approved: '승인됨', rejected: '반려됨' };
+  const { t } = useTranslation();
+  const map = {
+    pending: t('admin.status_pending'),
+    approved: t('admin.status_approved'),
+    rejected: t('admin.status_rejected'),
+  };
   return <span className={`${styles.badge} ${styles[`badge_${status}`]}`}>{map[status] ?? status}</span>;
 }
 
@@ -572,7 +577,7 @@ export default function Admin() {
         {/* 대시보드 탭 */}
         {activeTab === 'dashboard' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>WHATPL 서비스 현황을 한눈에 확인하세요.</p>
+            <p className={styles.tabDesc}>{t('admin.dashboard_desc')}</p>
             <div className={styles.statGrid}>
               <div className={styles.statCard}>
                 <span className={styles.statValue}>{members.length}</span>
@@ -605,7 +610,7 @@ export default function Admin() {
         {/* Creator 신청 탭 */}
         {activeTab === 'creator-requests' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>Creator 신청 목록을 검토하고 승인 또는 반려하세요.</p>
+            <p className={styles.tabDesc}>{t('admin.creator_requests_desc')}</p>
             {error && <p className={styles.errorMsg}>{error}</p>}
             {fetching ? (
               <p className={styles.loading}>불러오는 중...</p>
@@ -623,7 +628,7 @@ export default function Admin() {
                       <StatusBadge status={r.status} />
                     </div>
                     {r.message && <p className={styles.message}>"{r.message}"</p>}
-                    <p className={styles.date}>신청일: {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
+                    <p className={styles.date}>{t('admin.applied_date')} {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
                     {r.status === 'pending' && (
                       <div className={styles.actions}>
                         <button className={styles.approveBtn} onClick={() => handleApprove(r.id)}>{t('admin.creator_requests_approve')}</button>
@@ -635,19 +640,19 @@ export default function Admin() {
                         <input
                           className={styles.rejectInput}
                           type="text"
-                          placeholder="반려 사유 (선택)"
+                          placeholder={t('admin.reject_reason_placeholder')}
                           value={rejectReasons[r.id] || ''}
                           onChange={e => setRejectReasons(prev => ({ ...prev, [r.id]: e.target.value }))}
                           maxLength={200}
                         />
-                        <button className={styles.rejectConfirmBtn} onClick={() => handleReject(r.id)}>반려 확정</button>
+                        <button className={styles.rejectConfirmBtn} onClick={() => handleReject(r.id)}>{t('admin.creator_requests_reject')}</button>
                       </div>
                     )}
                     {r.status === 'rejected' && r.rejectReason && (
-                      <p className={styles.rejectReason}>반려 사유: {r.rejectReason}</p>
+                      <p className={styles.rejectReason}>{t('admin.reject_reason_label')} {r.rejectReason}</p>
                     )}
                     {r.reviewedAt && (
-                      <p className={styles.reviewedAt}>처리일: {new Date(r.reviewedAt).toLocaleString('ko-KR')} ({r.reviewedBy})</p>
+                      <p className={styles.reviewedAt}>{t('admin.reviewed_date')} {new Date(r.reviewedAt).toLocaleString('ko-KR')} ({r.reviewedBy})</p>
                     )}
                   </div>
                 ))}
@@ -659,7 +664,7 @@ export default function Admin() {
         {/* 음원 삭제 요청 탭 */}
         {activeTab === 'delete-requests' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>Creator가 요청한 음원 삭제를 검토하고 처리하세요.</p>
+            <p className={styles.tabDesc}>{t('admin.delete_requests_desc')}</p>
             {deleteReqsError && <p className={styles.errorMsg}>{deleteReqsError}</p>}
             {deleteReqsFetching ? (
               <p className={styles.loading}>불러오는 중...</p>
@@ -677,7 +682,7 @@ export default function Admin() {
                       <StatusBadge status={r.status} />
                     </div>
                     {r.reason && <p className={styles.message}>"{r.reason}"</p>}
-                    <p className={styles.date}>요청일: {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
+                    <p className={styles.date}>{t('admin.applied_date')} {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
                     {r.status === 'pending' && (
                       <div className={styles.actions}>
                         <button className={styles.approveBtn} onClick={() => handleDrApprove(r.id)}>{t('admin.creator_requests_approve')}</button>
@@ -689,19 +694,19 @@ export default function Admin() {
                         <input
                           className={styles.rejectInput}
                           type="text"
-                          placeholder="반려 사유 (선택)"
+                          placeholder={t('admin.reject_reason_placeholder')}
                           value={drRejectReasons[r.id] || ''}
                           onChange={e => setDrRejectReasons(prev => ({ ...prev, [r.id]: e.target.value }))}
                           maxLength={200}
                         />
-                        <button className={styles.rejectConfirmBtn} onClick={() => handleDrReject(r.id)}>반려 확정</button>
+                        <button className={styles.rejectConfirmBtn} onClick={() => handleDrReject(r.id)}>{t('admin.creator_requests_reject')}</button>
                       </div>
                     )}
                     {r.status === 'rejected' && r.rejectReason && (
-                      <p className={styles.rejectReason}>반려 사유: {r.rejectReason}</p>
+                      <p className={styles.rejectReason}>{t('admin.reject_reason_label')} {r.rejectReason}</p>
                     )}
                     {r.reviewedAt && (
-                      <p className={styles.reviewedAt}>처리일: {new Date(r.reviewedAt).toLocaleString('ko-KR')} ({r.reviewedBy})</p>
+                      <p className={styles.reviewedAt}>{t('admin.reviewed_date')} {new Date(r.reviewedAt).toLocaleString('ko-KR')} ({r.reviewedBy})</p>
                     )}
                   </div>
                 ))}
@@ -713,7 +718,7 @@ export default function Admin() {
         {/* 음원 관리 탭 */}
         {activeTab === 'tracks' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>전체 음원을 조회하고 수정·삭제하세요. 소프트 삭제된 음원은 영구 삭제할 수 있습니다.</p>
+            <p className={styles.tabDesc}>{t('admin.tracks_desc')}</p>
             {tracksError && <p className={styles.errorMsg}>{tracksError}</p>}
             {tracksFetching ? (
               <p className={styles.loading}>불러오는 중...</p>
@@ -780,7 +785,7 @@ export default function Admin() {
         {/* 회원 관리 탭 */}
         {activeTab === 'members' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>전체 회원 목록을 조회하고 계정을 관리하세요.</p>
+            <p className={styles.tabDesc}>{t('admin.members_desc')}</p>
             <div className={styles.memberFilters}>
               <div className={styles.filterGroup}>
                 <span className={styles.filterLabel}>{t('admin.members_filter_role')}</span>
@@ -875,7 +880,7 @@ export default function Admin() {
         {/* 사이트 설정 탭 */}
         {activeTab === 'site-settings' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>사이트 로고, 배경 이미지, 테마 색상을 설정하세요.</p>
+            <p className={styles.tabDesc}>{t('admin.site_settings_desc')}</p>
             <div className={styles.brandCard}>
 
               <div>
@@ -990,7 +995,7 @@ export default function Admin() {
         {/* 삭제 로그 탭 */}
         {activeTab === 'delete-logs' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>관리자가 영구 삭제 처리한 음원 기록입니다.</p>
+            <p className={styles.tabDesc}>{t('admin.delete_logs_desc')}</p>
             {hardDeleteLogsFetching ? (
               <p className={styles.loading}>불러오는 중...</p>
             ) : hardDeleteLogs.length === 0 ? (

@@ -368,7 +368,21 @@
     "modal_soft_delete_button": "Soft Delete",
     "modal_hard_delete_title": "Permanent Delete",
     "modal_hard_delete_button": "Permanent Delete",
-    "modal_cancel_button": "Cancel"
+    "modal_cancel_button": "Cancel",
+    "dashboard_desc": "Check the current status of the WHATPL service at a glance.",
+    "creator_requests_desc": "Review the Creator application list and approve or reject.",
+    "delete_requests_desc": "Review and process track deletion requests from Creators.",
+    "tracks_desc": "Browse and manage all tracks.",
+    "members_desc": "Browse all members and manage accounts.",
+    "site_settings_desc": "Configure the site logo, background image, and theme colors.",
+    "delete_logs_desc": "Logs of tracks permanently deleted by admins.",
+    "status_pending": "Pending",
+    "status_approved": "Approved",
+    "status_rejected": "Rejected",
+    "applied_date": "Applied:",
+    "reviewed_date": "Reviewed:",
+    "reject_reason_label": "Rejection reason:",
+    "reject_reason_placeholder": "Rejection reason (optional)"
   },
   "track": {
     "play_button": "Play",
@@ -506,7 +520,37 @@
   },
   "support": {
     "title": "Support",
-    "subtitle": "Find answers to frequently asked questions about WHATPL."
+    "subtitle": "Find answers to frequently asked questions about WHATPL.",
+    "sec1_title": "Account FAQ",
+    "sec2_title": "Creator FAQ",
+    "sec3_title": "Music FAQ",
+    "sec4_title": "Account & Content Management",
+    "s1q1": "I forgot my ID.",
+    "s1a1": "Use the 'Find ID' feature on the login screen to look up your registration info.",
+    "s1q2": "I forgot my password.",
+    "s1a2": "You can set a new password using the password reset feature.",
+    "s1q3": "I want to update my account information.",
+    "s1a3": "After logging in, you can update your name, email, date of birth, phone number, profile image, and favorite genre in My Page.",
+    "s2q1": "How do I apply to become a Creator?",
+    "s2a1": "You can apply for Creator status from My Page. Creator features will be available after admin approval.",
+    "s2q2": "What can I do as a Creator?",
+    "s2a2": "You can upload and manage your own music.",
+    "s2q3": "How do I check the result of my Creator application?",
+    "s2a3": "Once the admin processes your application, you will be notified in the service. You can also check the status on My Page.",
+    "s3q1": "Can I add music to a playlist?",
+    "s3a1": "You can select any track and add it to your personal playlist.",
+    "s3q2": "Where can I find the music I liked?",
+    "s3a2": "You can view your liked tracks on My Page or the Home screen.",
+    "s3q3": "Can't I delete the default playlist?",
+    "s3a3": "The default playlist cannot be deleted. You can rename it, and playlists you created can be freely deleted.",
+    "s4q1": "How is inappropriate content handled?",
+    "s4a1": "Admins may restrict or remove content in accordance with the service policy.",
+    "s4q2": "Can my account be restricted?",
+    "s4a2": "If service usage terms are violated, an admin may restrict your account.",
+    "s4q3": "I want to delete a track I uploaded.",
+    "s4a3": "You can submit a deletion request from My Page → My Tracks. It will be processed after admin review and you will be notified of the result.",
+    "link_terms": "Terms of Service",
+    "link_privacy": "Privacy Policy"
   },
   "findid": {
     "title": "Find ID",
@@ -618,6 +662,7 @@
     "close": "Close",
     "back": "Back",
     "login": "Login",
-    "signup": "Sign Up"
+    "signup": "Sign Up",
+    "n_tracks": "{{count}} tracks"
   }
 }
