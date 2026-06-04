@@ -95,6 +95,8 @@
     "day_format": "日",
     "label_phone": "電話番号",
     "label_profile_image": "プロフィール写真（任意）",
+    "profile_placeholder": "写真",
+    "profile_file_select": "ファイルを選択",
     "profile_hint": "jpg / png / webp、最大2MB",
     "label_favorite_genre": "好きなジャンル（任意）",
     "no_selection": "選択なし",

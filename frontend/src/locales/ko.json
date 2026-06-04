@@ -95,6 +95,8 @@
     "day_format": "일",
     "label_phone": "휴대폰 번호",
     "label_profile_image": "프로필 사진 (선택)",
+    "profile_placeholder": "사진",
+    "profile_file_select": "파일 선택",
     "profile_hint": "jpg / png / webp, 최대 2MB",
     "label_favorite_genre": "좋아하는 장르 (선택)",
     "no_selection": "선택 안함",

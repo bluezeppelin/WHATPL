@@ -311,11 +311,11 @@ export default function Signup() {
                 {profilePreview ? (
                   <img src={profilePreview} alt="미리보기" className={styles.profilePreviewImg} />
                 ) : (
-                  <span className={styles.profileAvatarPlaceholder}>사진</span>
+                  <span className={styles.profileAvatarPlaceholder}>{t('signup.profile_placeholder')}</span>
                 )}
               </div>
               <label className={styles.profilePickBtn}>
-                파일 선택
+                {t('signup.profile_file_select')}
                 <input type="file" accept="image/jpeg,image/png,image/webp" className={styles.profileFileInput} onChange={handleProfileFileChange} />
               </label>
               {profileFile && <span className={styles.profileFileName}>{profileFile.name}</span>}

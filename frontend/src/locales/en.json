@@ -95,6 +95,8 @@
     "day_format": "",
     "label_phone": "Phone Number",
     "label_profile_image": "Profile Photo (optional)",
+    "profile_placeholder": "Photo",
+    "profile_file_select": "Select File",
     "profile_hint": "jpg / png / webp, max 2MB",
     "label_favorite_genre": "Favorite Genre (optional)",
     "no_selection": "No preference",
