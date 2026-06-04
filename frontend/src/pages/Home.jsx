@@ -277,7 +277,7 @@ export default function Home() {
                     <div className={styles.creatorInfo}>
                       <p className={styles.creatorName}>{creator.artistName}</p>
                       <p className={styles.creatorMeta}>
-                        {creator.trackCount}곡 · 구독자 {creator.subscriberCount}명
+                        {t('creator.track_count', { count: creator.trackCount })} · {t('creator.subscriber_count', { count: creator.subscriberCount })}
                       </p>
                     </div>
                   </li>
