@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { updateTrack } from '../api/tracks';
 import styles from './EditTrackModal.module.css';
 import { GENRES as BASE_GENRES } from '../constants/genres';
@@ -8,6 +9,7 @@ const GENRES = ['', ...BASE_GENRES];
 const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a1a2e'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%237c5cfc' stroke-width='3' fill='none'/%3E%3Ccircle cx='100' cy='100' r='12' fill='%237c5cfc'/%3E%3C/svg%3E";
 
 export default function EditTrackModal({ track, onClose, onSaved }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     title: track.title,
     artist: track.artist,
@@ -21,14 +23,12 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
   const coverInputRef = useRef(null);
   const overlayRef = useRef(null);
 
-  // ESC 키로 닫기
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  // 스크롤 잠금
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
@@ -43,9 +43,9 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.title.trim()) return setError('제목을 입력해주세요.');
-    if (!form.artist.trim()) return setError('아티스트 이름을 입력해주세요.');
-    if (!form.genre) return setError('장르를 선택해주세요.');
+    if (!form.title.trim()) return setError(t('track_edit_modal.error_title_required'));
+    if (!form.artist.trim()) return setError(t('track_edit_modal.error_artist_required'));
+    if (!form.genre) return setError(t('track_edit_modal.error_genre_required'));
 
     setSaving(true);
     setError('');
@@ -59,7 +59,7 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
       onSaved(updated);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || '저장에 실패했습니다.');
+      setError(err.response?.data?.error || t('track_edit_modal.error_default'));
       setSaving(false);
     }
   };
@@ -72,7 +72,7 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
     >
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h2 className={styles.heading}>트랙 정보 수정</h2>
+          <h2 className={styles.heading}>{t('track_edit_modal.heading')}</h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -82,7 +82,6 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
 
         <form onSubmit={handleSubmit} className={styles.body}>
           <div className={styles.topRow}>
-            {/* 커버 이미지 변경 */}
             <div className={styles.coverArea}>
               <button
                 type="button"
@@ -99,7 +98,7 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                   </svg>
-                  <span>변경</span>
+                  <span>{t('track_edit_modal.cover_change_button')}</span>
                 </div>
               </button>
               <input
@@ -109,31 +108,30 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
                 className={styles.hidden}
                 onChange={onCoverChange}
               />
-              <p className={styles.coverHint}>클릭하여 커버 변경</p>
+              <p className={styles.coverHint}>{t('track_edit_modal.label_cover')}</p>
             </div>
 
-            {/* 제목 + 아티스트 */}
             <div className={styles.mainFields}>
               <div className={styles.field}>
-                <label className={styles.label}>제목 *</label>
+                <label className={styles.label}>{t('track_edit_modal.label_title')}</label>
                 <input
                   type="text"
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   className={styles.input}
-                  placeholder="트랙 제목"
+                  placeholder={t('track_edit_modal.placeholder_title')}
                   maxLength={100}
                   autoFocus
                 />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>아티스트 *</label>
+                <label className={styles.label}>{t('track_edit_modal.label_artist')}</label>
                 <input
                   type="text"
                   value={form.artist}
                   onChange={e => setForm(f => ({ ...f, artist: e.target.value }))}
                   className={styles.input}
-                  placeholder="아티스트 이름"
+                  placeholder={t('track_edit_modal.placeholder_artist')}
                   maxLength={100}
                 />
               </div>
@@ -141,13 +139,13 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>장르 *</label>
+            <label className={styles.label}>{t('track_edit_modal.label_genre')}</label>
             <select
               value={form.genre}
               onChange={e => setForm(f => ({ ...f, genre: e.target.value }))}
               className={styles.select}
             >
-              <option value="">장르 선택</option>
+              <option value="">{t('track_edit_modal.placeholder_genre')}</option>
               {GENRES.filter(Boolean).map(g => (
                 <option key={g} value={g}>{g}</option>
               ))}
@@ -155,12 +153,12 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>설명</label>
+            <label className={styles.label}>{t('track_edit_modal.label_description')}</label>
             <textarea
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
               className={styles.textarea}
-              placeholder="트랙에 대해 소개해주세요..."
+              placeholder={t('track_edit_modal.placeholder_description')}
               rows={4}
               maxLength={500}
             />
@@ -171,15 +169,15 @@ export default function EditTrackModal({ track, onClose, onSaved }) {
 
           <div className={styles.footer}>
             <button type="button" className={styles.cancelBtn} onClick={onClose} disabled={saving}>
-              취소
+              {t('track_edit_modal.button_cancel')}
             </button>
             <button type="submit" className={styles.saveBtn} disabled={saving}>
               {saving ? (
                 <>
                   <span className={styles.savingSpinner} />
-                  저장 중...
+                  {t('track_edit_modal.button_saving')}
                 </>
-              ) : '저장'}
+              ) : t('track_edit_modal.button_save')}
             </button>
           </div>
         </form>

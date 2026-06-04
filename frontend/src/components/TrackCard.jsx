@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../hooks/usePlayer';
 import { useAuth } from '../context/AuthContext';
 import { likeTrack, unlikeTrack } from '../api/likes';
@@ -22,6 +23,7 @@ function formatPlays(n) {
 }
 
 export default function TrackCard({ track, isLiked = false, onLikeToggle, isFollowing = false, onFollowToggle }) {
+  const { t } = useTranslation();
   const { playToDefault, currentTrack, isPlaying } = usePlayer();
   const isCurrentlyPlaying = isPlaying && currentTrack?.id === track.id;
   const { user } = useAuth();
@@ -32,13 +34,12 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
   const [followLoading, setFollowLoading] = useState(false);
   const [addToPlOpen, setAddToPlOpen] = useState(false);
 
-  // 부모 상태 변경 시 동기화
   useEffect(() => setLiked(isLiked), [isLiked]);
   useEffect(() => setFollowing(isFollowing), [isFollowing]);
 
   function handlePlay() {
     if (!user) {
-      navigate('/login', { state: { message: '음악을 재생하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('trackcard.play_redirect') } });
       return;
     }
     playToDefault(track);
@@ -47,7 +48,7 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
   async function handleFollow(e) {
     e.stopPropagation();
     if (!user) {
-      navigate('/login', { state: { message: '팔로우하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('trackcard.follow_redirect') } });
       return;
     }
     if (followLoading) return;
@@ -71,7 +72,7 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
   async function handleLike(e) {
     e.stopPropagation();
     if (!user) {
-      navigate('/login', { state: { message: '좋아요를 하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('trackcard.like_redirect') } });
       return;
     }
     if (likeLoading) return;
@@ -95,7 +96,7 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
   function handleAddToPlaylist(e) {
     e.stopPropagation();
     if (!user) {
-      navigate('/login', { state: { message: '플레이리스트에 추가하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('trackcard.playlist_redirect') } });
       return;
     }
     setAddToPlOpen(true);
@@ -144,9 +145,9 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
           <button
             className={`${styles.followBtn} ${following ? styles.followBtnActive : ''}`}
             onClick={handleFollow}
-            aria-label={following ? '구독 취소' : '구독'}
+            aria-label={following ? t('trackcard.follow_button_following') : t('trackcard.follow_button_follow')}
           >
-            {following ? '구독 중' : '+ 구독'}
+            {following ? t('trackcard.follow_button_following') : t('trackcard.follow_button_follow')}
           </button>
         </div>
         {track.genre && <span className={styles.genre}>{track.genre}</span>}
@@ -161,22 +162,20 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
         </span>
 
         <div className={styles.metaActions}>
-          {/* 플레이리스트 추가 */}
           <button
             className={styles.metaIconBtn}
             onClick={handleAddToPlaylist}
-            title="플레이리스트에 추가"
+            title={t('trackcard.add_playlist_title')}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M14 10H3v2h11v-2zm0-4H3v2h11V6zm4 8v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM3 16h7v-2H3v2z"/>
             </svg>
           </button>
 
-          {/* 좋아요 */}
           <button
             className={`${styles.likeBtn} ${liked ? styles.likeBtnActive : ''}`}
             onClick={handleLike}
-            aria-label={liked ? '좋아요 취소' : '좋아요'}
+            aria-label={liked ? t('trackcard.like_button_unlike_aria') : t('trackcard.like_button_like_aria')}
           >
             {liked ? (
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -189,11 +188,10 @@ export default function TrackCard({ track, isLiked = false, onLikeToggle, isFoll
             )}
           </button>
 
-          {/* 상세 페이지 */}
           <Link
             to={`/tracks/${track.id}`}
             className={styles.metaIconBtn}
-            title="곡 상세 보기"
+            title={t('trackcard.detail_button_title')}
             onClick={e => e.stopPropagation()}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">

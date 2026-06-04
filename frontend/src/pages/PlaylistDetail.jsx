@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getPlaylist, renamePlaylist, deletePlaylist, reorderPlaylist } from '../api/playlists';
 import { usePlayer } from '../hooks/usePlayer';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +13,7 @@ function formatDate(iso) {
 }
 
 export default function PlaylistDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { loadPlaylist, play, syncRemoveTrack, syncReorderTracks } = usePlayer();
@@ -25,7 +27,6 @@ export default function PlaylistDetail() {
   const [dragFrom, setDragFrom] = useState(null);
   const [dragOver, setDragOver] = useState(null);
 
-  // 삭제 debounce flush
   const flushTimerRef = useRef(null);
   const playlistRef = useRef(null);
   useEffect(() => { playlistRef.current = playlist; }, [playlist]);
@@ -40,25 +41,19 @@ export default function PlaylistDetail() {
   };
 
   useEffect(() => { load(); }, [id]);
-
-  useEffect(() => {
-    if (editingName) nameRef.current?.focus();
-  }, [editingName]);
+  useEffect(() => { if (editingName) nameRef.current?.focus(); }, [editingName]);
 
   const handlePlayAll = () => {
     if (!playlist?.tracks?.length) return;
     if (!user) {
-      navigate('/login', { state: { message: '음악을 재생하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('trackcard.play_redirect') } });
       return;
     }
     loadPlaylist(playlist, playlist.tracks);
   };
 
   const handleRename = async () => {
-    if (!nameInput.trim() || nameInput === playlist.name) {
-      setEditingName(false);
-      return;
-    }
+    if (!nameInput.trim() || nameInput === playlist.name) { setEditingName(false); return; }
     try {
       const updated = await renamePlaylist(id, nameInput.trim());
       setPlaylist(prev => ({ ...prev, name: updated.name }));
@@ -70,31 +65,29 @@ export default function PlaylistDetail() {
   };
 
   const handleDelete = async () => {
-    if (!confirm(`"${playlist.name}"을(를) 삭제하시겠습니까?`)) return;
+    if (!confirm(`"${playlist.name}"${t('playlist.rename_confirm_text')}`)) return;
     try {
       await deletePlaylist(id);
       navigate('/playlists');
     } catch (err) {
-      alert(err.response?.data?.error || '삭제할 수 없습니다.');
+      alert(err.response?.data?.error || t('playlist.delete_failed_alert'));
     }
   };
 
   const handleRemoveTrack = (index) => {
     const trackId = playlist.tracks[index]?.id;
     if (!trackId) return;
-    // 즉시 UI 반영
     setPlaylist(prev => {
       const next = {
         ...prev,
         tracks: prev.tracks.filter((_, i) => i !== index),
         trackIds: prev.trackIds.filter((_, i) => i !== index),
       };
-      playlistRef.current = next; // flush가 최신 상태를 읽도록 즉시 동기화
+      playlistRef.current = next;
       return next;
     });
     syncRemoveTrack(id, trackId, index);
 
-    // 500ms 내 연속 삭제는 타이머 리셋, 마지막 삭제 후 한 번만 PUT
     if (flushTimerRef.current) clearTimeout(flushTimerRef.current);
     flushTimerRef.current = setTimeout(() => {
       const pl = playlistRef.current;
@@ -115,34 +108,22 @@ export default function PlaylistDetail() {
 
   const handleDrop = async (e, toIdx) => {
     e.preventDefault();
-    if (dragFrom === null || dragFrom === toIdx) {
-      setDragFrom(null);
-      setDragOver(null);
-      return;
-    }
+    if (dragFrom === null || dragFrom === toIdx) { setDragFrom(null); setDragOver(null); return; }
     const newTracks = [...playlist.tracks];
     const [moved] = newTracks.splice(dragFrom, 1);
     newTracks.splice(toIdx, 0, moved);
 
-    setPlaylist(prev => ({ ...prev, tracks: newTracks, trackIds: newTracks.map(t => t.id) }));
+    setPlaylist(prev => ({ ...prev, tracks: newTracks, trackIds: newTracks.map(tr => tr.id) }));
     syncReorderTracks(id, newTracks, dragFrom, toIdx);
     setDragFrom(null);
     setDragOver(null);
 
-    reorderPlaylist(id, newTracks.map(t => t.id)).catch(() => alert('순서 저장에 실패했습니다.'));
+    reorderPlaylist(id, newTracks.map(tr => tr.id)).catch(() => alert(t('playlist.order_save_failed_alert')));
   };
 
-  const handleDragEnd = () => {
-    setDragFrom(null);
-    setDragOver(null);
-  };
+  const handleDragEnd = () => { setDragFrom(null); setDragOver(null); };
 
-  if (loading) {
-    return (
-      <div className={styles.centered}><div className={styles.spinner} /></div>
-    );
-  }
-
+  if (loading) return <div className={styles.centered}><div className={styles.spinner} /></div>;
   if (!playlist) return null;
 
   const realCoverUrl = playlist.tracks?.[0]?.coverUrl || null;
@@ -157,19 +138,13 @@ export default function PlaylistDetail() {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
           </svg>
-          플레이리스트
+          {t('playlist.type_label')}
         </button>
 
-        {/* 헤더 */}
         <section className={styles.hero}>
           <div className={styles.coverBox}>
             {realCoverUrl ? (
-              <img
-                src={realCoverUrl}
-                alt={playlist.name}
-                className={styles.cover}
-                onError={e => { e.currentTarget.src = DEFAULT_COVER; }}
-              />
+              <img src={realCoverUrl} alt={playlist.name} className={styles.cover} onError={e => { e.currentTarget.src = DEFAULT_COVER; }} />
             ) : (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className={styles.cover}>
                 <rect width="200" height="200" fill="#1a1a2e"/>
@@ -178,27 +153,25 @@ export default function PlaylistDetail() {
                 <rect x="50" y="120" width="85" height="8" rx="4" fill="var(--accent)" opacity="0.45"/>
               </svg>
             )}
-            {playlist.isDefault && <span className={styles.defaultBadge}>기본 재생목록</span>}
+            {playlist.isDefault && <span className={styles.defaultBadge}>{t('playlist.default_label')}</span>}
           </div>
 
           <div className={styles.info}>
-            <span className={styles.typeLabel}>플레이리스트</span>
+            <span className={styles.typeLabel}>{t('playlist.type_label')}</span>
 
             {editingName ? (
               <input
-                ref={nameRef}
-                value={nameInput}
+                ref={nameRef} value={nameInput}
                 onChange={e => setNameInput(e.target.value)}
                 onBlur={handleRename}
                 onKeyDown={e => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') setEditingName(false); }}
-                className={styles.nameInput}
-                maxLength={50}
+                className={styles.nameInput} maxLength={50}
               />
             ) : (
               <h1
                 className={`${styles.name} ${!playlist.isDefault ? styles.nameEditable : ''}`}
                 onClick={() => !playlist.isDefault && setEditingName(true)}
-                title={!playlist.isDefault ? '클릭하여 이름 변경' : ''}
+                title={!playlist.isDefault ? t('playlist.edit_title_aria') : ''}
               >
                 {playlist.name}
                 {!playlist.isDefault && (
@@ -209,22 +182,16 @@ export default function PlaylistDetail() {
               </h1>
             )}
 
-            <p className={styles.meta}>{playlist.tracks.length}곡 · {formatDate(playlist.createdAt)}</p>
+            <p className={styles.meta}>{playlist.tracks.length}{t('playlists.track_count')} · {formatDate(playlist.createdAt)}</p>
 
             <div className={styles.actions}>
-              <button
-                className={styles.playAllBtn}
-                onClick={handlePlayAll}
-                disabled={!playlist.tracks.length}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                모두 재생
+              <button className={styles.playAllBtn} onClick={handlePlayAll} disabled={!playlist.tracks.length}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                {t('playlist.play_all_button')}
               </button>
 
               {!playlist.isDefault && (
-                <button className={styles.deleteBtn} onClick={handleDelete} title="플레이리스트 삭제">
+                <button className={styles.deleteBtn} onClick={handleDelete} title={t('playlist.delete_button_title')}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                   </svg>
@@ -234,63 +201,48 @@ export default function PlaylistDetail() {
           </div>
         </section>
 
-        {/* 트랙 목록 */}
         <section className={styles.tracks}>
           {playlist.tracks.length === 0 ? (
             <div className={styles.empty}>
-              <p className={styles.emptyTitle}>아직 이 플레이리스트에 트랙이 없습니다.</p>
-              <p className={styles.emptySub}>음악을 추가해 재생목록을 채워보세요.</p>
-              <Link to="/" className={styles.emptyLink}>음악 둘러보기 →</Link>
+              <p className={styles.emptyTitle}>{t('playlist.empty_state')}</p>
+              <p className={styles.emptySub}>{t('playlist.empty_state_hint')}</p>
+              <Link to="/" className={styles.emptyLink}>{t('playlist.empty_state_link')}</Link>
             </div>
           ) : (
-            playlist.tracks.map((track, idx) => {
-              return (
-                <div
-                  key={`${track.id}-${idx}`}
-                  className={`${styles.row} ${dragOver === idx ? styles.rowDragOver : ''} ${dragFrom === idx ? styles.rowDragging : ''}`}
-                  draggable
-                  onDragStart={e => handleDragStart(e, idx)}
-                  onDragOver={e => handleDragOver(e, idx)}
-                  onDrop={e => handleDrop(e, idx)}
-                  onDragEnd={handleDragEnd}
-                >
-                  <span className={styles.dragHandle}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                    </svg>
-                  </span>
-                  <span className={styles.rowNum}>{idx + 1}</span>
-                  <button className={styles.rowCover} onClick={() => {
-                    if (!user) {
-                      navigate('/login', { state: { message: '음악을 재생하려면 로그인이 필요합니다.' } });
-                      return;
-                    }
-                    play(track, { id: playlist.id, name: playlist.name, tracks: playlist.tracks }, idx);
-                  }}>
-                    <img
-                      src={track.coverUrl || DEFAULT_COVER}
-                      alt={track.title}
-                      className={styles.rowImg}
-                      onError={e => { e.currentTarget.src = DEFAULT_COVER; }}
-                    />
-                  </button>
-                  <div className={styles.rowInfo}>
-                    <p className={styles.rowTitle}>{track.title}</p>
-                    <p className={styles.rowArtist}>{track.artist}</p>
-                  </div>
-                  {track.genre && <span className={styles.rowGenre}>{track.genre}</span>}
-                  <button
-                    className={styles.removeBtn}
-                    onClick={() => handleRemoveTrack(idx)}
-                    title="목록에서 제거"
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
-                  </button>
+            playlist.tracks.map((track, idx) => (
+              <div
+                key={`${track.id}-${idx}`}
+                className={`${styles.row} ${dragOver === idx ? styles.rowDragOver : ''} ${dragFrom === idx ? styles.rowDragging : ''}`}
+                draggable
+                onDragStart={e => handleDragStart(e, idx)}
+                onDragOver={e => handleDragOver(e, idx)}
+                onDrop={e => handleDrop(e, idx)}
+                onDragEnd={handleDragEnd}
+              >
+                <span className={styles.dragHandle}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                  </svg>
+                </span>
+                <span className={styles.rowNum}>{idx + 1}</span>
+                <button className={styles.rowCover} onClick={() => {
+                  if (!user) { navigate('/login', { state: { message: t('trackcard.play_redirect') } }); return; }
+                  play(track, { id: playlist.id, name: playlist.name, tracks: playlist.tracks }, idx);
+                }}>
+                  <img src={track.coverUrl || DEFAULT_COVER} alt={track.title} className={styles.rowImg} onError={e => { e.currentTarget.src = DEFAULT_COVER; }} />
+                </button>
+                <div className={styles.rowInfo}>
+                  <p className={styles.rowTitle}>{track.title}</p>
+                  <p className={styles.rowArtist}>{track.artist}</p>
                 </div>
-              );
-            })
+                {track.genre && <span className={styles.rowGenre}>{track.genre}</span>}
+                <button className={styles.removeBtn} onClick={() => handleRemoveTrack(idx)} title={t('playlist.remove_button_title')}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              </div>
+            ))
           )}
         </section>
       </div>

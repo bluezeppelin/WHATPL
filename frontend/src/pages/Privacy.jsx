@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from './InfoPage.module.css';
 
 export default function Privacy() {
+  const { t } = useTranslation();
   return (
     <div className={styles.page}>
       <div className={styles.container}>
         <header className={styles.header}>
-          <h1 className={styles.title}>개인정보처리방침</h1>
-          <p className={styles.subtitle}>최종 업데이트: 2026년 1월</p>
+          <h1 className={styles.title}>{t('privacy.title')}</h1>
+          <p className={styles.subtitle}>{t('privacy.updated')}</p>
         </header>
 
         <div className={styles.notice}>

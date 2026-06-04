@@ -5,6 +5,7 @@ import App from './App';
 import { PlayerProvider } from './hooks/usePlayer';
 import { AuthProvider } from './context/AuthContext';
 import { applyTheme } from './utils/theme';
+import './i18n';
 import './index.css';
 
 // 첫 paint 전에 캐시된 테마를 적용해 색상 깜빡임 방지 (있을 때만)

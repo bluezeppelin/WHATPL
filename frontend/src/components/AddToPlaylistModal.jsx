@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getPlaylists, addTrackToPlaylist, createPlaylist } from '../api/playlists';
 import styles from './AddToPlaylistModal.module.css';
 
 export default function AddToPlaylistModal({ track, onClose }) {
+  const { t } = useTranslation();
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toggling, setToggling] = useState(null); // 진행 중인 playlistId
+  const [toggling, setToggling] = useState(null);
   const [newName, setNewName] = useState('');
   const [creating, setCreating] = useState(false);
   const overlayRef = useRef(null);
@@ -28,7 +30,7 @@ export default function AddToPlaylistModal({ track, onClose }) {
         p.id !== playlist.id ? p : { ...p, trackIds: [...p.trackIds, track.id] }
       ));
     } catch {
-      alert('오류가 발생했습니다.');
+      alert(t('playlist_modal.error_generic'));
     } finally {
       setToggling(null);
     }
@@ -44,7 +46,7 @@ export default function AddToPlaylistModal({ track, onClose }) {
       setPlaylists(prev => [...prev, { ...created, trackIds: [track.id] }]);
       setNewName('');
     } catch {
-      alert('생성에 실패했습니다.');
+      alert(t('playlist_modal.create_error'));
     } finally {
       setCreating(false);
     }
@@ -74,7 +76,7 @@ export default function AddToPlaylistModal({ track, onClose }) {
           </button>
         </div>
 
-        <p className={styles.subheading}>플레이리스트에 추가</p>
+        <p className={styles.subheading}>{t('playlist_modal.heading')}</p>
 
         {loading ? (
           <div className={styles.loading}><div className={styles.spinner} /></div>
@@ -106,18 +108,17 @@ export default function AddToPlaylistModal({ track, onClose }) {
           </ul>
         )}
 
-        {/* 새 플레이리스트 만들기 */}
         <form onSubmit={handleCreate} className={styles.createRow}>
           <input
             type="text"
             value={newName}
             onChange={e => setNewName(e.target.value)}
-            placeholder="새 플레이리스트 이름..."
+            placeholder={t('playlist_modal.create_placeholder')}
             className={styles.createInput}
             maxLength={50}
           />
           <button type="submit" className={styles.createBtn} disabled={creating || !newName.trim()}>
-            {creating ? '...' : '만들기'}
+            {creating ? t('playlist_modal.create_button_loading') : t('playlist_modal.create_button')}
           </button>
         </form>
       </div>

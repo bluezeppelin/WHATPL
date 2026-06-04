@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { getNotifications, markAsRead, markAllAsRead, deleteNotification } from '../api/notifications';
 import styles from './MyPage.module.css';
 
 export default function Notifications() {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const [notifications, setNotifications] = useState(undefined);
   const [notifLoading, setNotifLoading] = useState(false);
@@ -53,11 +55,11 @@ export default function Notifications() {
             <svg width="44" height="44" viewBox="0 0 24 24" fill="var(--text-tertiary)">
               <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
             </svg>
-            <h2 className={styles.gateTitle}>로그인이 필요합니다</h2>
-            <p className={styles.gateDesc}>알림을 보려면 먼저 로그인해주세요.</p>
+            <h2 className={styles.gateTitle}>{t('notifications.gate_login_required')}</h2>
+            <p className={styles.gateDesc}>{t('notifications.gate_login_desc')}</p>
             <div className={styles.gateActions}>
-              <Link to="/login" className={styles.gatePrimary}>로그인</Link>
-              <Link to="/signup" className={styles.gateSecondary}>회원가입</Link>
+              <Link to="/login" className={styles.gatePrimary}>{t('notifications.gate_login_link')}</Link>
+              <Link to="/signup" className={styles.gateSecondary}>{t('notifications.gate_signup_link')}</Link>
             </div>
           </div>
         </div>
@@ -68,21 +70,20 @@ export default function Notifications() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.heading}>알림</h1>
+        <h1 className={styles.heading}>{t('notifications.heading')}</h1>
         <section className={styles.tabContent}>
-          <p className={styles.tabDesc}>서비스 활동과 관련된 알림을 확인하세요.</p>
           <div className={styles.card}>
             <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>알림 목록</h2>
+              <h2 className={styles.cardTitle}>{t('notifications.heading')}</h2>
               {notifications?.some(n => !n.isRead) && (
-                <button className={styles.editBtn} onClick={handleMarkAllRead}>모두 읽음 처리</button>
+                <button className={styles.editBtn} onClick={handleMarkAllRead}>{t('notifications.mark_all_read')}</button>
               )}
             </div>
-            {notifLoading && <p className={styles.statusLoading}>불러오는 중...</p>}
+            {notifLoading && <p className={styles.statusLoading}>{t('notifications.loading')}</p>}
             {!notifLoading && notifications !== undefined && notifications.length === 0 && (
               <div className={styles.emptyState}>
-                <p className={styles.statusNone}>알림이 없습니다.</p>
-                <p className={styles.statusNoneSub}>새로운 알림이 생기면 여기에 표시됩니다.</p>
+                <p className={styles.statusNone}>{t('notifications.empty_state')}</p>
+                <p className={styles.statusNoneSub}>{t('notifications.empty_hint')}</p>
               </div>
             )}
             {!notifLoading && notifications?.length > 0 && (
@@ -95,7 +96,7 @@ export default function Notifications() {
                     <button
                       className={styles.notifContent}
                       onClick={() => handleMarkRead(n)}
-                      aria-label={n.isRead ? undefined : '읽음 처리'}
+                      aria-label={n.isRead ? undefined : t('notifications.read_aria')}
                     >
                       {!n.isRead && <span className={styles.notifDot} />}
                       <div className={styles.notifTextWrap}>
@@ -112,7 +113,7 @@ export default function Notifications() {
                     <button
                       className={styles.notifDeleteBtn}
                       onClick={() => handleDeleteNotif(n.id)}
-                      aria-label="알림 삭제"
+                      aria-label={t('notifications.delete_aria')}
                     >
                       ✕
                     </button>

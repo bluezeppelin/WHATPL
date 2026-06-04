@@ -1,79 +1,60 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import styles from './InfoPage.module.css';
 
-const INTRO_CARDS = [
-  {
-    title: '음악을 감상하는 공간',
-    desc: 'WHATPL은 사용자가 다양한 트랙을 감상하고, 좋아하는 음악을 저장할 수 있는 음악 커뮤니티 서비스입니다.',
-  },
-  {
-    title: '음악을 업로드하는 공간',
-    desc: 'Creator는 자신의 음악을 업로드하고 관리하며, 자신의 음악을 사용자들에게 소개할 수 있습니다.',
-  },
-  {
-    title: '크리에이터를 발견하는 공간',
-    desc: '사용자는 관심 있는 Creator를 팔로우하고, 새롭게 업로드되는 음악을 확인하며 더 다양한 음악을 발견할 수 있습니다.',
-  },
-];
-
 export default function About() {
+  const { t } = useTranslation();
   const { user } = useAuth();
+
+  const INTRO_CARDS = [
+    { key: 'intro_card1', title: t('about.intro_card1_title') },
+    { key: 'intro_card2', title: t('about.intro_card2_title') },
+    { key: 'intro_card3', title: t('about.intro_card3_title') },
+  ];
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
         <header className={styles.header}>
-          <h1 className={styles.title}>서비스 소개</h1>
-          <p className={styles.subtitle}>WHATPL · What You Play</p>
+          <h1 className={styles.title}>{t('about.title')}</h1>
+          <p className={styles.subtitle}>{t('about.subtitle')}</p>
         </header>
 
-        {/* 소개 카드 3개 */}
         <section className={styles.section}>
           <div className={styles.introGrid}>
             {INTRO_CARDS.map(card => (
-              <div key={card.title} className={styles.introCard}>
+              <div key={card.key} className={styles.introCard}>
                 <p className={styles.introCardTitle}>{card.title}</p>
-                <p className={styles.introCardDesc}>{card.desc}</p>
               </div>
             ))}
           </div>
-          <p className={styles.introClosure}>
-            WHATPL은 사용자가 음악을 감상하고, Creator의 음악을 발견하며, 자신만의 음악 경험을 만들어갈 수 있는 공간을 지향합니다.
-          </p>
         </section>
 
-        {/* 회원 유형 */}
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>회원 유형</h2>
+          <h2 className={styles.sectionTitle}>{t('about.member_types_title')}</h2>
           <div className={styles.memberGrid}>
             <div className={styles.memberCard}>
-              <div className={styles.cardLabel}>일반 회원</div>
-              <p className={styles.cardDesc}>
-                음악 감상, 좋아요, 플레이리스트, Creator 팔로우 기능을 이용할 수 있습니다.
-              </p>
+              <div className={styles.cardLabel}>{t('about.member_general')}</div>
             </div>
             <div className={styles.memberCard}>
-              <div className={`${styles.cardLabel} ${styles.cardLabelCreator}`}>Creator</div>
-              <p className={styles.cardDesc}>
-                자신의 음악을 업로드하고 관리할 수 있습니다. Creator 전환은 관리자 승인 후 가능합니다.
-              </p>
+              <div className={`${styles.cardLabel} ${styles.cardLabelCreator}`}>{t('about.member_creator')}</div>
             </div>
           </div>
         </section>
 
         <div className={styles.actions}>
           {user ? (
-            <Link to="/mypage" className={styles.primaryBtn}>마이페이지로 이동</Link>
+            <Link to="/mypage" className={styles.primaryBtn}>{t('about.button_mypage')}</Link>
           ) : (
-            <Link to="/signup" className={styles.primaryBtn}>지금 가입하기</Link>
+            <Link to="/signup" className={styles.primaryBtn}>{t('about.button_signup')}</Link>
           )}
-          <Link to="/explore" className={styles.secondaryBtn}>음악 탐색하기</Link>
+          <Link to="/explore" className={styles.secondaryBtn}>{t('about.button_explore')}</Link>
         </div>
 
         <div className={styles.teamSection}>
-          <p className={styles.teamLabel}>Project Team</p>
-          <p className={styles.teamName}>Created by Team AWSome</p>
+          <p className={styles.teamLabel}>{t('about.team_label')}</p>
+          <p className={styles.teamName}>{t('about.team_name')}</p>
         </div>
       </div>
     </div>

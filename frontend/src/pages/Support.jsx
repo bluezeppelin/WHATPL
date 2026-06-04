@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from './InfoPage.module.css';
 
 const FAQS = [
@@ -74,6 +75,7 @@ const FAQS = [
 ];
 
 export default function Support() {
+  const { t } = useTranslation();
   const [openIdx, setOpenIdx] = useState({});
 
   function toggle(catI, itemI) {
@@ -85,8 +87,8 @@ export default function Support() {
     <div className={styles.page}>
       <div className={styles.container}>
         <header className={styles.header}>
-          <h1 className={styles.title}>고객센터</h1>
-          <p className={styles.subtitle}>WHATPL 이용 중 자주 묻는 질문을 확인할 수 있습니다.</p>
+          <h1 className={styles.title}>{t('support.title')}</h1>
+          <p className={styles.subtitle}>{t('support.subtitle')}</p>
         </header>
 
         {FAQS.map((cat, catI) => (

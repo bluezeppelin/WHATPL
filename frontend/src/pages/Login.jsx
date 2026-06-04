@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { login as loginApi } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import { useCapsLock, CapsLockWarning } from '../hooks/useCapsLock';
 import styles from './Login.module.css';
 
 export default function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -30,7 +32,7 @@ export default function Login() {
       login(data.token, data.user);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.error || '로그인에 실패했습니다.');
+      setError(err.response?.data?.error || t('login.error_default'));
     } finally {
       setLoading(false);
     }
@@ -39,7 +41,7 @@ export default function Login() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.title}>로그인</h1>
+        <h1 className={styles.title}>{t('login.title')}</h1>
 
         {redirectMessage && (
           <p className={styles.redirectMsg}>{redirectMessage}</p>
@@ -47,21 +49,21 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>
-            <label className={styles.label}>아이디</label>
+            <label className={styles.label}>{t('login.label_id')}</label>
             <input
               className={styles.input}
               type="text"
               name="loginId"
               value={form.loginId}
               onChange={handleChange}
-              placeholder="아이디를 입력하세요"
+              placeholder={t('login.placeholder_id')}
               autoComplete="username"
               required
             />
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>비밀번호</label>
+            <label className={styles.label}>{t('login.label_password')}</label>
             <input
               className={styles.input}
               type="password"
@@ -71,7 +73,7 @@ export default function Login() {
               onKeyDown={pwCaps.handler}
               onKeyUp={pwCaps.handler}
               onBlur={pwCaps.reset}
-              placeholder="비밀번호를 입력하세요"
+              placeholder={t('login.placeholder_password')}
               autoComplete="current-password"
               required
             />
@@ -81,19 +83,19 @@ export default function Login() {
           {error && <p className={styles.error}>{error}</p>}
 
           <button className={styles.submitBtn} type="submit" disabled={loading}>
-            {loading ? '로그인 중...' : '로그인'}
+            {loading ? t('login.button_submit_loading') : t('login.button_submit')}
           </button>
         </form>
 
         <div className={styles.links}>
-          <Link to="/find-id" className={styles.link}>아이디 찾기</Link>
+          <Link to="/find-id" className={styles.link}>{t('login.link_find_id')}</Link>
           <span className={styles.divider}>|</span>
-          <Link to="/reset-password" className={styles.link}>비밀번호 초기화</Link>
+          <Link to="/reset-password" className={styles.link}>{t('login.link_reset_password')}</Link>
         </div>
 
         <p className={styles.signupPrompt}>
-          계정이 없으신가요?{' '}
-          <Link to="/signup" className={styles.signupLink}>회원가입</Link>
+          {t('login.signup_prompt')}{' '}
+          <Link to="/signup" className={styles.signupLink}>{t('login.signup_link')}</Link>
         </p>
       </div>
     </div>

@@ -1,4 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { getTracks, getTrendingTracks, getTopLikedTracks } from '../api/tracks';
+import { getCreators } from '../api/creators';
+import { getMyLikedTracks } from '../api/likes';
+import { getMyFollowedArtists } from '../api/followedArtists';
+import { getMyRecentlyPlayed } from '../api/recentlyPlayed';
+import { getSiteSettings } from '../api/siteSettings';
+import { useAuth } from '../context/AuthContext';
+import { usePlayer } from '../hooks/usePlayer';
+import TrackCard from '../components/TrackCard';
+import styles from './Home.module.css';
 
 function useDragScroll() {
   const isDragging = useRef(false);
@@ -36,23 +48,13 @@ function useDragScroll() {
     },
   };
 }
-import { useNavigate } from 'react-router-dom';
-import { getTracks, getTrendingTracks, getTopLikedTracks } from '../api/tracks';
-import { getCreators } from '../api/creators';
-import { getMyLikedTracks } from '../api/likes';
-import { getMyFollowedArtists } from '../api/followedArtists';
-import { getMyRecentlyPlayed } from '../api/recentlyPlayed';
-import { getSiteSettings } from '../api/siteSettings';
-import { useAuth } from '../context/AuthContext';
-import { usePlayer } from '../hooks/usePlayer';
-import TrackCard from '../components/TrackCard';
-import styles from './Home.module.css';
 
 const SIDEBAR_GENRES = ['Hip-Hop', 'R&B', 'Electronic', 'Rock/Metal', 'Lo-Fi', 'Acoustic', 'Jazz', 'Blues', 'Classical'];
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%231a1510'/%3E%3Ccircle cx='40' cy='30' r='14' fill='%23c89f62'/%3E%3Cellipse cx='40' cy='66' rx='24' ry='18' fill='%23c89f62'/%3E%3C/svg%3E";
 const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a1a2e'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%23c89f62' stroke-width='3' fill='none'/%3E%3Ccircle cx='100' cy='100' r='12' fill='%23c89f62'/%3E%3C/svg%3E";
 
 export default function Home() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { playToDefault } = usePlayer();
@@ -97,7 +99,7 @@ export default function Home() {
   useEffect(() => {
     if (user) {
       getMyLikedTracks()
-        .then(data => setLikedIds(new Set(data.likedTracks.map(t => t.id))))
+        .then(data => setLikedIds(new Set(data.likedTracks.map(tr => tr.id))))
         .catch(() => setLikedIds(new Set()));
       getMyFollowedArtists()
         .then(data => setFollowedArtists(new Set(data.followedArtists.map(f => f.artistName.toLowerCase()))))
@@ -130,7 +132,7 @@ export default function Home() {
 
   function handleRecentPlay(track) {
     if (!user) {
-      navigate('/login', { state: { message: '음악을 재생하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('home.redirect_play_message') } });
       return;
     }
     playToDefault(track);
@@ -138,7 +140,6 @@ export default function Home() {
 
   return (
     <main className={styles.page}>
-      {/* 히어로 */}
       <section
         className={styles.hero}
         style={heroBgUrl ? {
@@ -150,18 +151,18 @@ export default function Home() {
       >
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            자유로운 음악을 <span className={styles.highlight}>발견하고</span><br />나만의 사운드를 업로드하세요
+            {t('home.hero_title_main')}<span className={styles.highlight}>{t('home.hero_title_highlight')}</span><br />{t('home.hero_title_sub')}
           </h1>
-          <p className={styles.heroSub}>좋아하는 음악을 발견하고,<br />나만의 트랙으로 Creator가 되어보세요.</p>
+          <p className={styles.heroSub}>{t('home.hero_description').split('\n').map((line, i) => (
+            <span key={i}>{line}{i === 0 && <br />}</span>
+          ))}</p>
         </div>
         <div className={styles.heroGlow} />
       </section>
 
       <div className={styles.sectionDivider} />
 
-      {/* 70/30 레이아웃 */}
       <div className={styles.layout}>
-        {/* 왼쪽 70% — 메인 콘텐츠 */}
         <div className={styles.main}>
           {loading ? (
             <>
@@ -187,21 +188,20 @@ export default function Home() {
               <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--text-tertiary)">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
               </svg>
-              <p>아직 트랙이 없습니다.</p>
-              <a href="/upload" className={styles.emptyLink}>첫 번째 트랙 업로드하기</a>
+              <p>{t('home.empty_tracks')}</p>
+              <a href="/upload" className={styles.emptyLink}>{t('home.empty_tracks_link')}</a>
             </div>
           ) : (
             <>
-              {/* 새로 올라온 사운드 */}
               {newTracks.length > 0 && (
                 <div className={styles.section}>
                   <div className={styles.sectionHeaderRow}>
                     <div>
-                      <h2 className={styles.sectionTitle}>새로 올라온 사운드</h2>
-                      <p className={styles.sectionDesc}>Creator들이 최근 업로드한 새로운 트랙을 만나보세요.</p>
+                      <h2 className={styles.sectionTitle}>{t('home.new_sounds_section')}</h2>
+                      <p className={styles.sectionDesc}>{t('home.new_sounds_desc')}</p>
                     </div>
                     <button className={styles.sectionMore} onClick={() => navigate('/explore?sort=new')}>
-                      더보기 →
+                      {t('home.see_more')}
                     </button>
                   </div>
                   <div className={styles.trackRow} {...newDrag}>
@@ -212,16 +212,15 @@ export default function Home() {
                 </div>
               )}
 
-              {/* 최근 인기 사운드 */}
               {trendingTracks.length > 0 && (
                 <div className={styles.section}>
                   <div className={styles.sectionHeaderRow}>
                     <div>
-                      <h2 className={styles.sectionTitle}>최근 인기 사운드</h2>
-                      <p className={styles.sectionDesc}>최근 7일 동안 WHATPL에서 많이 재생된 사운드를 확인해보세요.</p>
+                      <h2 className={styles.sectionTitle}>{t('home.trending_section')}</h2>
+                      <p className={styles.sectionDesc}>{t('home.trending_desc')}</p>
                     </div>
                     <button className={styles.sectionMore} onClick={() => navigate('/explore?sort=plays')}>
-                      더보기 →
+                      {t('home.see_more')}
                     </button>
                   </div>
                   <div className={styles.trackRow} {...trendDrag}>
@@ -232,16 +231,15 @@ export default function Home() {
                 </div>
               )}
 
-              {/* 좋아요 많은 사운드 */}
               {topLikedTracks.length > 0 && (
                 <div className={styles.section}>
                   <div className={styles.sectionHeaderRow}>
                     <div>
-                      <h2 className={styles.sectionTitle}>좋아요 많은 사운드</h2>
-                      <p className={styles.sectionDesc}>WHATPL 회원들이 가장 많이 좋아한 사운드를 만나보세요.</p>
+                      <h2 className={styles.sectionTitle}>{t('home.liked_section')}</h2>
+                      <p className={styles.sectionDesc}>{t('home.liked_desc')}</p>
                     </div>
                     <button className={styles.sectionMore} onClick={() => navigate('/explore?sort=likes')}>
-                      더보기 →
+                      {t('home.see_more')}
                     </button>
                   </div>
                   <div className={styles.trackRow} {...likedDrag}>
@@ -255,15 +253,13 @@ export default function Home() {
           )}
         </div>
 
-        {/* 오른쪽 30% — 사이드 위젯 */}
         <aside className={styles.side}>
-          {/* 인기 크리에이터 */}
           <div className={styles.widget}>
-            <h3 className={styles.widgetTitle}>인기 크리에이터</h3>
+            <h3 className={styles.widgetTitle}>{t('home.popular_creators')}</h3>
             {creators === undefined ? (
               <p className={styles.widgetEmpty}>&nbsp;</p>
             ) : creators.length === 0 ? (
-              <p className={styles.widgetEmpty}>등록된 크리에이터가 없습니다.</p>
+              <p className={styles.widgetEmpty}>{t('home.no_creators')}</p>
             ) : (
               <ul className={styles.creatorList}>
                 {creators.slice(0, 6).map(creator => (
@@ -290,9 +286,8 @@ export default function Home() {
             )}
           </div>
 
-          {/* 장르 바로가기 */}
           <div className={styles.widget}>
-            <h3 className={styles.widgetTitle}>장르 바로가기</h3>
+            <h3 className={styles.widgetTitle}>{t('home.genre_shortcuts')}</h3>
             <div className={styles.genreGrid}>
               {SIDEBAR_GENRES.map(g => (
                 <button
@@ -306,15 +301,14 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 최근 들은 곡 */}
           <div className={styles.widget}>
-            <h3 className={styles.widgetTitle}>최근 들은 곡</h3>
+            <h3 className={styles.widgetTitle}>{t('home.recent_played')}</h3>
             {!user ? (
-              <p className={styles.widgetEmpty}>로그인하면 최근 들은 곡을 볼 수 있습니다.</p>
+              <p className={styles.widgetEmpty}>{t('home.login_for_recent')}</p>
             ) : recentlyPlayed === undefined ? (
               <p className={styles.widgetEmpty}>&nbsp;</p>
             ) : recentlyPlayed.length === 0 ? (
-              <p className={styles.widgetEmpty}>최근 재생 기록이 없습니다.</p>
+              <p className={styles.widgetEmpty}>{t('home.no_recent_history')}</p>
             ) : (
               <ul className={styles.recentList}>
                 {recentlyPlayed.slice(0, 5).map(track => (

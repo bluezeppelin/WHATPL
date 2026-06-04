@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../hooks/usePlayer';
 import { search } from '../api/search';
@@ -10,6 +12,7 @@ const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%231a1510'/%3E%3Ccircle cx='20' cy='14' r='7' fill='%23c89f62'/%3E%3Cellipse cx='20' cy='34' rx='13' ry='10' fill='%23c89f62'/%3E%3C/svg%3E";
 
 export default function Navbar({ logoUrl = '' }) {
+  const { t } = useTranslation();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, logout, roleLabel, loading: authLoading } = useAuth();
@@ -17,14 +20,12 @@ export default function Navbar({ logoUrl = '' }) {
   const [logoFailed, setLogoFailed] = useState(false);
   const [avatarFailed, setAvatarFailed] = useState(false);
 
-  // 검색
   const [query, setQuery] = useState('');
   const [results, setResults] = useState(null);
   const [dropOpen, setDropOpen] = useState(false);
   const [searching, setSearching] = useState(false);
   const wrapRef = useRef(null);
 
-  // 알림 드롭다운
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifDropOpen, setNotifDropOpen] = useState(false);
   const [notifItems, setNotifItems] = useState(null);
@@ -34,7 +35,6 @@ export default function Navbar({ logoUrl = '' }) {
   useEffect(() => { setLogoFailed(false); }, [logoUrl]);
   useEffect(() => { setAvatarFailed(false); }, [user?.profileImageUrl]);
 
-  // unread count 60초 주기 갱신
   useEffect(() => {
     if (!user) { setUnreadCount(0); return; }
     let cancelled = false;
@@ -49,7 +49,6 @@ export default function Navbar({ logoUrl = '' }) {
     return () => { cancelled = true; clearInterval(iv); };
   }, [user]);
 
-  // 페이지 이동 시 검색·알림 드롭다운 닫기
   useEffect(() => {
     setQuery('');
     setResults(null);
@@ -57,7 +56,6 @@ export default function Navbar({ logoUrl = '' }) {
     setNotifDropOpen(false);
   }, [pathname]);
 
-  // debounce 검색
   useEffect(() => {
     if (!query.trim()) {
       setResults(null);
@@ -80,7 +78,6 @@ export default function Navbar({ logoUrl = '' }) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // 검색 드롭다운 외부 클릭 닫기
   useEffect(() => {
     function handle(e) {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setDropOpen(false);
@@ -89,7 +86,6 @@ export default function Navbar({ logoUrl = '' }) {
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
-  // 알림 드롭다운 외부 클릭 + ESC 닫기
   useEffect(() => {
     if (!notifDropOpen) return;
     function handleOutside(e) {
@@ -108,7 +104,6 @@ export default function Navbar({ logoUrl = '' }) {
     };
   }, [notifDropOpen]);
 
-  // 프로필 영역 클릭 → 알림 드롭다운 토글
   function handleToggleDrop() {
     const opening = !notifDropOpen;
     setNotifDropOpen(opening);
@@ -121,7 +116,6 @@ export default function Navbar({ logoUrl = '' }) {
     }
   }
 
-  // 알림 항목 클릭 → 읽음 처리 + 이동
   async function handleNotifClick(notif) {
     if (!notif.isRead) {
       try {
@@ -134,7 +128,6 @@ export default function Navbar({ logoUrl = '' }) {
     if (notif.link) navigate(notif.link);
   }
 
-  // 모두 읽음
   async function handleMarkAllRead() {
     try {
       await markAllAsRead();
@@ -145,7 +138,7 @@ export default function Navbar({ logoUrl = '' }) {
 
   function handlePlay(track) {
     if (!user) {
-      navigate('/login', { state: { message: '음악을 재생하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('trackcard.play_redirect') } });
       setDropOpen(false);
       return;
     }
@@ -157,6 +150,11 @@ export default function Navbar({ logoUrl = '' }) {
     logout();
     resetPlayer();
     navigate('/');
+  }
+
+  function handleLangChange(lang) {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('lang', lang);
   }
 
   function handleKeyDown(e) {
@@ -180,7 +178,6 @@ export default function Navbar({ logoUrl = '' }) {
 
   return (
     <nav className={styles.nav}>
-      {/* 로고 */}
       <div className={styles.logoArea}>
         <Link to="/" className={styles.logo}>
           {showLogoImg ? (
@@ -198,12 +195,11 @@ export default function Navbar({ logoUrl = '' }) {
             to="/admin"
             className={`${styles.adminConsolePill} ${pathname === '/admin' ? styles.adminConsolePillActive : ''}`}
           >
-            관리자 콘솔
+            {t('navbar.admin_console')}
           </Link>
         )}
       </div>
 
-      {/* 검색바 */}
       <div className={styles.searchWrap} ref={wrapRef}>
         <div className={styles.searchBox}>
           <svg className={styles.searchIcon} width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
@@ -212,7 +208,7 @@ export default function Navbar({ logoUrl = '' }) {
           <input
             className={styles.searchInput}
             type="text"
-            placeholder="곡 또는 크리에이터 검색"
+            placeholder={t('navbar.search_placeholder')}
             value={query}
             onChange={e => setQuery(e.target.value)}
             onFocus={() => results && setDropOpen(true)}
@@ -223,21 +219,20 @@ export default function Navbar({ logoUrl = '' }) {
             <button
               className={styles.searchClear}
               onClick={() => { setQuery(''); setResults(null); setDropOpen(false); }}
-              aria-label="검색어 지우기"
+              aria-label={t('navbar.search_clear_aria')}
             >✕</button>
           )}
         </div>
 
-        {/* 검색 드롭다운 */}
         {dropOpen && results && (
           <div className={styles.dropdown}>
             {!hasResults ? (
-              <p className={styles.dropEmpty}>검색 결과가 없습니다</p>
+              <p className={styles.dropEmpty}>{t('navbar.search_no_results')}</p>
             ) : (
               <>
                 {previewTracks.length > 0 && (
                   <div className={styles.dropSection}>
-                    <p className={styles.dropSectionTitle}>곡</p>
+                    <p className={styles.dropSectionTitle}>{t('navbar.search_songs_section')}</p>
                     {previewTracks.map(track => (
                       <div key={track.id} className={styles.dropItem}>
                         <button className={styles.dropCoverBtn} onClick={() => handlePlay(track)} aria-label={`${track.title} 재생`}>
@@ -259,7 +254,7 @@ export default function Navbar({ logoUrl = '' }) {
                 )}
                 {previewCreators.length > 0 && (
                   <div className={styles.dropSection}>
-                    <p className={styles.dropSectionTitle}>크리에이터</p>
+                    <p className={styles.dropSectionTitle}>{t('navbar.search_creators_section')}</p>
                     {previewCreators.map(creator => (
                       <button key={creator.id} className={styles.dropItem} onClick={() => navigate(`/creators/${creator.id}`)}>
                         <img src={creator.profileImageUrl || DEFAULT_AVATAR} alt={creator.creatorName} className={styles.dropAvatar} onError={e => { e.currentTarget.src = DEFAULT_AVATAR; }} />
@@ -274,35 +269,32 @@ export default function Navbar({ logoUrl = '' }) {
               </>
             )}
             <button className={styles.dropViewAll} onClick={goToAll}>
-              "{query}" 전체 검색 결과 보기
+              "{query}" {t('navbar.search_view_all')}
             </button>
           </div>
         )}
       </div>
 
-      {/* 우측 메뉴 */}
       <div className={styles.links}>
-        <Link to="/" className={`${styles.link} ${pathname === '/' ? styles.active : ''}`}>홈</Link>
-        <Link to="/explore" className={`${styles.link} ${pathname.startsWith('/explore') ? styles.active : ''}`}>음악 탐색</Link>
-        <Link to="/playlists" className={`${styles.link} ${pathname.startsWith('/playlists') ? styles.active : ''}`}>플레이리스트</Link>
+        <Link to="/" className={`${styles.link} ${pathname === '/' ? styles.active : ''}`}>{t('navbar.nav_home')}</Link>
+        <Link to="/explore" className={`${styles.link} ${pathname.startsWith('/explore') ? styles.active : ''}`}>{t('navbar.nav_explore')}</Link>
+        <Link to="/playlists" className={`${styles.link} ${pathname.startsWith('/playlists') ? styles.active : ''}`}>{t('navbar.nav_playlists')}</Link>
         {user?.role === 'creator' && (
           <Link to="/upload" className={`${styles.uploadBtn} ${pathname === '/upload' ? styles.uploadBtnActive : ''}`}>
-            + 업로드
+            {t('navbar.nav_upload')}
           </Link>
         )}
         {user?.role === 'user' && (
           <Link to="/upload" className={`${styles.uploadBtn} ${pathname === '/upload' ? styles.uploadBtnActive : ''}`}>
-            + Creator 신청
+            {t('navbar.nav_creator_request')}
           </Link>
         )}
 
         <div className={styles.authArea}>
           {authLoading ? null : user ? (
             <>
-              {/* 프로필 영역 — 전체 클릭 시 알림 드롭다운 토글 */}
               <div className={styles.profileArea} ref={notifDropRef}>
-                <button className={styles.profileToggle} onClick={handleToggleDrop} aria-label="알림 열기">
-                  {/* 아바타 + unread 뱃지 */}
+                <button className={styles.profileToggle} onClick={handleToggleDrop} aria-label={t('navbar.notifications_title')}>
                   <div className={styles.avatarWrap}>
                     {user.profileImageUrl && !avatarFailed ? (
                       <img
@@ -324,26 +316,23 @@ export default function Navbar({ logoUrl = '' }) {
                   <span className={styles.roleTag}>{roleLabel}</span>
                 </button>
 
-                {/* 알림 드롭다운 */}
                 {notifDropOpen && (
                   <div className={styles.notifDrop}>
-                    {/* 헤더 */}
                     <div className={styles.notifDropHeader}>
-                      <span className={styles.notifDropTitle}>알림</span>
+                      <span className={styles.notifDropTitle}>{t('navbar.notifications_title')}</span>
                       <button
                         className={styles.notifDropMarkAll}
                         onClick={handleMarkAllRead}
                         disabled={!notifItems?.some(n => !n.isRead)}
                       >
-                        모두 읽음
+                        {t('navbar.notifications_mark_all')}
                       </button>
                     </div>
 
-                    {/* 알림 목록 */}
                     <div className={styles.notifDropList}>
-                      {notifLoading && <p className={styles.notifDropEmpty}>불러오는 중...</p>}
+                      {notifLoading && <p className={styles.notifDropEmpty}>{t('navbar.notification_loading')}</p>}
                       {!notifLoading && (!notifItems || notifItems.length === 0) && (
-                        <p className={styles.notifDropEmpty}>알림이 없습니다.</p>
+                        <p className={styles.notifDropEmpty}>{t('navbar.notifications_empty')}</p>
                       )}
                       {!notifLoading && notifItems?.length > 0 && notifItems.map(n => (
                         <button
@@ -366,43 +355,53 @@ export default function Navbar({ logoUrl = '' }) {
                       ))}
                     </div>
 
-                    {/* 하단 버튼 */}
                     <div className={styles.notifDropFooter}>
                       <button
                         className={`${styles.notifDropFooterBtn} ${styles.notifDropFooterBtnGhost}`}
                         onClick={() => { navigate('/notifications'); setNotifDropOpen(false); }}
                       >
-                        전체 알림 보기
+                        {t('navbar.notifications_view_all')}
                       </button>
                       <button
                         className={`${styles.notifDropFooterBtn} ${styles.notifDropFooterBtnAlt}`}
                         onClick={() => { navigate('/my-sound'); setNotifDropOpen(false); }}
                       >
-                        마이 사운드
+                        {t('navbar.my_sound')}
                       </button>
                       <button
                         className={styles.notifDropFooterBtn}
                         onClick={() => { navigate('/mypage'); setNotifDropOpen(false); }}
                       >
-                        마이페이지
+                        {t('navbar.my_page')}
                       </button>
                     </div>
                   </div>
                 )}
               </div>
 
-              <button className={styles.logoutBtn} onClick={handleLogout}>로그아웃</button>
+              <button className={styles.logoutBtn} onClick={handleLogout}>{t('navbar.nav_logout')}</button>
             </>
           ) : (
             <>
               <Link to="/login" className={`${styles.authBtn} ${pathname === '/login' ? styles.authBtnActive : ''}`}>
-                로그인
+                {t('navbar.nav_login')}
               </Link>
               <Link to="/signup" className={`${styles.authBtn} ${styles.authBtnFill} ${pathname === '/signup' ? styles.authBtnActive : ''}`}>
-                회원가입
+                {t('navbar.nav_signup')}
               </Link>
             </>
           )}
+          <div className={styles.langSelector}>
+            {['ko', 'en', 'ja'].map(lang => (
+              <button
+                key={lang}
+                className={`${styles.langBtn} ${i18n.language === lang ? styles.langBtnActive : ''}`}
+                onClick={() => handleLangChange(lang)}
+              >
+                {lang === 'ko' ? '한' : lang === 'en' ? 'EN' : 'JP'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </nav>

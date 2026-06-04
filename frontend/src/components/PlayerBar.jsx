@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../hooks/usePlayer';
 import { useAuth } from '../context/AuthContext';
 import NowPlayingPanel from './NowPlayingPanel';
@@ -132,6 +133,7 @@ function AlbumCard({ item, ctrlType, ctrlProps, isPlaying }) {
 
 /* ─── PlayerBar 본체 ─── */
 export default function PlayerBar() {
+  const { t } = useTranslation();
   const {
     currentTrack, currentIndex, currentPlaylist, playKey, isPlaying, audioRef,
     play, pause, playNext, playPrev,
@@ -363,7 +365,7 @@ export default function PlayerBar() {
                 className={`${styles.likeBtn} ${isLiked ? styles.likeBtnActive : ''}`}
                 onClick={handleLike}
                 disabled={!user || likeLoading}
-                title={isLiked ? '좋아요 취소' : '좋아요'}
+                title={isLiked ? t('player.like_button_unlike') : t('player.like_button_like')}
               >
                 <span className={styles.likeHeart}>{isLiked ? '♥' : '♡'}</span>
                 <span className={styles.likeCount}>{likeCount}</span>
@@ -371,7 +373,7 @@ export default function PlayerBar() {
             </>
           ) : hasCheckedSession ? (
             <div className={styles.text}>
-              <p className={styles.emptyHint}>재생 중인 곡이 없습니다</p>
+              <p className={styles.emptyHint}>{t('player.no_track')}</p>
             </div>
           ) : null}
         </div>
@@ -383,7 +385,7 @@ export default function PlayerBar() {
           <button
             className={`${styles.auxBtn} ${styles.auxBtnLeft} ${shuffle ? styles.auxBtnActive : ''}`}
             onClick={toggleShuffle}
-            title={shuffle ? '셔플 켜짐' : '셔플 꺼짐'}
+            title={shuffle ? t('player.shuffle_on_title') : t('player.shuffle_off_title')}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4zM14.83 13.41l-1.41 1.41 2.61 2.61L14 19.5h6v-6l-2.04 2.04z"/>
@@ -408,7 +410,7 @@ export default function PlayerBar() {
           <button
             className={`${styles.auxBtn} ${styles.auxBtnRight} ${repeatMode !== 'none' ? styles.auxBtnActive : ''}`}
             onClick={cycleRepeat}
-            title={repeatMode === 'none' ? '반복 없음' : repeatMode === 'all' ? '전체 반복' : '한 곡 반복'}
+            title={repeatMode === 'none' ? t('player.repeat_none_title') : repeatMode === 'all' ? t('player.repeat_all_title') : t('player.repeat_one_title')}
           >
             <span className={styles.auxBtnRepeatWrap}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -426,7 +428,7 @@ export default function PlayerBar() {
               className={`${styles.iconBtn} ${panelOpen ? styles.iconBtnActive : ''}`}
               onClick={() => setPanelOpen(o => !o)}
               onMouseDown={e => e.stopPropagation()}
-              title="재생 목록"
+              title={t('player.playlist_button_title')}
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/>

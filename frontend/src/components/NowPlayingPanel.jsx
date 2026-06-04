@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { usePlayer } from '../hooks/usePlayer';
 import { reorderPlaylist } from '../api/playlists';
 import styles from './NowPlayingPanel.module.css';
@@ -6,6 +7,7 @@ import styles from './NowPlayingPanel.module.css';
 const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a1a2e'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%237c5cfc' stroke-width='3' fill='none'/%3E%3Ccircle cx='100' cy='100' r='12' fill='%237c5cfc'/%3E%3C/svg%3E";
 
 export default function NowPlayingPanel({ open, onClose }) {
+  const { t } = useTranslation();
   const { currentIndex, currentPlaylist, play, syncRemoveTrack, syncReorderTracks } = usePlayer();
   const panelRef = useRef(null);
   const listRef = useRef(null);
@@ -14,11 +16,9 @@ export default function NowPlayingPanel({ open, onClose }) {
   const [dragFrom, setDragFrom] = useState(null);
   const [dragOver, setDragOver] = useState(null);
 
-  // 삭제 후 debounce flush: 개별 DELETE 대신 마지막 클릭 500ms 뒤에 전체 목록을 PUT 한 번으로 덮어씀
-  // → 빠른 연속 삭제 시 JSON 파일 read-write 경쟁 조건 방지
   const flushTimerRef = useRef(null);
   const playlistRef = useRef(currentPlaylist);
-  playlistRef.current = currentPlaylist; // 매 렌더마다 최신값 동기화
+  playlistRef.current = currentPlaylist;
 
   useEffect(() => () => { if (flushTimerRef.current) clearTimeout(flushTimerRef.current); }, []);
 
@@ -42,9 +42,8 @@ export default function NowPlayingPanel({ open, onClose }) {
     e.stopPropagation();
     const trackId = tracks[idx]?.id;
     if (!trackId) return;
-    syncRemoveTrack(currentPlaylist.id, trackId, idx); // index 기반 단일 항목 제거
+    syncRemoveTrack(currentPlaylist.id, trackId, idx);
 
-    // 500ms 내 연속 삭제는 타이머 리셋, 마지막 삭제 후 한 번만 PUT
     if (flushTimerRef.current) clearTimeout(flushTimerRef.current);
     flushTimerRef.current = setTimeout(() => {
       const pl = playlistRef.current;
@@ -58,7 +57,6 @@ export default function NowPlayingPanel({ open, onClose }) {
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  // 드래그 중 리스트 상/하단 가장자리 근처면 자동 스크롤
   const autoScrollOnDrag = (e) => {
     const list = listRef.current;
     if (!list) return;
@@ -79,7 +77,6 @@ export default function NowPlayingPanel({ open, onClose }) {
     autoScrollOnDrag(e);
   };
 
-  // 항목 사이의 빈 공간/가장자리에서도 스크롤이 동작하도록 컨테이너에도 dragover 처리
   const handleListDragOver = (e) => {
     if (dragFrom === null) return;
     e.preventDefault();
@@ -102,8 +99,8 @@ export default function NowPlayingPanel({ open, onClose }) {
     setDragFrom(null);
     setDragOver(null);
 
-    reorderPlaylist(currentPlaylist.id, newTracks.map(t => t.id))
-      .catch(() => alert('순서 저장에 실패했습니다.'));
+    reorderPlaylist(currentPlaylist.id, newTracks.map(tr => tr.id))
+      .catch(() => alert(t('playlist.order_save_failed_alert')));
   };
 
   const handleDragEnd = () => {
@@ -118,12 +115,12 @@ export default function NowPlayingPanel({ open, onClose }) {
       <div ref={panelRef} className={`${styles.panel} ${open ? styles.panelOpen : ''}`}>
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <h2 className={styles.heading}>재생 목록</h2>
+            <h2 className={styles.heading}>{t('nowplaying.heading')}</h2>
             <span className={styles.playlistName}>{name}</span>
           </div>
           <div className={styles.headerRight}>
             <span className={styles.count}>{tracks.length}곡</span>
-            <button className={styles.closeBtn} onClick={onClose}>
+            <button className={styles.closeBtn} onClick={onClose} aria-label={t('nowplaying.close_button_aria')}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
@@ -137,7 +134,7 @@ export default function NowPlayingPanel({ open, onClose }) {
               <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--text-tertiary)">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
               </svg>
-              <p>재생 목록이 비어있습니다</p>
+              <p>{t('nowplaying.empty_state')}</p>
             </div>
           ) : (
             tracks.map((track, idx) => {
@@ -178,7 +175,7 @@ export default function NowPlayingPanel({ open, onClose }) {
                   <button
                     className={styles.removeBtn}
                     onClick={(e) => handleRemove(e, idx)}
-                    title="목록에서 제거"
+                    title={t('nowplaying.remove_button_title')}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>

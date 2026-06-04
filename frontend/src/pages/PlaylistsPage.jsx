@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getPlaylists, createPlaylist } from '../api/playlists';
 import { useAuth } from '../context/AuthContext';
 import styles from './PlaylistsPage.module.css';
@@ -42,6 +43,7 @@ function PlaylistCover({ covers }) {
 }
 
 export default function PlaylistsPage() {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +66,7 @@ export default function PlaylistsPage() {
       setPlaylists(prev => [...prev, { ...created, trackCount: 0, covers: [] }]);
       setNewName('');
     } catch {
-      alert('생성에 실패했습니다.');
+      alert(t('playlist_modal.create_error'));
     } finally {
       setCreating(false);
     }
@@ -76,11 +78,11 @@ export default function PlaylistsPage() {
     return (
       <main className={styles.page}>
         <div className={styles.gateBox}>
-          <h2 className={styles.gateTitle}>로그인이 필요합니다</h2>
-          <p className={styles.gateDesc}>플레이리스트 기능을 사용하려면 로그인해주세요.</p>
+          <h2 className={styles.gateTitle}>{t('playlists.gate_login_required')}</h2>
+          <p className={styles.gateDesc}>{t('playlists.gate_login_desc')}</p>
           <div className={styles.gateActions}>
-            <Link to="/login" className={styles.gatePrimary}>로그인</Link>
-            <Link to="/signup" className={styles.gateSecondary}>회원가입</Link>
+            <Link to="/login" className={styles.gatePrimary}>{t('playlists.gate_login_link')}</Link>
+            <Link to="/signup" className={styles.gateSecondary}>{t('playlists.gate_signup_link')}</Link>
           </div>
         </div>
       </main>
@@ -91,20 +93,20 @@ export default function PlaylistsPage() {
     <main className={styles.page}>
       <div className={styles.headerRow}>
         <div className={styles.headingWrap}>
-          <h1 className={styles.heading}>플레이리스트</h1>
-          <p className={styles.subHeading}>나만의 재생목록을 만들고 관리하세요.</p>
+          <h1 className={styles.heading}>{t('playlists.heading')}</h1>
+          <p className={styles.subHeading}>{t('playlists.subheading')}</p>
         </div>
         <form onSubmit={handleCreate} className={styles.createForm}>
           <input
             type="text"
             value={newName}
             onChange={e => setNewName(e.target.value)}
-            placeholder="새 플레이리스트 이름..."
+            placeholder={t('playlists.create_placeholder')}
             className={styles.createInput}
             maxLength={50}
           />
           <button type="submit" className={styles.createBtn} disabled={creating || !newName.trim()}>
-            + 만들기
+            {t('playlists.create_button')}
           </button>
         </form>
       </div>
@@ -113,8 +115,8 @@ export default function PlaylistsPage() {
         <div className={styles.loading}><div className={styles.spinner} /></div>
       ) : playlists.length === 0 ? (
         <div className={styles.emptyState}>
-          <p className={styles.emptyTitle}>아직 만든 플레이리스트가 없습니다.</p>
-          <p className={styles.emptySub}>첫 번째 플레이리스트를 만들어보세요.</p>
+          <p className={styles.emptyTitle}>{t('playlists.empty_state')}</p>
+          <p className={styles.emptySub}>{t('playlists.empty_state_hint')}</p>
         </div>
       ) : (
         <div className={styles.grid}>
@@ -122,10 +124,10 @@ export default function PlaylistsPage() {
             <Link key={pl.id} to={`/playlists/${pl.id}`} className={styles.card}>
               <div className={styles.coverArea}>
                 <PlaylistCover covers={pl.covers} />
-                {pl.isDefault && <span className={styles.defaultBadge}>기본</span>}
+                {pl.isDefault && <span className={styles.defaultBadge}>{t('playlists.default_badge')}</span>}
               </div>
               <p className={styles.cardName}>{pl.name}</p>
-              <p className={styles.cardCount}>{pl.trackCount}곡</p>
+              <p className={styles.cardCount}>{pl.trackCount}{t('playlists.track_count')}</p>
             </Link>
           ))}
         </div>

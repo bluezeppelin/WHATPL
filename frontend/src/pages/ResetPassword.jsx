@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { resetPassword } from '../api/auth';
 import { useCapsLock, CapsLockWarning } from '../hooks/useCapsLock';
 import styles from './Login.module.css';
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({ loginId: '', email: '', newPassword: '', confirmPassword: '' });
   const [error, setError] = useState('');
@@ -21,7 +23,7 @@ export default function ResetPassword() {
     e.preventDefault();
     setError('');
     if (form.newPassword !== form.confirmPassword) {
-      setError('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      setError(t('resetpw.error_password_mismatch'));
       return;
     }
     setLoading(true);
@@ -29,7 +31,7 @@ export default function ResetPassword() {
       await resetPassword(form);
       setDone(true);
     } catch (err) {
-      setError(err.response?.data?.message || '비밀번호 초기화에 실패했습니다.');
+      setError(err.response?.data?.message || t('resetpw.error_default'));
     } finally {
       setLoading(false);
     }
@@ -39,13 +41,15 @@ export default function ResetPassword() {
     return (
       <div className={styles.container}>
         <div className={styles.card}>
-          <h1 className={styles.title}>비밀번호 초기화 완료</h1>
+          <h1 className={styles.title}>{t('resetpw.completion_title')}</h1>
           <div className={styles.form}>
             <p style={{ color: 'var(--text, #fff)', fontSize: '0.95rem', textAlign: 'center', lineHeight: 1.6 }}>
-              비밀번호가 성공적으로 초기화되었습니다.<br />새 비밀번호로 로그인하세요.
+              {t('resetpw.completion_desc').split('\n').map((line, i) => (
+                <span key={i}>{line}{i === 0 && <br />}</span>
+              ))}
             </p>
             <button className={styles.submitBtn} onClick={() => navigate('/login')}>
-              로그인하기
+              {t('findid.button_login')}
             </button>
           </div>
         </div>
@@ -56,35 +60,35 @@ export default function ResetPassword() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.title}>비밀번호 초기화</h1>
+        <h1 className={styles.title}>{t('resetpw.title')}</h1>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.field}>
-            <label className={styles.label}>아이디</label>
+            <label className={styles.label}>{t('resetpw.label_id')}</label>
             <input
               className={styles.input}
               type="text"
               name="loginId"
               value={form.loginId}
               onChange={handleChange}
-              placeholder="가입한 아이디"
+              placeholder={t('resetpw.placeholder_id')}
               required
             />
           </div>
           <div className={styles.field}>
-            <label className={styles.label}>이메일</label>
+            <label className={styles.label}>{t('resetpw.label_email')}</label>
             <input
               className={styles.input}
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
-              placeholder="가입 시 입력한 이메일"
+              placeholder={t('resetpw.placeholder_email')}
               required
             />
           </div>
           <div className={styles.field}>
-            <label className={styles.label}>새 비밀번호</label>
+            <label className={styles.label}>{t('resetpw.label_new_password')}</label>
             <input
               className={styles.input}
               type="password"
@@ -94,13 +98,13 @@ export default function ResetPassword() {
               onKeyDown={pwNewCaps.handler}
               onKeyUp={pwNewCaps.handler}
               onBlur={pwNewCaps.reset}
-              placeholder="새 비밀번호 입력"
+              placeholder={t('resetpw.placeholder_new_password')}
               required
             />
             <CapsLockWarning on={pwNewCaps.on} />
           </div>
           <div className={styles.field}>
-            <label className={styles.label}>새 비밀번호 확인</label>
+            <label className={styles.label}>{t('resetpw.label_confirm_password')}</label>
             <input
               className={styles.input}
               type="password"
@@ -110,7 +114,7 @@ export default function ResetPassword() {
               onKeyDown={pwConfirmCaps.handler}
               onKeyUp={pwConfirmCaps.handler}
               onBlur={pwConfirmCaps.reset}
-              placeholder="새 비밀번호 재입력"
+              placeholder={t('resetpw.placeholder_confirm_password')}
               required
             />
             <CapsLockWarning on={pwConfirmCaps.on} />
@@ -119,18 +123,14 @@ export default function ResetPassword() {
           {error && <p className={styles.error}>{error}</p>}
 
           <button className={styles.submitBtn} type="submit" disabled={loading}>
-            {loading ? '처리 중...' : '비밀번호 초기화'}
+            {loading ? t('resetpw.button_loading') : t('resetpw.button_submit')}
           </button>
-
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted, #888)', textAlign: 'center', margin: 0 }}>
-            현재는 시연용 간단 초기화 방식입니다. 실제 서비스에서는 이메일 인증이 필요합니다.
-          </p>
         </form>
 
         <div className={styles.links}>
-          <Link to="/login" className={styles.link}>로그인으로 돌아가기</Link>
+          <Link to="/login" className={styles.link}>{t('resetpw.link_back')}</Link>
           <span className={styles.divider}>|</span>
-          <Link to="/find-id" className={styles.link}>아이디 찾기</Link>
+          <Link to="/find-id" className={styles.link}>{t('resetpw.link_find_id')}</Link>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { getCreatorProfile } from '../api/creators';
 import { followArtist, unfollowArtist } from '../api/followedArtists';
@@ -10,6 +11,7 @@ import styles from './CreatorDetail.module.css';
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%231a1510'/%3E%3Ccircle cx='60' cy='46' r='22' fill='%23c89f62'/%3E%3Cellipse cx='60' cy='100' rx='36' ry='28' fill='%23c89f62'/%3E%3C/svg%3E";
 
 export default function CreatorDetail() {
+  const { t } = useTranslation();
   const { creatorId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -35,9 +37,9 @@ export default function CreatorDetail() {
       })
       .catch(err => {
         if (err.response?.status === 404) {
-          setError('존재하지 않는 크리에이터입니다.');
+          setError(t('creator.not_found'));
         } else {
-          setError('프로필을 불러오는 데 실패했습니다.');
+          setError(t('creator.load_error'));
         }
       })
       .finally(() => setLoading(false));
@@ -46,13 +48,13 @@ export default function CreatorDetail() {
   useEffect(() => {
     if (!user) { setLikedIds(new Set()); return; }
     getMyLikedTracks()
-      .then(data => setLikedIds(new Set(data.likedTracks.map(t => t.id))))
+      .then(data => setLikedIds(new Set(data.likedTracks.map(tr => tr.id))))
       .catch(() => setLikedIds(new Set()));
   }, [user]);
 
   async function handleSubscribeToggle() {
     if (!user) {
-      navigate('/login', { state: { message: '구독하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('creator.subscribe_redirect') } });
       return;
     }
     if (followLoading || !creator?.artistName) return;
@@ -112,7 +114,7 @@ export default function CreatorDetail() {
         <div className={styles.container}>
           <div className={styles.errorBox}>
             <p className={styles.errorText}>{error}</p>
-            <button className={styles.backBtn} onClick={() => navigate(-1)}>돌아가기</button>
+            <button className={styles.backBtn} onClick={() => navigate(-1)}>{t('creator.back_button')}</button>
           </div>
         </div>
       </main>
@@ -122,7 +124,6 @@ export default function CreatorDetail() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-        {/* 프로필 헤더 */}
         <section className={styles.header}>
           <div className={styles.avatarWrap}>
             <img
@@ -135,11 +136,11 @@ export default function CreatorDetail() {
 
           <div className={styles.headerInfo}>
             <p className={styles.profileLabel}>Creator Profile</p>
-            <h1 className={styles.artistName}>{creator.artistName || '이름 없음'}</h1>
+            <h1 className={styles.artistName}>{creator.artistName}</h1>
             <div className={styles.stats}>
-              <span className={styles.stat}>구독자 <strong>{subscriberCount.toLocaleString()}</strong>명</span>
+              <span className={styles.stat}>{t('creator.subscribe_button')} <strong>{subscriberCount.toLocaleString()}</strong></span>
               <span className={styles.statDivider}>·</span>
-              <span className={styles.stat}>트랙 <strong>{creator.trackCount}</strong>개</span>
+              <span className={styles.stat}><strong>{creator.trackCount}</strong></span>
             </div>
 
             {!isSelf && (
@@ -148,13 +149,12 @@ export default function CreatorDetail() {
                 onClick={handleSubscribeToggle}
                 disabled={followLoading}
               >
-                {isSubscribed ? '구독 취소' : '구독'}
+                {isSubscribed ? t('creator.unsubscribe_button') : t('creator.subscribe_button')}
               </button>
             )}
           </div>
         </section>
 
-        {/* 트랙 섹션 */}
         <section className={styles.tracksSection}>
           <h2 className={styles.sectionTitle}>Uploaded Tracks</h2>
 
@@ -163,7 +163,7 @@ export default function CreatorDetail() {
               <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--text-tertiary)">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
               </svg>
-              <p>아직 공개된 트랙이 없습니다.</p>
+              <p>{t('creator.empty_state')}</p>
             </div>
           ) : (
             <div className={styles.grid}>

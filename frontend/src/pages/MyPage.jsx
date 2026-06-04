@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { useCapsLock, CapsLockWarning } from '../hooks/useCapsLock';
 import { usePlayer } from '../hooks/usePlayer';
@@ -10,13 +11,7 @@ import styles from './MyPage.module.css';
 import { GENRES as BASE_GENRES } from '../constants/genres';
 
 const ROLE_LABELS = { user: '일반회원', creator: 'Creator 회원', admin: '관리자' };
-const REQUEST_STATUS_LABELS = { pending: '승인 대기중', approved: '승인됨', rejected: '반려됨' };
 const GENRES = ['', ...BASE_GENRES];
-
-const TABS = [
-  { id: 'profile', label: '프로필' },
-  { id: 'creator', label: 'Creator 관리' },
-];
 
 function InfoRow({ label, value }) {
   if (!value) return null;
@@ -30,12 +25,25 @@ function InfoRow({ label, value }) {
 
 
 export default function MyPage() {
+  const { t } = useTranslation();
   const { user, loading, roleLabel, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const { playToDefault } = usePlayer();
   const { search: locationSearch } = useLocation();
   const tabFromUrl = new URLSearchParams(locationSearch).get('tab');
   const validTabIds = ['profile', 'creator'];
+
+  const TABS = [
+    { id: 'profile', label: t('mypage.tab_profile') },
+    { id: 'creator', label: t('mypage.tab_creator') },
+  ];
+
+  const REQUEST_STATUS_LABELS = {
+    pending: t('mypage.creator_status_pending'),
+    approved: t('mypage.creator_status_approved'),
+    rejected: t('mypage.creator_status_rejected'),
+  };
+
   const [activeTab, setActiveTab] = useState(
     tabFromUrl && validTabIds.includes(tabFromUrl) ? tabFromUrl : 'profile'
   );
@@ -282,11 +290,11 @@ export default function MyPage() {
 
   useEffect(() => {
     if (!deleteDone) return;
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       logout();
       navigate('/login');
     }, 5000);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [deleteDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function closeDeleteModal() {
@@ -307,9 +315,9 @@ export default function MyPage() {
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
               </svg>
             </div>
-            <h2 className={styles.farewellTitle}>회원탈퇴가 완료되었습니다.</h2>
+            <h2 className={styles.farewellTitle}>{t('mypage.farewell_title')}</h2>
             <p className={styles.farewellDesc}>
-              그동안 WHATPL을 이용해주셔서 감사합니다.
+              {t('mypage.farewell_desc')}
             </p>
             <div className={styles.gateActions}>
               <button type="button" className={styles.gatePrimary} onClick={handleGoToLogin}>
@@ -334,11 +342,11 @@ export default function MyPage() {
             <svg width="44" height="44" viewBox="0 0 24 24" fill="var(--text-tertiary)">
               <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
             </svg>
-            <h2 className={styles.gateTitle}>로그인이 필요합니다</h2>
-            <p className={styles.gateDesc}>마이페이지를 보려면 먼저 로그인해주세요.</p>
+            <h2 className={styles.gateTitle}>{t('mypage.gate_login_required')}</h2>
+            <p className={styles.gateDesc}>{t('mypage.gate_login_desc')}</p>
             <div className={styles.gateActions}>
-              <Link to="/login" className={styles.gatePrimary}>로그인</Link>
-              <Link to="/signup" className={styles.gateSecondary}>회원가입</Link>
+              <Link to="/login" className={styles.gatePrimary}>{t('mypage.gate_login_link')}</Link>
+              <Link to="/signup" className={styles.gateSecondary}>{t('mypage.gate_signup_link')}</Link>
             </div>
           </div>
         </div>
@@ -349,7 +357,7 @@ export default function MyPage() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.heading}>마이페이지</h1>
+        <h1 className={styles.heading}>{t('mypage.heading')}</h1>
 
         {/* 탭 네비게이션 — Creator 관리는 creator 전용 */}
         <nav className={styles.tabs}>
@@ -371,7 +379,7 @@ export default function MyPage() {
 
             {/* 프로필 사진 */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}>프로필 사진</h2>
+              <h2 className={styles.cardTitle}>{t('mypage.profile_image_title')}</h2>
               {profileSuccess && <p className={styles.successMsg}>프로필 사진이 업데이트되었습니다.</p>}
               <div className={styles.profileImageSection}>
                 <div className={styles.profileAvatar}>
@@ -390,7 +398,7 @@ export default function MyPage() {
                 </div>
                 <div className={styles.profileImageActions}>
                   <label className={styles.profilePickBtn}>
-                    사진 선택
+                    {t('mypage.profile_pick_button')}
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
@@ -404,10 +412,10 @@ export default function MyPage() {
                       onClick={handleProfileUpload}
                       disabled={profileUploading}
                     >
-                      {profileUploading ? '업로드 중...' : '업로드'}
+                      {profileUploading ? t('mypage.profile_uploading') : t('mypage.profile_upload_button')}
                     </button>
                   )}
-                  <p className={styles.editHint}>jpg, png, webp · 최대 2MB</p>
+                  <p className={styles.editHint}>{t('mypage.profile_hint')}</p>
                 </div>
               </div>
               {profileError && <p className={styles.editError}>{profileError}</p>}
@@ -415,9 +423,9 @@ export default function MyPage() {
 
             <div className={styles.card}>
               <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>내 정보</h2>
+                <h2 className={styles.cardTitle}>{t('mypage.info_title')}</h2>
                 {!editing && (
-                  <button className={styles.editBtn} onClick={startEdit}>정보 수정</button>
+                  <button className={styles.editBtn} onClick={startEdit}>{t('mypage.edit_button')}</button>
                 )}
               </div>
 
@@ -426,11 +434,11 @@ export default function MyPage() {
               )}
 
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>아이디</span>
+                <span className={styles.infoLabel}>{t('mypage.info_id')}</span>
                 <span className={styles.infoValue}>{user.loginId}</span>
               </div>
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>회원등급</span>
+                <span className={styles.infoLabel}>{t('mypage.info_role')}</span>
                 <span className={`${styles.roleBadge} ${styles[`role_${user.role}`]}`}>
                   {roleLabel ?? ROLE_LABELS[user.role] ?? user.role}
                 </span>
@@ -438,19 +446,19 @@ export default function MyPage() {
 
               {!editing && (
                 <div className={styles.infoList}>
-                  <InfoRow label="성명" value={user.name} />
-                  <InfoRow label="이메일" value={user.email} />
-                  <InfoRow label="생년월일" value={user.birthDate} />
-                  <InfoRow label="휴대폰" value={user.phone} />
-                  <InfoRow label="좋아하는 장르" value={user.favoriteGenre} />
-                  <InfoRow label="크리에이터명" value={user.artistName} />
+                  <InfoRow label={t('mypage.info_name')} value={user.name} />
+                  <InfoRow label={t('mypage.info_email')} value={user.email} />
+                  <InfoRow label={t('mypage.info_birth')} value={user.birthDate} />
+                  <InfoRow label={t('mypage.info_phone')} value={user.phone} />
+                  <InfoRow label={t('mypage.info_genre')} value={user.favoriteGenre} />
+                  <InfoRow label={t('mypage.info_artist_name')} value={user.artistName} />
                 </div>
               )}
 
               {editing && (
                 <form onSubmit={handleSave} className={styles.editForm}>
                   <div className={styles.editField}>
-                    <label className={styles.editLabel}>성명 <span className={styles.required}>*</span></label>
+                    <label className={styles.editLabel}>{t('mypage.info_name')} <span className={styles.required}>*</span></label>
                     <input
                       className={styles.editInput}
                       type="text"
@@ -461,7 +469,7 @@ export default function MyPage() {
                     />
                   </div>
                   <div className={styles.editField}>
-                    <label className={styles.editLabel}>이메일 <span className={styles.required}>*</span></label>
+                    <label className={styles.editLabel}>{t('mypage.info_email')} <span className={styles.required}>*</span></label>
                     <input
                       className={styles.editInput}
                       type="email"
@@ -471,7 +479,7 @@ export default function MyPage() {
                     />
                   </div>
                   <div className={styles.editField}>
-                    <label className={styles.editLabel}>생년월일</label>
+                    <label className={styles.editLabel}>{t('mypage.info_birth')}</label>
                     <input
                       className={styles.editInput}
                       type="date"
@@ -500,7 +508,7 @@ export default function MyPage() {
                     />
                   </div>
                   <div className={styles.editField}>
-                    <label className={styles.editLabel}>좋아하는 장르</label>
+                    <label className={styles.editLabel}>{t('mypage.info_genre')}</label>
                     <select
                       className={styles.editInput}
                       value={editForm.favoriteGenre}
@@ -512,7 +520,7 @@ export default function MyPage() {
                     </select>
                   </div>
                   <div className={styles.editField}>
-                    <label className={styles.editLabel}>크리에이터명</label>
+                    <label className={styles.editLabel}>{t('mypage.info_artist_name')}</label>
                     <input
                       className={styles.editInput}
                       type="text"
@@ -526,10 +534,10 @@ export default function MyPage() {
                   {editError && <p className={styles.editError}>{editError}</p>}
                   <div className={styles.editActions}>
                     <button type="submit" className={styles.saveBtn} disabled={editSaving}>
-                      {editSaving ? '저장 중...' : '저장'}
+                      {editSaving ? t('mypage.form_save_loading') : t('mypage.form_save_button')}
                     </button>
                     <button type="button" className={styles.cancelBtn} onClick={cancelEdit} disabled={editSaving}>
-                      취소
+                      {t('mypage.form_cancel_button')}
                     </button>
                   </div>
                 </form>
@@ -538,11 +546,11 @@ export default function MyPage() {
 
             {/* 비밀번호 변경 */}
             <div className={styles.card}>
-              <h2 className={styles.cardTitle}>비밀번호 변경</h2>
+              <h2 className={styles.cardTitle}>{t('mypage.password_title')}</h2>
               {pwSuccess && <p className={styles.successMsg}>비밀번호가 성공적으로 변경되었습니다.</p>}
               <form onSubmit={handleChangePassword} className={styles.editForm}>
                 <div className={styles.editField}>
-                  <label className={styles.editLabel}>현재 비밀번호</label>
+                  <label className={styles.editLabel}>{t('mypage.password_current')}</label>
                   <input
                     className={styles.editInput}
                     type="password"
@@ -556,7 +564,7 @@ export default function MyPage() {
                   <CapsLockWarning on={pwCurrentCaps.on} />
                 </div>
                 <div className={styles.editField}>
-                  <label className={styles.editLabel}>새 비밀번호</label>
+                  <label className={styles.editLabel}>{t('mypage.password_new')}</label>
                   <input
                     className={styles.editInput}
                     type="password"
@@ -568,10 +576,10 @@ export default function MyPage() {
                     autoComplete="new-password"
                   />
                   <CapsLockWarning on={pwNewCaps.on} />
-                  <p className={styles.editHint}>8자 이상 입력해주세요.</p>
+                  <p className={styles.editHint}>{t('mypage.password_hint')}</p>
                 </div>
                 <div className={styles.editField}>
-                  <label className={styles.editLabel}>새 비밀번호 확인</label>
+                  <label className={styles.editLabel}>{t('mypage.password_confirm')}</label>
                   <input
                     className={styles.editInput}
                     type="password"
@@ -587,7 +595,7 @@ export default function MyPage() {
                 {pwError && <p className={styles.editError}>{pwError}</p>}
                 <div className={styles.editActions}>
                   <button type="submit" className={styles.saveBtn} disabled={pwSaving}>
-                    {pwSaving ? '변경 중...' : '비밀번호 변경'}
+                    {pwSaving ? t('mypage.password_button_loading') : t('mypage.password_button')}
                   </button>
                 </div>
               </form>
@@ -597,11 +605,11 @@ export default function MyPage() {
             {user?.role !== 'admin' && (
               <div className={styles.dangerZone}>
                 <div className={styles.dangerZoneHeader}>
-                  <h2 className={styles.dangerZoneTitle}>회원 탈퇴</h2>
+                  <h2 className={styles.dangerZoneTitle}>{t('mypage.delete_account_title')}</h2>
                   <p className={styles.dangerZoneDesc}>탈퇴 시 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.</p>
                 </div>
                 <button className={styles.dangerBtn} onClick={() => setShowDeleteModal(true)}>
-                  회원 탈퇴
+                  {t('mypage.delete_button')}
                 </button>
               </div>
             )}
@@ -609,14 +617,14 @@ export default function MyPage() {
             {showDeleteModal && (
               <div className={styles.modalOverlay} onClick={closeDeleteModal}>
                 <div className={styles.modal} onClick={e => e.stopPropagation()}>
-                  <h3 className={styles.modalTitle}>정말 탈퇴하시겠습니까?</h3>
+                  <h3 className={styles.modalTitle}>{t('mypage.delete_modal_title')}</h3>
                   <p className={styles.modalDesc}>
                     탈퇴 시 업로드한 음원, 좋아요, 플레이리스트, 팔로우 기록 등<br />
                     모든 데이터가 <strong>영구 삭제</strong>되며 복구할 수 없습니다.
                   </p>
                   <form onSubmit={handleDeleteAccount} className={styles.editForm}>
                     <div className={styles.editField}>
-                      <label className={styles.editLabel}>현재 비밀번호</label>
+                      <label className={styles.editLabel}>{t('mypage.delete_password_label')}</label>
                       <input
                         className={styles.editInput}
                         type="password"
@@ -631,13 +639,13 @@ export default function MyPage() {
                       <CapsLockWarning on={pwDeleteCaps.on} />
                     </div>
                     <div className={styles.editField}>
-                      <label className={styles.editLabel}>확인을 위해 <strong>회원탈퇴</strong>를 입력하세요</label>
+                      <label className={styles.editLabel}>{t('mypage.delete_confirm_label')}</label>
                       <input
                         className={styles.editInput}
                         type="text"
                         value={deleteConfirm}
                         onChange={e => setDeleteConfirm(e.target.value)}
-                        placeholder="회원탈퇴"
+                        placeholder={t('mypage.delete_confirm_placeholder')}
                         disabled={deleteLoading}
                       />
                     </div>
@@ -648,7 +656,7 @@ export default function MyPage() {
                         className={styles.dangerConfirmBtn}
                         disabled={deleteLoading || !deletePassword || deleteConfirm !== '회원탈퇴'}
                       >
-                        {deleteLoading ? '처리 중...' : '탈퇴 확인'}
+                        {deleteLoading ? t('mypage.delete_confirm_button_loading') : t('mypage.delete_confirm_button')}
                       </button>
                       <button
                         type="button"
@@ -656,7 +664,7 @@ export default function MyPage() {
                         onClick={closeDeleteModal}
                         disabled={deleteLoading}
                       >
-                        취소
+                        {t('mypage.form_cancel_button')}
                       </button>
                     </div>
                   </form>
@@ -677,7 +685,7 @@ export default function MyPage() {
                 <h2 className={styles.cardTitle}>관리자 계정</h2>
                 <p className={styles.statusInfoMsg}>
                   관리자 기능은{' '}
-                  <Link to="/admin" className={styles.applyLink} style={{ marginLeft: 0 }}>관리자 페이지</Link>
+                  <Link to="/admin" className={styles.applyLink} style={{ marginLeft: 0 }}>{t('mypage.creator_admin_link')}</Link>
                   에서 관리하세요.
                 </p>
               </div>
@@ -686,7 +694,7 @@ export default function MyPage() {
             {/* user: Creator 신청 상태 */}
             {user.role === 'user' && (
               <div className={styles.card}>
-                <h2 className={styles.cardTitle}>Creator 신청 상태</h2>
+                <h2 className={styles.cardTitle}>{t('mypage.creator_section_title')}</h2>
 
                 {request === undefined && (
                   <p className={styles.statusLoading}>불러오는 중...</p>
@@ -694,8 +702,8 @@ export default function MyPage() {
 
                 {request === null && (
                   <div className={styles.requestDetail}>
-                    <p className={styles.statusNone}>Creator 신청을 아직 하지 않았습니다.</p>
-                    <Link to="/upload" className={styles.applyLink} style={{ marginLeft: 0 }}>Creator 신청하러 가기 →</Link>
+                    <p className={styles.statusNone}>{t('mypage.creator_not_applied')}</p>
+                    <Link to="/upload" className={styles.applyLink} style={{ marginLeft: 0 }}>{t('mypage.creator_apply_link')}</Link>
                   </div>
                 )}
 
@@ -708,24 +716,24 @@ export default function MyPage() {
                       </span>
                     </div>
                     <div className={styles.statusRow}>
-                      <span className={styles.statusLabel}>신청 크리에이터명</span>
+                      <span className={styles.statusLabel}>{t('mypage.creator_artist_name')}</span>
                       <span className={styles.statusValue}>{request.artistName}</span>
                     </div>
                     {request.message && (
                       <div className={styles.statusRow}>
-                        <span className={styles.statusLabel}>신청 메시지</span>
+                        <span className={styles.statusLabel}>{t('mypage.creator_message')}</span>
                         <span className={styles.statusValue}>{request.message}</span>
                       </div>
                     )}
                     <div className={styles.statusRow}>
-                      <span className={styles.statusLabel}>신청일</span>
+                      <span className={styles.statusLabel}>{t('mypage.creator_applied_date')}</span>
                       <span className={styles.statusValue}>
                         {new Date(request.createdAt).toLocaleDateString('ko-KR')}
                       </span>
                     </div>
                     {request.reviewedAt && (
                       <div className={styles.statusRow}>
-                        <span className={styles.statusLabel}>처리일</span>
+                        <span className={styles.statusLabel}>{t('mypage.creator_reviewed_date')}</span>
                         <span className={styles.statusValue}>
                           {new Date(request.reviewedAt).toLocaleDateString('ko-KR')}
                         </span>
@@ -736,14 +744,14 @@ export default function MyPage() {
                     )}
                     {request.status === 'approved' && (
                       <div className={styles.requestDetail}>
-                        <p className={styles.statusInfoMsg}>이제 Creator 회원으로 음원을 업로드할 수 있습니다.</p>
-                        <Link to="/upload" className={styles.applyLink} style={{ marginLeft: 0 }}>음원 업로드하러 가기 →</Link>
+                        <p className={styles.statusInfoMsg}>{t('mypage.creator_approved_msg')}</p>
+                        <Link to="/upload" className={styles.applyLink} style={{ marginLeft: 0 }}>{t('mypage.creator_upload_link')}</Link>
                       </div>
                     )}
                     {request.status === 'rejected' && (
                       <>
                         <div className={styles.rejectReasonBox}>
-                          <span className={styles.rejectReasonLabel}>반려 사유</span>
+                          <span className={styles.rejectReasonLabel}>{t('mypage.creator_reject_reason')}</span>
                           <span className={styles.rejectReasonText}>
                             {request.rejectReason || '반려 사유가 입력되지 않았습니다.'}
                           </span>
@@ -751,7 +759,7 @@ export default function MyPage() {
                         <p className={styles.statusInfoMsg}>내용을 보완하여 다시 신청할 수 있습니다.</p>
                         {!showReapply ? (
                           <button className={styles.reapplyBtn} onClick={() => setShowReapply(true)}>
-                            다시 신청하기
+                            {t('mypage.creator_reapply_button')}
                           </button>
                         ) : (
                           <form onSubmit={handleReapply} className={styles.reapplyForm}>
@@ -773,7 +781,7 @@ export default function MyPage() {
                                 className={styles.reapplyCancelBtn}
                                 onClick={() => { setShowReapply(false); setReapplyError(''); }}
                               >
-                                취소
+                                {t('mypage.form_cancel_button')}
                               </button>
                             </div>
                           </form>
@@ -789,15 +797,15 @@ export default function MyPage() {
             {user.role === 'creator' && (
               <>
                 <div className={styles.card}>
-                  <h2 className={styles.cardTitle}>Creator 신청 상태</h2>
-                  <p className={styles.statusApproved}>Creator 회원으로 활동 중입니다.</p>
-                  <Link to="/upload" className={styles.applyLink} style={{ marginLeft: 0 }}>음원 업로드하러 가기 →</Link>
+                  <h2 className={styles.cardTitle}>{t('mypage.creator_section_title')}</h2>
+                  <p className={styles.statusApproved}>{t('mypage.creator_active_msg')}</p>
+                  <Link to="/upload" className={styles.applyLink} style={{ marginLeft: 0 }}>{t('mypage.creator_upload_link')}</Link>
                 </div>
 
                 <div className={styles.card}>
                   <div className={styles.cardHeader}>
-                    <h2 className={styles.cardTitle}>업로드한 음원 관리</h2>
-                    <Link to="/upload" className={styles.editBtn} style={{ textDecoration: 'none' }}>+ 새 업로드</Link>
+                    <h2 className={styles.cardTitle}>{t('mypage.uploaded_tracks_title')}</h2>
+                    <Link to="/upload" className={styles.editBtn} style={{ textDecoration: 'none' }}>{t('mypage.uploaded_tracks_new_button')}</Link>
                   </div>
 
                   {myTracks === undefined && (
@@ -805,9 +813,9 @@ export default function MyPage() {
                   )}
                   {myTracks !== undefined && myTracks.length === 0 && (
                     <div className={styles.uploadEmpty}>
-                      <p className={styles.statusNone}>아직 업로드한 음원이 없습니다.</p>
-                      <p className={styles.statusNoneSub}>나만의 사운드를 WHATPL에 공유해보세요.</p>
-                      <Link to="/upload" className={styles.uploadNewBtn}>첫 음원 업로드하기 →</Link>
+                      <p className={styles.statusNone}>{t('mypage.uploaded_tracks_empty')}</p>
+                      <p className={styles.statusNoneSub}>{t('mypage.uploaded_tracks_empty_hint')}</p>
+                      <Link to="/upload" className={styles.uploadNewBtn}>{t('mypage.uploaded_tracks_new_link')}</Link>
                     </div>
                   )}
                   {myTracks !== undefined && myTracks.length > 0 && (
@@ -830,8 +838,8 @@ export default function MyPage() {
                                 <div className={styles.myTrackTitleRow}>
                                   <span className={styles.myTrackTitle}>{track.title}</span>
                                   {isDeleted
-                                    ? <span className={styles.myTrackBadgeDeleted}>삭제됨</span>
-                                    : <span className={styles.myTrackBadgeActive}>정상</span>
+                                    ? <span className={styles.myTrackBadgeDeleted}>{t('mypage.track_status_deleted')}</span>
+                                    : <span className={styles.myTrackBadgeActive}>{t('mypage.track_status_active')}</span>
                                   }
                                 </div>
                                 <p className={styles.myTrackMeta}>
@@ -867,13 +875,13 @@ export default function MyPage() {
                                   </svg>
                                 </button>
                                 <button className={styles.myTrackEditBtn} onClick={() => openEditTrack(track)}>
-                                  수정
+                                  {t('mypage.track_edit_button')}
                                 </button>
                                 {myDeleteReqs.some(r => r.trackId === track.id && r.status === 'pending') ? (
-                                  <span className={styles.myTrackPendingBadge}>삭제 요청 대기 중</span>
+                                  <span className={styles.myTrackPendingBadge}>{t('mypage.track_delete_request_pending')}</span>
                                 ) : (
                                   <button className={styles.myTrackDeleteReqBtn} onClick={() => openDeleteReq(track)}>
-                                    삭제 요청
+                                    {t('mypage.track_delete_request_button')}
                                   </button>
                                 )}
                               </div>
@@ -888,7 +896,7 @@ export default function MyPage() {
                 {/* 삭제 요청 내역 */}
                 {myDeleteReqs.length > 0 && (
                   <div className={styles.card}>
-                    <h2 className={styles.cardTitle}>삭제 요청 내역</h2>
+                    <h2 className={styles.cardTitle}>{t('mypage.delete_requests_title')}</h2>
                     <ul className={styles.deleteReqList}>
                       {myDeleteReqs.map(r => (
                         <li key={r.id} className={styles.deleteReqItem}>
@@ -950,9 +958,9 @@ export default function MyPage() {
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.modalSaveBtn} onClick={handleEditTrackSave} disabled={editTrackSaving}>
-                {editTrackSaving ? '저장 중...' : '저장'}
+                {editTrackSaving ? t('mypage.form_save_loading') : t('mypage.form_save_button')}
               </button>
-              <button className={styles.modalCancelBtn} onClick={() => setEditTrackTarget(null)} disabled={editTrackSaving}>취소</button>
+              <button className={styles.modalCancelBtn} onClick={() => setEditTrackTarget(null)} disabled={editTrackSaving}>{t('mypage.form_cancel_button')}</button>
             </div>
           </div>
         </div>
@@ -990,7 +998,7 @@ export default function MyPage() {
               <button className={styles.modalDeleteBtn} onClick={handleDeleteReqSubmit} disabled={deleteReqSubmitting}>
                 {deleteReqSubmitting ? '요청 중...' : '삭제 요청 제출'}
               </button>
-              <button className={styles.modalCancelBtn} onClick={() => setDeleteReqTarget(null)} disabled={deleteReqSubmitting}>취소</button>
+              <button className={styles.modalCancelBtn} onClick={() => setDeleteReqTarget(null)} disabled={deleteReqSubmitting}>{t('mypage.form_cancel_button')}</button>
             </div>
           </div>
         </div>

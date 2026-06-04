@@ -745,3 +745,34 @@
   color: var(--text-primary);
   background: rgba(123, 47, 247, 0.08);
 }
+
+.langSelector {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.langBtn {
+  padding: 4px 7px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  line-height: 1;
+}
+
+.langBtn:hover {
+  color: var(--text-primary);
+  background: rgba(123, 47, 247, 0.08);
+}
+
+.langBtnActive {
+  color: var(--accent);
+  border-color: rgba(123, 47, 247, 0.4);
+  background: rgba(123, 47, 247, 0.08);
+}

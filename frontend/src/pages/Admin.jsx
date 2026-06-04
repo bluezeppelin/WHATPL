@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { getCreatorRequests, approveCreatorRequest, rejectCreatorRequest } from '../api/creatorRequests';
 import { getAdminTracks, updateAdminTrack, deleteAdminTrack, getAdminDeleteRequests, approveDeleteRequest, rejectDeleteRequest, hardDeleteTrack, getHardDeleteLogs } from '../api/adminTracks';
@@ -11,17 +12,6 @@ import { applyTheme } from '../utils/theme';
 import { useCapsLock, CapsLockWarning } from '../hooks/useCapsLock';
 import styles from './Admin.module.css';
 import { GENRES as TRACK_GENRES } from '../constants/genres';
-
-const TABS = [
-  { id: 'dashboard', label: '대시보드' },
-  { id: 'creator-requests', label: 'Creator 신청' },
-  { id: 'delete-requests', label: '음원 삭제 요청' },
-  { id: 'tracks', label: '음원 관리' },
-  { id: 'members', label: '회원 관리' },
-  { id: 'site-settings', label: '사이트 설정' },
-  { id: 'delete-logs', label: '삭제 로그' },
-  { id: 'server-monitor', label: '서버 모니터링' },
-];
 
 function formatUptime(seconds) {
   const d = Math.floor(seconds / 86400);
@@ -69,8 +59,20 @@ function StatusBadge({ status }) {
 }
 
 export default function Admin() {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  const TABS = [
+    { id: 'dashboard', label: t('admin.tab_dashboard') },
+    { id: 'creator-requests', label: t('admin.tab_creator_requests') },
+    { id: 'delete-requests', label: t('admin.tab_delete_requests') },
+    { id: 'tracks', label: t('admin.tab_tracks') },
+    { id: 'members', label: t('admin.tab_members') },
+    { id: 'site-settings', label: t('admin.tab_site_settings') },
+    { id: 'delete-logs', label: t('admin.tab_delete_logs') },
+    { id: 'server-monitor', label: t('admin.tab_server_monitor') },
+  ];
 
   // Creator 신청 상태
   const [requests, setRequests] = useState([]);
@@ -226,7 +228,7 @@ export default function Admin() {
       window.dispatchEvent(new CustomEvent('site-settings-changed', {
         detail: { theme: updated.theme, logoUrl: updated.logoUrl, heroBackgroundUrl: updated.heroBackgroundUrl },
       }));
-      setBrandMsg('설정이 저장되었습니다.');
+      setBrandMsg(t('admin.settings_success'));
       setTimeout(() => setBrandMsg(''), 3000);
     } catch (err) {
       setBrandError(err.response?.data?.error || err.message || '저장에 실패했습니다.');
@@ -477,9 +479,9 @@ export default function Admin() {
       <main className={styles.page}>
         <div className={styles.container}>
           <div className={styles.gateBox}>
-            <h2 className={styles.gateTitle}>로그인이 필요합니다</h2>
+            <h2 className={styles.gateTitle}>{t('admin.gate_login_required')}</h2>
             <div className={styles.gateActions}>
-              <Link to="/login" className={styles.gatePrimary}>로그인</Link>
+              <Link to="/login" className={styles.gatePrimary}>{t('admin.gate_login_link')}</Link>
             </div>
           </div>
         </div>
@@ -492,10 +494,10 @@ export default function Admin() {
       <main className={styles.page}>
         <div className={styles.container}>
           <div className={styles.gateBox}>
-            <h2 className={styles.gateTitle}>관리자만 접근할 수 있습니다</h2>
-            <p className={styles.gateDesc}>이 페이지는 관리자 계정으로만 접근 가능합니다.</p>
+            <h2 className={styles.gateTitle}>{t('admin.gate_admin_only')}</h2>
+            <p className={styles.gateDesc}>{t('admin.gate_admin_desc')}</p>
             <div className={styles.gateActions}>
-              <Link to="/" className={styles.gatePrimary}>홈으로</Link>
+              <Link to="/" className={styles.gatePrimary}>{t('admin.gate_admin_link')}</Link>
             </div>
           </div>
         </div>
@@ -508,13 +510,13 @@ export default function Admin() {
       <main className={styles.page}>
         <div className={styles.container}>
           <div className={styles.gateBox}>
-            <h2 className={styles.gateTitle}>관리자 인증 확인</h2>
-            <p className={styles.gateDesc}>보안을 위해 현재 비밀번호를 다시 확인합니다.</p>
+            <h2 className={styles.gateTitle}>{t('admin.reauth_title')}</h2>
+            <p className={styles.gateDesc}>{t('admin.reauth_desc')}</p>
             <form onSubmit={handleReauth} className={styles.reauthForm}>
               <input
                 type="password"
                 className={styles.reauthInput}
-                placeholder="현재 비밀번호"
+                placeholder={t('admin.reauth_placeholder')}
                 value={reauthPw}
                 onChange={e => setReauthPw(e.target.value)}
                 onKeyDown={pwReauthCaps.handler}
@@ -529,7 +531,7 @@ export default function Admin() {
                 className={styles.reauthSubmitBtn}
                 disabled={reauthLoading || !reauthPw}
               >
-                {reauthLoading ? '확인 중...' : '확인'}
+                {reauthLoading ? t('admin.reauth_button_loading') : t('admin.reauth_button')}
               </button>
             </form>
           </div>
@@ -546,7 +548,7 @@ export default function Admin() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-        <h1 className={styles.heading}>관리자</h1>
+        <h1 className={styles.heading}>{t('admin.heading')}</h1>
 
         {/* 탭 네비게이션 */}
         <nav className={styles.tabs}>
@@ -574,27 +576,27 @@ export default function Admin() {
             <div className={styles.statGrid}>
               <div className={styles.statCard}>
                 <span className={styles.statValue}>{members.length}</span>
-                <span className={styles.statLabel}>전체 회원</span>
+                <span className={styles.statLabel}>{t('admin.stat_total_members')}</span>
               </div>
               <div className={styles.statCard}>
                 <span className={styles.statValue}>{statCreators}</span>
-                <span className={styles.statLabel}>활성 Creator</span>
+                <span className={styles.statLabel}>{t('admin.stat_active_creators')}</span>
               </div>
               <div className={styles.statCard}>
                 <span className={styles.statValue}>{statActiveTracks}</span>
-                <span className={styles.statLabel}>활성 음원</span>
+                <span className={styles.statLabel}>{t('admin.stat_active_tracks')}</span>
               </div>
               <div className={`${styles.statCard} ${statPendingCreator > 0 ? styles.statCardAlert : ''}`}>
                 <span className={styles.statValue}>{statPendingCreator}</span>
-                <span className={styles.statLabel}>Creator 신청 대기</span>
+                <span className={styles.statLabel}>{t('admin.stat_pending_creators')}</span>
               </div>
               <div className={`${styles.statCard} ${statPendingDelete > 0 ? styles.statCardAlert : ''}`}>
                 <span className={styles.statValue}>{statPendingDelete}</span>
-                <span className={styles.statLabel}>삭제 요청 대기</span>
+                <span className={styles.statLabel}>{t('admin.stat_pending_deletes')}</span>
               </div>
               <div className={styles.statCard}>
                 <span className={styles.statValue}>{hardDeleteLogs.length}</span>
-                <span className={styles.statLabel}>영구 삭제 기록</span>
+                <span className={styles.statLabel}>{t('admin.stat_hard_delete_logs')}</span>
               </div>
             </div>
           </section>
@@ -608,7 +610,7 @@ export default function Admin() {
             {fetching ? (
               <p className={styles.loading}>불러오는 중...</p>
             ) : requests.length === 0 ? (
-              <p className={styles.empty}>대기 중인 Creator 신청이 없습니다.</p>
+              <p className={styles.empty}>{t('admin.creator_requests_empty')}</p>
             ) : (
               <div className={styles.list}>
                 {requests.map(r => (
@@ -624,8 +626,8 @@ export default function Admin() {
                     <p className={styles.date}>신청일: {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
                     {r.status === 'pending' && (
                       <div className={styles.actions}>
-                        <button className={styles.approveBtn} onClick={() => handleApprove(r.id)}>승인 처리</button>
-                        <button className={styles.rejectToggleBtn} onClick={() => setRejectOpen(prev => ({ ...prev, [r.id]: !prev[r.id] }))}>반려 처리</button>
+                        <button className={styles.approveBtn} onClick={() => handleApprove(r.id)}>{t('admin.creator_requests_approve')}</button>
+                        <button className={styles.rejectToggleBtn} onClick={() => setRejectOpen(prev => ({ ...prev, [r.id]: !prev[r.id] }))}>{t('admin.creator_requests_reject')}</button>
                       </div>
                     )}
                     {r.status === 'pending' && rejectOpen[r.id] && (
@@ -662,7 +664,7 @@ export default function Admin() {
             {deleteReqsFetching ? (
               <p className={styles.loading}>불러오는 중...</p>
             ) : deleteReqs.length === 0 ? (
-              <p className={styles.empty}>대기 중인 음원 삭제 요청이 없습니다.</p>
+              <p className={styles.empty}>{t('admin.delete_requests_empty')}</p>
             ) : (
               <div className={styles.list}>
                 {deleteReqs.map(r => (
@@ -678,8 +680,8 @@ export default function Admin() {
                     <p className={styles.date}>요청일: {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
                     {r.status === 'pending' && (
                       <div className={styles.actions}>
-                        <button className={styles.approveBtn} onClick={() => handleDrApprove(r.id)}>승인 처리</button>
-                        <button className={styles.rejectToggleBtn} onClick={() => setDrRejectOpen(prev => ({ ...prev, [r.id]: !prev[r.id] }))}>반려 처리</button>
+                        <button className={styles.approveBtn} onClick={() => handleDrApprove(r.id)}>{t('admin.creator_requests_approve')}</button>
+                        <button className={styles.rejectToggleBtn} onClick={() => setDrRejectOpen(prev => ({ ...prev, [r.id]: !prev[r.id] }))}>{t('admin.creator_requests_reject')}</button>
                       </div>
                     )}
                     {r.status === 'pending' && drRejectOpen[r.id] && (
@@ -716,15 +718,15 @@ export default function Admin() {
             {tracksFetching ? (
               <p className={styles.loading}>불러오는 중...</p>
             ) : tracks.length === 0 ? (
-              <p className={styles.empty}>조건에 맞는 음원을 찾을 수 없습니다.</p>
+              <p className={styles.empty}>{t('admin.tracks_empty')}</p>
             ) : (
               <div className={styles.trackList}>
-                {tracks.map(t => {
-                  const isDeleted = t.status === 'deleted';
+                {tracks.map(tr => {
+                  const isDeleted = tr.status === 'deleted';
                   return (
-                    <div key={t.id} className={`${styles.trackCard} ${isDeleted ? styles.trackCardDeleted : ''}`}>
-                      {t.coverUrl ? (
-                        <img src={t.coverUrl} alt={t.title} className={styles.trackCover} />
+                    <div key={tr.id} className={`${styles.trackCard} ${isDeleted ? styles.trackCardDeleted : ''}`}>
+                      {tr.coverUrl ? (
+                        <img src={tr.coverUrl} alt={tr.title} className={styles.trackCover} />
                       ) : (
                         <div className={styles.trackCoverPlaceholder}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--text-tertiary)">
@@ -734,36 +736,36 @@ export default function Admin() {
                       )}
                       <div className={styles.trackInfo}>
                         <div className={styles.trackTitleRow}>
-                          <p className={styles.trackTitle}>{t.title}</p>
+                          <p className={styles.trackTitle}>{tr.title}</p>
                           {isDeleted && <span className={styles.deletedBadge}>삭제됨</span>}
                         </div>
                         <p className={styles.trackMeta}>
-                          {t.artist}
-                          {t.genre && <span className={styles.trackGenreTag}>{t.genre}</span>}
+                          {tr.artist}
+                          {tr.genre && <span className={styles.trackGenreTag}>{tr.genre}</span>}
                         </p>
                         {isDeleted && (
                           <p className={styles.trackDeletedInfo}>
-                            {new Date(t.deletedAt).toLocaleString('ko-KR')} · {t.deletedBy}
-                            {t.deleteReason && ` · "${t.deleteReason}"`}
+                            {new Date(tr.deletedAt).toLocaleString('ko-KR')} · {tr.deletedBy}
+                            {tr.deleteReason && ` · "${tr.deleteReason}"`}
                           </p>
                         )}
-                        {!isDeleted && t.uploadedByUserId && (
-                          <p className={styles.trackUploader}>업로더 ID: {t.uploadedByUserId}</p>
+                        {!isDeleted && tr.uploadedByUserId && (
+                          <p className={styles.trackUploader}>업로더 ID: {tr.uploadedByUserId}</p>
                         )}
                       </div>
                       <div className={styles.trackActions}>
                         {!isDeleted && (
                           <>
-                            <button className={styles.trackEditBtn} onClick={() => openEdit(t)}>수정</button>
-                            <button className={styles.trackDeleteBtn} onClick={() => openDelete(t)}>소프트 삭제</button>
+                            <button className={styles.trackEditBtn} onClick={() => openEdit(tr)}>{t('admin.tracks_edit_button')}</button>
+                            <button className={styles.trackDeleteBtn} onClick={() => openDelete(tr)}>{t('admin.tracks_soft_delete_button')}</button>
                           </>
                         )}
                         {isDeleted && (
                           <button
                             className={styles.trackHardDeleteBtn}
-                            onClick={() => { setHardDeleteTarget(t); setHardDeleteConfirmText(''); }}
+                            onClick={() => { setHardDeleteTarget(tr); setHardDeleteConfirmText(''); }}
                           >
-                            영구 삭제
+                            {t('admin.tracks_hard_delete_button')}
                           </button>
                         )}
                       </div>
@@ -781,8 +783,13 @@ export default function Admin() {
             <p className={styles.tabDesc}>전체 회원 목록을 조회하고 계정을 관리하세요.</p>
             <div className={styles.memberFilters}>
               <div className={styles.filterGroup}>
-                <span className={styles.filterLabel}>역할</span>
-                {[['', '전체'], ['user', '일반회원'], ['creator', 'Creator'], ['admin', '관리자']].map(([val, label]) => (
+                <span className={styles.filterLabel}>{t('admin.members_filter_role')}</span>
+                {[
+                  ['', t('admin.members_filter_all_roles')],
+                  ['user', t('admin.members_filter_user')],
+                  ['creator', t('admin.members_filter_creator')],
+                  ['admin', t('admin.members_filter_admin')],
+                ].map(([val, label]) => (
                   <button
                     key={val}
                     className={`${styles.filterBtn} ${memberRoleFilter === val ? styles.filterBtnActive : ''}`}
@@ -792,7 +799,11 @@ export default function Admin() {
               </div>
               <div className={styles.filterGroup}>
                 <span className={styles.filterLabel}>상태</span>
-                {[['', '전체'], ['active', '활성'], ['inactive', '비활성']].map(([val, label]) => (
+                {[
+                  ['', t('admin.members_filter_all_roles')],
+                  ['active', t('admin.members_filter_active')],
+                  ['inactive', t('admin.members_filter_inactive')],
+                ].map(([val, label]) => (
                   <button
                     key={val}
                     className={`${styles.filterBtn} ${memberStatusFilter === val ? styles.filterBtnActive : ''}`}
@@ -805,7 +816,7 @@ export default function Admin() {
             {membersFetching ? (
               <p className={styles.loading}>불러오는 중...</p>
             ) : members.length === 0 ? (
-              <p className={styles.empty}>조건에 맞는 회원을 찾을 수 없습니다.</p>
+              <p className={styles.empty}>{t('admin.members_empty')}</p>
             ) : (
               <div className={styles.memberList}>
                 {members.map(m => {
@@ -829,7 +840,7 @@ export default function Admin() {
                           <span className={styles.memberLoginId}>{m.loginId}</span>
                           <span className={`${styles.memberRoleBadge} ${styles[`role_${m.role}`]}`}>{roleMap[m.role] ?? m.role}</span>
                           <span className={`${styles.memberStatusBadge} ${isInactive ? styles.statusInactive : styles.statusActive}`}>
-                            {isInactive ? '비활성' : '활성'}
+                            {isInactive ? t('admin.members_filter_inactive') : t('admin.members_filter_active')}
                           </span>
                         </div>
                         <div className={styles.memberMeta}>
@@ -846,10 +857,10 @@ export default function Admin() {
                       </div>
                       <div className={styles.memberActions}>
                         {isInactive ? (
-                          <button className={styles.activateBtn} onClick={() => handleActivate(m)}>계정 활성화</button>
+                          <button className={styles.activateBtn} onClick={() => handleActivate(m)}>{t('admin.members_activate')}</button>
                         ) : (
                           canDeactivate && (
-                            <button className={styles.deactivateBtn} onClick={() => handleDeactivate(m)}>계정 비활성화</button>
+                            <button className={styles.deactivateBtn} onClick={() => handleDeactivate(m)}>{t('admin.members_deactivate')}</button>
                           )
                         )}
                       </div>
@@ -944,7 +955,7 @@ export default function Admin() {
                         type="color"
                         className={styles.brandColorSwatch}
                         value={brandTheme[key] || '#000000'}
-                        onChange={e => setBrandTheme(t => ({ ...t, [key]: e.target.value }))}
+                        onChange={e => setBrandTheme(th => ({ ...th, [key]: e.target.value }))}
                         title={label}
                       />
                       <span className={styles.brandColorHex}>{brandTheme[key]}</span>
@@ -966,7 +977,7 @@ export default function Admin() {
                   onClick={handleBrandApply}
                   disabled={brandSaving}
                 >
-                  {brandSaving ? '저장 중...' : '적용'}
+                  {brandSaving ? t('admin.settings_saving') : '적용'}
                 </button>
                 {brandMsg && <p className={styles.brandSuccessMsg}>{brandMsg}</p>}
                 {brandError && <p className={styles.brandErrorMsg}>{brandError}</p>}
@@ -983,7 +994,7 @@ export default function Admin() {
             {hardDeleteLogsFetching ? (
               <p className={styles.loading}>불러오는 중...</p>
             ) : hardDeleteLogs.length === 0 ? (
-              <p className={styles.empty}>영구 삭제 기록이 없습니다.</p>
+              <p className={styles.empty}>{t('admin.delete_logs_empty')}</p>
             ) : (
               <div className={styles.logList}>
                 {[...hardDeleteLogs].reverse().map(log => (
@@ -1043,10 +1054,10 @@ export default function Admin() {
             </div>
 
             {monitorLoading && !monitorData && (
-              <p className={styles.loading}>서버 정보를 불러오는 중...</p>
+              <p className={styles.loading}>{t('admin.server_monitor_loading')}</p>
             )}
             {!monitorData && !monitorLoading && monitorStatus === 'error' && (
-              <p className={styles.errorMsg}>서버 모니터링 데이터를 불러올 수 없습니다.</p>
+              <p className={styles.errorMsg}>{t('admin.server_monitor_error_load')}</p>
             )}
 
             {monitorData && (() => {
@@ -1272,7 +1283,7 @@ export default function Admin() {
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.modalDeleteBtn} onClick={handleDeleteConfirm} disabled={deleteConfirming}>
-                {deleteConfirming ? '삭제 중...' : '소프트 삭제'}
+                {deleteConfirming ? '삭제 중...' : t('admin.tracks_soft_delete_button')}
               </button>
               <button className={styles.modalCancelBtn} onClick={() => setDeleteTarget(null)} disabled={deleteConfirming}>
                 취소
@@ -1314,7 +1325,7 @@ export default function Admin() {
                 onClick={handleHardDelete}
                 disabled={hardDeleteConfirming || hardDeleteConfirmText !== 'DELETE'}
               >
-                {hardDeleteConfirming ? '삭제 중...' : '영구 삭제'}
+                {hardDeleteConfirming ? '삭제 중...' : t('admin.tracks_hard_delete_button')}
               </button>
               <button className={styles.modalCancelBtn} onClick={() => setHardDeleteTarget(null)} disabled={hardDeleteConfirming}>
                 취소
@@ -1376,7 +1387,7 @@ export default function Admin() {
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.modalSaveBtn} onClick={handleEditSave} disabled={editSaving}>
-                {editSaving ? '저장 중...' : '저장'}
+                {editSaving ? '저장 중...' : t('admin.tracks_edit_button')}
               </button>
               <button className={styles.modalCancelBtn} onClick={() => setEditTarget(null)} disabled={editSaving}>
                 취소

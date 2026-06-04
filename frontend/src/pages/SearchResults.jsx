@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { search } from '../api/search';
 import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../hooks/usePlayer';
@@ -9,6 +10,7 @@ const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%231a1510'/%3E%3Ccircle cx='40' cy='30' r='14' fill='%23c89f62'/%3E%3Cellipse cx='40' cy='66' rx='24' ry='18' fill='%23c89f62'/%3E%3C/svg%3E";
 
 export default function SearchResults() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const q = searchParams.get('q') || '';
@@ -21,7 +23,7 @@ export default function SearchResults() {
 
   function handlePlay(track) {
     if (!user) {
-      navigate('/login', { state: { message: '음악을 재생하려면 로그인이 필요합니다.' } });
+      navigate('/login', { state: { message: t('trackcard.play_redirect') } });
       return;
     }
     playToDefault(track);
@@ -43,7 +45,7 @@ export default function SearchResults() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.heading}>
-            {q ? <><span className={styles.query}>"{q}"</span> 검색 결과</> : '검색'}
+            {q ? <><span className={styles.query}>"{q}"</span> {t('search.heading')}</> : t('search.heading')}
           </h1>
           {!loading && results && (
             <p className={styles.count}>총 {total}개 결과</p>
@@ -61,23 +63,22 @@ export default function SearchResults() {
             <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--text-tertiary)">
               <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
             </svg>
-            <p className={styles.emptyTitle}>검색 결과가 없습니다</p>
-            <p className={styles.emptySub}>다른 검색어를 입력해보세요.</p>
+            <p className={styles.emptyTitle}>{t('search.empty_state')}</p>
+            <p className={styles.emptySub}>{t('search.empty_hint')}</p>
           </div>
         )}
 
         {!loading && results && total > 0 && (
           <>
-            {/* Songs 섹션 */}
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>
-                곡
+                {t('search.section_songs')}
                 {results.tracks.length > 0 && (
                   <span className={styles.sectionCount}>{results.tracks.length}</span>
                 )}
               </h2>
               {results.tracks.length === 0 ? (
-                <p className={styles.sectionEmpty}>검색된 곡이 없습니다.</p>
+                <p className={styles.sectionEmpty}>{t('search.section_empty_songs')}</p>
               ) : (
                 <div className={styles.trackList}>
                   {results.tracks.map(track => (
@@ -115,16 +116,15 @@ export default function SearchResults() {
               )}
             </section>
 
-            {/* Creators 섹션 */}
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>
-                크리에이터
+                {t('search.section_creators')}
                 {results.creators.length > 0 && (
                   <span className={styles.sectionCount}>{results.creators.length}</span>
                 )}
               </h2>
               {results.creators.length === 0 ? (
-                <p className={styles.sectionEmpty}>검색된 크리에이터가 없습니다.</p>
+                <p className={styles.sectionEmpty}>{t('search.section_empty_creators')}</p>
               ) : (
                 <div className={styles.creatorList}>
                   {results.creators.map(creator => (

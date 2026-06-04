@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { checkLoginId, checkArtistName, signup } from '../api/auth';
 import { useCapsLock, CapsLockWarning } from '../hooks/useCapsLock';
 import styles from './Signup.module.css';
@@ -8,13 +9,8 @@ import { GENRES as BASE_GENRES } from '../constants/genres';
 const GENRES = ['', ...BASE_GENRES];
 
 const INITIAL_FORM = {
-  loginId: '',
-  password: '',
-  passwordConfirm: '',
-  email: '',
-  name: '',
-  favoriteGenre: '',
-  artistName: '',
+  loginId: '', password: '', passwordConfirm: '', email: '',
+  name: '', favoriteGenre: '', artistName: '',
 };
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -63,10 +59,11 @@ const PRIVACY_TEXT = `WHATPL은 회원가입, 로그인, 계정 관리, Creator 
 회원은 위 개인정보 수집 및 이용에 동의합니다.`;
 
 export default function Signup() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState(INITIAL_FORM);
-  const [idStatus, setIdStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
-  const [artistNameStatus, setArtistNameStatus] = useState(null); // null | 'checking' | 'available' | 'taken'
+  const [idStatus, setIdStatus] = useState(null);
+  const [artistNameStatus, setArtistNameStatus] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [signupDone, setSignupDone] = useState(false);
@@ -87,14 +84,12 @@ export default function Signup() {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
 
-  function handleGoToLogin() {
-    navigate('/login');
-  }
+  function handleGoToLogin() { navigate('/login'); }
 
   useEffect(() => {
     if (!signupDone) return;
-    const t = setTimeout(() => navigate('/login'), 5000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => navigate('/login'), 5000);
+    return () => clearTimeout(timer);
   }, [signupDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleProfileFileChange(e) {
@@ -117,9 +112,7 @@ export default function Signup() {
     try {
       const { available } = await checkLoginId(form.loginId.trim());
       setIdStatus(available ? 'available' : 'taken');
-    } catch {
-      setIdStatus(null);
-    }
+    } catch { setIdStatus(null); }
   }
 
   async function handleCheckArtistName() {
@@ -128,89 +121,55 @@ export default function Signup() {
     try {
       const { available } = await checkArtistName(form.artistName.trim());
       setArtistNameStatus(available ? 'available' : 'taken');
-    } catch {
-      setArtistNameStatus(null);
-    }
+    } catch { setArtistNameStatus(null); }
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
 
-    if (idStatus !== 'available') {
-      setError('아이디 중복검사를 완료해주세요.');
-      return;
-    }
-    if (form.password !== form.passwordConfirm) {
-      setError('비밀번호가 일치하지 않습니다.');
-      return;
-    }
-    if (form.artistName.trim() && artistNameStatus !== 'available') {
-      setError('아티스트명 중복검사를 완료해주세요.');
-      return;
-    }
+    if (idStatus !== 'available') { setError(t('signup.id_check_error')); return; }
+    if (form.password !== form.passwordConfirm) { setError(t('signup.password_mismatch')); return; }
+    if (form.artistName.trim() && artistNameStatus !== 'available') { setError(t('signup.artist_check_error')); return; }
 
-    // 생년월일 검증 및 조합 — 선택 입력 (모두 비우거나 모두 채우거나)
     let birthDate = '';
     const birthAnyFilled = birthYear || birthMonth || birthDay;
     const birthAllFilled = birthYear && birthMonth && birthDay;
-    if (birthAnyFilled && !birthAllFilled) {
-      setError('생년월일은 선택 입력입니다. 모두 선택하거나 모두 비워주세요.');
-      return;
-    }
+    if (birthAnyFilled && !birthAllFilled) { setError(t('signup.birth_date_partial_error')); return; }
     if (birthAllFilled) {
       birthDate = `${birthYear}-${birthMonth}-${birthDay}`;
       const dateCheck = new Date(birthDate);
       if (isNaN(dateCheck.getTime()) || dateCheck.getDate() !== Number(birthDay)) {
-        setError('유효하지 않은 생년월일입니다.');
-        return;
+        setError(t('signup.birth_date_invalid_error')); return;
       }
     }
 
-    // 휴대폰 번호 검증 및 조합 — 선택 입력 (모두 비우거나 모두 채우거나)
     let phone = '';
     const phoneAnyFilled = phoneMid || phoneLast;
     const phoneAllFilled = phoneMid && phoneLast;
-    if (phoneAnyFilled && !phoneAllFilled) {
-      setError('휴대폰 번호는 선택 입력입니다. 모두 입력하거나 모두 비워주세요.');
-      return;
-    }
+    if (phoneAnyFilled && !phoneAllFilled) { setError(t('signup.phone_partial_error')); return; }
     if (phoneAllFilled) {
-      if (!/^\d{3,4}$/.test(phoneMid)) {
-        setError('휴대폰 번호 중간 자리를 올바르게 입력해주세요. (3~4자리)');
-        return;
-      }
-      if (!/^\d{4}$/.test(phoneLast)) {
-        setError('휴대폰 번호 마지막 자리를 올바르게 입력해주세요. (4자리)');
-        return;
-      }
+      if (!/^\d{3,4}$/.test(phoneMid)) { setError(t('signup.phone_mid_error')); return; }
+      if (!/^\d{4}$/.test(phoneLast)) { setError(t('signup.phone_last_error')); return; }
       phone = `010-${phoneMid}-${phoneLast}`;
     }
 
-    if (!termsAgreed || !privacyAgreed) {
-      setError('필수 약관에 동의해야 회원가입할 수 있습니다.');
-      return;
-    }
+    if (!termsAgreed || !privacyAgreed) { setError(t('signup.agreement_error')); return; }
 
     setLoading(true);
     try {
       const { loginId, password, email, name, favoriteGenre, artistName } = form;
       const fd = new FormData();
-      fd.append('loginId', loginId);
-      fd.append('password', password);
-      fd.append('email', email);
-      fd.append('name', name);
-      fd.append('birthDate', birthDate);
-      fd.append('phone', phone);
-      fd.append('favoriteGenre', favoriteGenre);
-      fd.append('artistName', artistName);
-      fd.append('termsAgreed', String(termsAgreed));
-      fd.append('privacyAgreed', String(privacyAgreed));
+      fd.append('loginId', loginId); fd.append('password', password);
+      fd.append('email', email); fd.append('name', name);
+      fd.append('birthDate', birthDate); fd.append('phone', phone);
+      fd.append('favoriteGenre', favoriteGenre); fd.append('artistName', artistName);
+      fd.append('termsAgreed', String(termsAgreed)); fd.append('privacyAgreed', String(privacyAgreed));
       if (profileFile) fd.append('profileImage', profileFile);
       await signup(fd);
       setSignupDone(true);
     } catch (err) {
-      setError(err.response?.data?.error || '회원가입에 실패했습니다.');
+      setError(err.response?.data?.error || t('signup.error_default'));
     } finally {
       setLoading(false);
     }
@@ -225,13 +184,14 @@ export default function Signup() {
               <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
             </svg>
           </div>
-          <h2 className={styles.welcomeTitle}>환영합니다!</h2>
+          <h2 className={styles.welcomeTitle}>{t('signup.welcome_title')}</h2>
           <p className={styles.welcomeDesc}>
-            WHATPL 회원가입이 완료되었습니다.<br />
-            지금 로그인하고 자유롭게 음악을 탐색해보세요.
+            {t('signup.welcome_desc').split('\n').map((line, i) => (
+              <span key={i}>{line}{i === 0 && <br />}</span>
+            ))}
           </p>
           <button type="button" className={styles.welcomeBtn} onClick={handleGoToLogin}>
-            로그인 화면으로 이동
+            {t('signup.welcome_button')}
           </button>
         </div>
       </div>
@@ -241,167 +201,111 @@ export default function Signup() {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.title}>회원가입</h1>
+        <h1 className={styles.title}>{t('signup.title')}</h1>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* 아이디 */}
           <div className={styles.field}>
-            <label className={styles.label}>아이디 <span className={styles.required}>*</span></label>
+            <label className={styles.label}>{t('signup.label_id')} <span className={styles.required}>{t('signup.required_marker')}</span></label>
             <div className={styles.row}>
               <input
-                className={styles.input}
-                type="text"
-                name="loginId"
-                value={form.loginId}
-                onChange={handleChange}
-                placeholder="아이디를 입력하세요"
-                autoComplete="username"
-                required
+                className={styles.input} type="text" name="loginId"
+                value={form.loginId} onChange={handleChange}
+                placeholder={t('signup.placeholder_id')} autoComplete="username" required
               />
               <button type="button" className={styles.checkBtn} onClick={handleCheckId}>
-                중복검사
+                {t('signup.check_button')}
               </button>
             </div>
-            {idStatus === 'checking' && <p className={styles.info}>확인 중...</p>}
-            {idStatus === 'available' && <p className={styles.success}>사용 가능한 아이디입니다.</p>}
-            {idStatus === 'taken' && <p className={styles.error}>이미 사용 중인 아이디입니다.</p>}
+            {idStatus === 'checking' && <p className={styles.info}>{t('signup.checking')}</p>}
+            {idStatus === 'available' && <p className={styles.success}>{t('signup.available')}</p>}
+            {idStatus === 'taken' && <p className={styles.error}>{t('signup.taken')}</p>}
           </div>
 
-          {/* 비밀번호 */}
           <div className={styles.field}>
-            <label className={styles.label}>비밀번호 <span className={styles.required}>*</span></label>
+            <label className={styles.label}>{t('signup.label_password')} <span className={styles.required}>{t('signup.required_marker')}</span></label>
             <input
-              className={styles.input}
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              onKeyDown={pwCaps.handler}
-              onKeyUp={pwCaps.handler}
-              onBlur={pwCaps.reset}
-              placeholder="비밀번호를 입력하세요"
-              autoComplete="new-password"
-              required
+              className={styles.input} type="password" name="password"
+              value={form.password} onChange={handleChange}
+              onKeyDown={pwCaps.handler} onKeyUp={pwCaps.handler} onBlur={pwCaps.reset}
+              placeholder={t('signup.placeholder_password')} autoComplete="new-password" required
             />
             <CapsLockWarning on={pwCaps.on} />
           </div>
 
-          {/* 비밀번호 확인 */}
           <div className={styles.field}>
-            <label className={styles.label}>비밀번호 확인 <span className={styles.required}>*</span></label>
+            <label className={styles.label}>{t('signup.label_password_confirm')} <span className={styles.required}>{t('signup.required_marker')}</span></label>
             <input
-              className={styles.input}
-              type="password"
-              name="passwordConfirm"
-              value={form.passwordConfirm}
-              onChange={handleChange}
-              onKeyDown={pwConfirmCaps.handler}
-              onKeyUp={pwConfirmCaps.handler}
-              onBlur={pwConfirmCaps.reset}
-              placeholder="비밀번호를 다시 입력하세요"
-              autoComplete="new-password"
-              required
+              className={styles.input} type="password" name="passwordConfirm"
+              value={form.passwordConfirm} onChange={handleChange}
+              onKeyDown={pwConfirmCaps.handler} onKeyUp={pwConfirmCaps.handler} onBlur={pwConfirmCaps.reset}
+              placeholder={t('signup.placeholder_password_confirm')} autoComplete="new-password" required
             />
             <CapsLockWarning on={pwConfirmCaps.on} />
             {form.passwordConfirm && form.password !== form.passwordConfirm && (
-              <p className={styles.error}>비밀번호가 일치하지 않습니다.</p>
+              <p className={styles.error}>{t('signup.password_mismatch')}</p>
             )}
           </div>
 
-          {/* 이메일 */}
           <div className={styles.field}>
-            <label className={styles.label}>이메일 <span className={styles.required}>*</span></label>
+            <label className={styles.label}>{t('signup.label_email')} <span className={styles.required}>{t('signup.required_marker')}</span></label>
             <input
-              className={styles.input}
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="example@email.com"
-              autoComplete="email"
-              required
+              className={styles.input} type="email" name="email"
+              value={form.email} onChange={handleChange}
+              placeholder={t('signup.placeholder_email')} autoComplete="email" required
             />
           </div>
 
-          {/* 성명 */}
           <div className={styles.field}>
-            <label className={styles.label}>성명 <span className={styles.required}>*</span></label>
+            <label className={styles.label}>{t('signup.label_name')} <span className={styles.required}>{t('signup.required_marker')}</span></label>
             <input
-              className={styles.input}
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="이름을 입력하세요"
-              required
+              className={styles.input} type="text" name="name"
+              value={form.name} onChange={handleChange}
+              placeholder={t('signup.placeholder_name')} required
             />
           </div>
 
-          {/* 생년월일 */}
           <div className={styles.field}>
-            <label className={styles.label}>생년월일</label>
+            <label className={styles.label}>{t('signup.label_birth_date')}</label>
             <div className={styles.birthRow}>
-              <select
-                className={styles.input}
-                value={birthYear}
-                onChange={e => { setBirthYear(e.target.value); setBirthDay(''); }}
-              >
-                <option value="">년도</option>
-                {YEARS.map(y => <option key={y} value={y}>{y}년</option>)}
+              <select className={styles.input} value={birthYear} onChange={e => { setBirthYear(e.target.value); setBirthDay(''); }}>
+                <option value="">{t('signup.select_year')}</option>
+                {YEARS.map(y => <option key={y} value={y}>{y}{t('signup.year_format')}</option>)}
               </select>
-              <select
-                className={styles.input}
-                value={birthMonth}
-                onChange={e => { setBirthMonth(e.target.value); setBirthDay(''); }}
-              >
-                <option value="">월</option>
-                {MONTHS.map(m => <option key={m} value={m}>{Number(m)}월</option>)}
+              <select className={styles.input} value={birthMonth} onChange={e => { setBirthMonth(e.target.value); setBirthDay(''); }}>
+                <option value="">{t('signup.select_month')}</option>
+                {MONTHS.map(m => <option key={m} value={m}>{Number(m)}{t('signup.month_format')}</option>)}
               </select>
-              <select
-                className={styles.input}
-                value={birthDay}
-                onChange={e => setBirthDay(e.target.value)}
-              >
-                <option value="">일</option>
+              <select className={styles.input} value={birthDay} onChange={e => setBirthDay(e.target.value)}>
+                <option value="">{t('signup.select_day')}</option>
                 {(birthYear && birthMonth
                   ? Array.from({ length: new Date(Number(birthYear), Number(birthMonth), 0).getDate() }, (_, i) => String(i + 1).padStart(2, '0'))
                   : Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'))
-                ).map(d => <option key={d} value={d}>{Number(d)}일</option>)}
+                ).map(d => <option key={d} value={d}>{Number(d)}{t('signup.day_format')}</option>)}
               </select>
             </div>
           </div>
 
-          {/* 휴대폰 번호 */}
           <div className={styles.field}>
-            <label className={styles.label}>휴대폰 번호</label>
+            <label className={styles.label}>{t('signup.label_phone')}</label>
             <div className={styles.phoneRow}>
               <span className={`${styles.input} ${styles.phonePrefix} ${styles.phonePrefixFixed}`}>010</span>
               <span className={styles.phoneSep}>-</span>
               <input
-                className={`${styles.input} ${styles.phoneMid}`}
-                type="text"
-                inputMode="numeric"
-                value={phoneMid}
-                onChange={e => setPhoneMid(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="1234"
-                maxLength={4}
+                className={`${styles.input} ${styles.phoneMid}`} type="text" inputMode="numeric"
+                value={phoneMid} onChange={e => setPhoneMid(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="1234" maxLength={4}
               />
               <span className={styles.phoneSep}>-</span>
               <input
-                className={`${styles.input} ${styles.phoneLast}`}
-                type="text"
-                inputMode="numeric"
-                value={phoneLast}
-                onChange={e => setPhoneLast(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="5678"
-                maxLength={4}
+                className={`${styles.input} ${styles.phoneLast}`} type="text" inputMode="numeric"
+                value={phoneLast} onChange={e => setPhoneLast(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="5678" maxLength={4}
               />
             </div>
           </div>
 
-          {/* 프로필 사진 */}
           <div className={styles.field}>
-            <label className={styles.label}>프로필 사진 (선택)</label>
+            <label className={styles.label}>{t('signup.label_profile_image')}</label>
             <div className={styles.profilePickRow}>
               <div className={styles.profileAvatarSmall}>
                 {profilePreview ? (
@@ -412,128 +316,84 @@ export default function Signup() {
               </div>
               <label className={styles.profilePickBtn}>
                 파일 선택
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className={styles.profileFileInput}
-                  onChange={handleProfileFileChange}
-                />
+                <input type="file" accept="image/jpeg,image/png,image/webp" className={styles.profileFileInput} onChange={handleProfileFileChange} />
               </label>
               {profileFile && <span className={styles.profileFileName}>{profileFile.name}</span>}
             </div>
-            <p className={styles.hint}>jpg / png / webp, 최대 2MB</p>
+            <p className={styles.hint}>{t('signup.profile_hint')}</p>
           </div>
 
-          {/* 좋아하는 장르 */}
           <div className={styles.field}>
-            <label className={styles.label}>좋아하는 장르 (선택)</label>
-            <select
-              className={styles.input}
-              name="favoriteGenre"
-              value={form.favoriteGenre}
-              onChange={handleChange}
-            >
+            <label className={styles.label}>{t('signup.label_favorite_genre')}</label>
+            <select className={styles.input} name="favoriteGenre" value={form.favoriteGenre} onChange={handleChange}>
               {GENRES.map((g) => (
-                <option key={g} value={g}>{g || '선택 안함'}</option>
+                <option key={g} value={g}>{g || t('signup.no_selection')}</option>
               ))}
             </select>
           </div>
 
-          {/* 크리에이터명 */}
           <div className={styles.field}>
-            <label className={styles.label}>크리에이터명 (선택)</label>
+            <label className={styles.label}>{t('signup.label_artist_name')}</label>
             <div className={styles.row}>
               <input
-                className={styles.input}
-                type="text"
-                name="artistName"
-                value={form.artistName}
-                onChange={handleChange}
-                placeholder="활동할 크리에이터 이름"
-                maxLength={50}
+                className={styles.input} type="text" name="artistName"
+                value={form.artistName} onChange={handleChange}
+                placeholder={t('signup.artist_placeholder')} maxLength={50}
               />
-              <button
-                type="button"
-                className={styles.checkBtn}
-                onClick={handleCheckArtistName}
-                disabled={!form.artistName.trim()}
-              >
-                중복검사
+              <button type="button" className={styles.checkBtn} onClick={handleCheckArtistName} disabled={!form.artistName.trim()}>
+                {t('signup.artist_check_button')}
               </button>
             </div>
-            {artistNameStatus === 'checking' && <p className={styles.info}>확인 중...</p>}
-            {artistNameStatus === 'available' && <p className={styles.success}>사용 가능한 크리에이터명입니다.</p>}
-            {artistNameStatus === 'taken' && <p className={styles.error}>이미 사용 중인 크리에이터명입니다.</p>}
-            <p className={styles.hint}>선택사항입니다. 추후 Creator 회원 전환 시 크리에이터명으로 사용됩니다.</p>
+            {artistNameStatus === 'checking' && <p className={styles.info}>{t('signup.checking')}</p>}
+            {artistNameStatus === 'available' && <p className={styles.success}>{t('signup.artist_available')}</p>}
+            {artistNameStatus === 'taken' && <p className={styles.error}>{t('signup.artist_taken')}</p>}
+            <p className={styles.hint}>{t('signup.artist_hint')}</p>
           </div>
 
-          {/* 약관 동의 */}
           <div className={styles.termsSection}>
             <div className={styles.termItem}>
               <div className={styles.termRow}>
                 <label className={styles.termCheckLabel}>
-                  <input
-                    type="checkbox"
-                    className={styles.termCheckbox}
-                    checked={termsAgreed}
-                    onChange={e => setTermsAgreed(e.target.checked)}
-                  />
+                  <input type="checkbox" className={styles.termCheckbox} checked={termsAgreed} onChange={e => setTermsAgreed(e.target.checked)} />
                   <span className={styles.termLabel}>
-                    <span className={styles.termRequired}>[필수]</span>{' '}
-                    <Link to="/terms" className={styles.termPageLink}>서비스 이용약관</Link>에 동의합니다.
+                    <span className={styles.termRequired}>{t('signup.terms_required')}</span>{' '}
+                    <Link to="/terms" className={styles.termPageLink}>{t('signup.terms_link')}</Link>{t('signup.terms_agree')}
                   </span>
                 </label>
-                <button
-                  type="button"
-                  className={styles.termViewBtn}
-                  onClick={() => setShowTerms(v => !v)}
-                >
-                  {showTerms ? '접기' : '보기'}
+                <button type="button" className={styles.termViewBtn} onClick={() => setShowTerms(v => !v)}>
+                  {showTerms ? t('signup.terms_button_hide') : t('signup.terms_button_show')}
                 </button>
               </div>
-              {showTerms && (
-                <div className={styles.termContent}>{TERMS_TEXT}</div>
-              )}
+              {showTerms && <div className={styles.termContent}>{TERMS_TEXT}</div>}
             </div>
 
             <div className={styles.termItem}>
               <div className={styles.termRow}>
                 <label className={styles.termCheckLabel}>
-                  <input
-                    type="checkbox"
-                    className={styles.termCheckbox}
-                    checked={privacyAgreed}
-                    onChange={e => setPrivacyAgreed(e.target.checked)}
-                  />
+                  <input type="checkbox" className={styles.termCheckbox} checked={privacyAgreed} onChange={e => setPrivacyAgreed(e.target.checked)} />
                   <span className={styles.termLabel}>
-                    <span className={styles.termRequired}>[필수]</span>{' '}
-                    <Link to="/privacy" className={styles.termPageLink}>개인정보 수집 및 이용</Link>에 동의합니다.
+                    <span className={styles.termRequired}>{t('signup.terms_required')}</span>{' '}
+                    <Link to="/privacy" className={styles.termPageLink}>{t('signup.privacy_link')}</Link>{t('signup.terms_agree')}
                   </span>
                 </label>
-                <button
-                  type="button"
-                  className={styles.termViewBtn}
-                  onClick={() => setShowPrivacy(v => !v)}
-                >
-                  {showPrivacy ? '접기' : '보기'}
+                <button type="button" className={styles.termViewBtn} onClick={() => setShowPrivacy(v => !v)}>
+                  {showPrivacy ? t('signup.terms_button_hide') : t('signup.terms_button_show')}
                 </button>
               </div>
-              {showPrivacy && (
-                <div className={styles.termContent}>{PRIVACY_TEXT}</div>
-              )}
+              {showPrivacy && <div className={styles.termContent}>{PRIVACY_TEXT}</div>}
             </div>
           </div>
 
           {error && <p className={styles.error}>{error}</p>}
 
           <button className={styles.submitBtn} type="submit" disabled={loading}>
-            {loading ? '가입 중...' : '회원가입'}
+            {loading ? t('signup.button_submit_loading') : t('signup.button_submit')}
           </button>
         </form>
 
         <p className={styles.loginPrompt}>
-          이미 계정이 있으신가요?{' '}
-          <Link to="/login" className={styles.loginLink}>로그인</Link>
+          {t('signup.login_prompt')}{' '}
+          <Link to="/login" className={styles.loginLink}>{t('signup.login_link')}</Link>
         </p>
       </div>
     </div>
