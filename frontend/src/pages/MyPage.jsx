@@ -10,7 +10,6 @@ import { getMyUploadedTracks, updateMyUploadedTrack, createTrackDeleteRequest, g
 import styles from './MyPage.module.css';
 import { GENRES as BASE_GENRES } from '../constants/genres';
 
-const ROLE_LABELS = { user: '일반회원', creator: 'Creator 회원', admin: '관리자' };
 const GENRES = ['', ...BASE_GENRES];
 
 function InfoRow({ label, value }) {
@@ -26,6 +25,7 @@ function InfoRow({ label, value }) {
 
 export default function MyPage() {
   const { t } = useTranslation();
+  const ROLE_LABELS = { user: t('admin.member_role_user'), creator: t('admin.member_role_creator'), admin: t('admin.member_role_admin') };
   const { user, loading, roleLabel, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const { playToDefault } = usePlayer();
@@ -121,7 +121,7 @@ export default function MyPage() {
       setShowReapply(false);
       setReapplyMsg('');
     } catch (err) {
-      setReapplyError(err.response?.data?.error || err.message || '신청에 실패했습니다.');
+      setReapplyError(err.response?.data?.error || err.message || t('admin.error_approve'));
     } finally {
       setReapplySubmitting(false);
     }
@@ -146,7 +146,7 @@ export default function MyPage() {
       setMyTracks(prev => prev.map(t => t.id === editTrackTarget.id ? data.track : t));
       setEditTrackTarget(null);
     } catch (err) {
-      setEditTrackError(err.message || '수정에 실패했습니다.');
+      setEditTrackError(err.message || t('admin.error_save'));
     } finally {
       setEditTrackSaving(false);
     }
@@ -166,7 +166,7 @@ export default function MyPage() {
       setMyDeleteReqs(prev => [...prev, data.request]);
       setDeleteReqTarget(null);
     } catch (err) {
-      setDeleteReqError(err.message || '삭제 요청에 실패했습니다.');
+      setDeleteReqError(err.message || t('admin.error_save'));
     } finally {
       setDeleteReqSubmitting(false);
     }
@@ -203,7 +203,7 @@ export default function MyPage() {
       setEditSuccess(true);
       setTimeout(() => setEditSuccess(false), 3000);
     } catch (err) {
-      setEditError(err.response?.data?.error || '저장에 실패했습니다. 다시 시도해주세요.');
+      setEditError(err.response?.data?.error || t('mypage.error_save'));
     } finally {
       setEditSaving(false);
     }
@@ -213,7 +213,7 @@ export default function MyPage() {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      setProfileError('파일 크기는 2MB 이하여야 합니다.');
+      setProfileError(t('mypage.error_profile_size'));
       return;
     }
     setProfileError('');
@@ -233,7 +233,7 @@ export default function MyPage() {
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
     } catch (err) {
-      setProfileError(err.response?.data?.message || '업로드에 실패했습니다.');
+      setProfileError(err.response?.data?.message || t('mypage.error_profile_upload'));
     } finally {
       setProfileUploading(false);
     }
@@ -242,11 +242,11 @@ export default function MyPage() {
   async function handleChangePassword(e) {
     e.preventDefault();
     setPwError('');
-    if (!pwForm.currentPassword) return setPwError('현재 비밀번호를 입력해주세요.');
-    if (!pwForm.newPassword) return setPwError('새 비밀번호를 입력해주세요.');
-    if (pwForm.newPassword.length < 8) return setPwError('새 비밀번호는 8자 이상이어야 합니다.');
-    if (!pwForm.confirmPassword) return setPwError('새 비밀번호 확인을 입력해주세요.');
-    if (pwForm.newPassword !== pwForm.confirmPassword) return setPwError('새 비밀번호와 확인이 일치하지 않습니다.');
+    if (!pwForm.currentPassword) return setPwError(t('mypage.error_pw_current'));
+    if (!pwForm.newPassword) return setPwError(t('mypage.error_pw_new'));
+    if (pwForm.newPassword.length < 8) return setPwError(t('mypage.error_pw_length'));
+    if (!pwForm.confirmPassword) return setPwError(t('mypage.error_pw_confirm'));
+    if (pwForm.newPassword !== pwForm.confirmPassword) return setPwError(t('mypage.error_pw_mismatch'));
     setPwSaving(true);
     try {
       await changePassword({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
@@ -254,7 +254,7 @@ export default function MyPage() {
       setPwSuccess(true);
       setTimeout(() => setPwSuccess(false), 4000);
     } catch (err) {
-      setPwError(err.response?.data?.message || '비밀번호 변경에 실패했습니다.');
+      setPwError(err.response?.data?.message || t('mypage.error_pw_change'));
     } finally {
       setPwSaving(false);
     }
@@ -263,14 +263,14 @@ export default function MyPage() {
   async function handleDeleteAccount(e) {
     e.preventDefault();
     if (deleteConfirm !== '회원탈퇴') {
-      setDeleteError('"회원탈퇴"를 정확히 입력해주세요.');
+      setDeleteError(t('mypage.error_delete_confirm_text'));
       return;
     }
     setDeleteLoading(true);
     setDeleteError('');
     try {
       if (user?.role === 'admin') {
-        setDeleteError('관리자 계정은 회원탈퇴할 수 없습니다.');
+        setDeleteError(t('mypage.error_delete_admin'));
         setDeleteLoading(false);
         return;
       }
@@ -278,7 +278,7 @@ export default function MyPage() {
       setShowDeleteModal(false);
       setDeleteDone(true);
     } catch (err) {
-      setDeleteError(err.response?.data?.message || '탈퇴 처리 중 오류가 발생했습니다.');
+      setDeleteError(err.response?.data?.message || t('mypage.error_delete_failed'));
       setDeleteLoading(false);
     }
   }
@@ -321,7 +321,7 @@ export default function MyPage() {
             </p>
             <div className={styles.gateActions}>
               <button type="button" className={styles.gatePrimary} onClick={handleGoToLogin}>
-                로그인 화면으로 이동
+                {t('mypage.login_redirect_btn')}
               </button>
             </div>
           </div>
@@ -375,12 +375,12 @@ export default function MyPage() {
         {/* 프로필 탭 */}
         {activeTab === 'profile' && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>내 계정 정보를 확인하고 수정하세요.</p>
+            <p className={styles.tabDesc}>{t('mypage.tab_profile_desc')}</p>
 
             {/* 프로필 사진 */}
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>{t('mypage.profile_image_title')}</h2>
-              {profileSuccess && <p className={styles.successMsg}>프로필 사진이 업데이트되었습니다.</p>}
+              {profileSuccess && <p className={styles.successMsg}>{t('mypage.profile_success')}</p>}
               <div className={styles.profileImageSection}>
                 <div className={styles.profileAvatar}>
                   {(profilePreview || user.profileImageUrl) ? (
@@ -430,7 +430,7 @@ export default function MyPage() {
               </div>
 
               {editSuccess && (
-                <p className={styles.successMsg}>정보가 성공적으로 저장되었습니다.</p>
+                <p className={styles.successMsg}>{t('mypage.edit_success')}</p>
               )}
 
               <div className={styles.infoRow}>
@@ -488,7 +488,7 @@ export default function MyPage() {
                     />
                   </div>
                   <div className={styles.editField}>
-                    <label className={styles.editLabel}>휴대폰 번호</label>
+                    <label className={styles.editLabel}>{t('mypage.edit_phone_label')}</label>
                     <input
                       className={styles.editInput}
                       type="tel"
@@ -498,13 +498,13 @@ export default function MyPage() {
                     />
                   </div>
                   <div className={styles.editField}>
-                    <label className={styles.editLabel}>프로필 이미지 URL</label>
+                    <label className={styles.editLabel}>{t('mypage.edit_profile_url_label')}</label>
                     <input
                       className={styles.editInput}
                       type="url"
                       value={editForm.profileImageUrl}
                       onChange={e => setEditForm(f => ({ ...f, profileImageUrl: e.target.value }))}
-                      placeholder="이미지 URL"
+                      placeholder={t('mypage.edit_profile_url_placeholder')}
                     />
                   </div>
                   <div className={styles.editField}>
@@ -515,7 +515,7 @@ export default function MyPage() {
                       onChange={e => setEditForm(f => ({ ...f, favoriteGenre: e.target.value }))}
                     >
                       {GENRES.map(g => (
-                        <option key={g} value={g}>{g || '선택 안함'}</option>
+                        <option key={g} value={g}>{g || t('signup.no_selection')}</option>
                       ))}
                     </select>
                   </div>
@@ -526,10 +526,10 @@ export default function MyPage() {
                       type="text"
                       value={editForm.artistName}
                       onChange={e => setEditForm(f => ({ ...f, artistName: e.target.value }))}
-                      placeholder="활동할 크리에이터 이름"
+                      placeholder={t('mypage.edit_artist_placeholder')}
                       maxLength={50}
                     />
-                    <p className={styles.editHint}>선택사항입니다. 추후 Creator 회원 전환 시 크리에이터명으로 사용됩니다.</p>
+                    <p className={styles.editHint}>{t('mypage.edit_artist_hint')}</p>
                   </div>
                   {editError && <p className={styles.editError}>{editError}</p>}
                   <div className={styles.editActions}>
@@ -547,7 +547,7 @@ export default function MyPage() {
             {/* 비밀번호 변경 */}
             <div className={styles.card}>
               <h2 className={styles.cardTitle}>{t('mypage.password_title')}</h2>
-              {pwSuccess && <p className={styles.successMsg}>비밀번호가 성공적으로 변경되었습니다.</p>}
+              {pwSuccess && <p className={styles.successMsg}>{t('mypage.password_success')}</p>}
               <form onSubmit={handleChangePassword} className={styles.editForm}>
                 <div className={styles.editField}>
                   <label className={styles.editLabel}>{t('mypage.password_current')}</label>
@@ -606,7 +606,7 @@ export default function MyPage() {
               <div className={styles.dangerZone}>
                 <div className={styles.dangerZoneHeader}>
                   <h2 className={styles.dangerZoneTitle}>{t('mypage.delete_account_title')}</h2>
-                  <p className={styles.dangerZoneDesc}>탈퇴 시 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.</p>
+                  <p className={styles.dangerZoneDesc}>{t('mypage.delete_account_desc')}</p>
                 </div>
                 <button className={styles.dangerBtn} onClick={() => setShowDeleteModal(true)}>
                   {t('mypage.delete_button')}
@@ -619,8 +619,7 @@ export default function MyPage() {
                 <div className={styles.modal} onClick={e => e.stopPropagation()}>
                   <h3 className={styles.modalTitle}>{t('mypage.delete_modal_title')}</h3>
                   <p className={styles.modalDesc}>
-                    탈퇴 시 업로드한 음원, 좋아요, 플레이리스트, 팔로우 기록 등<br />
-                    모든 데이터가 <strong>영구 삭제</strong>되며 복구할 수 없습니다.
+                    {t('mypage.delete_modal_desc')}
                   </p>
                   <form onSubmit={handleDeleteAccount} className={styles.editForm}>
                     <div className={styles.editField}>
@@ -677,16 +676,15 @@ export default function MyPage() {
         {/* Creator 관리 탭 */}
         {activeTab === 'creator' && (user.role === 'creator' || user.role === 'user') && (
           <section className={styles.tabContent}>
-            <p className={styles.tabDesc}>Creator 신청 상태와 업로드한 음악을 관리하세요.</p>
+            <p className={styles.tabDesc}>{t('mypage.creator_tab_desc')}</p>
 
             {/* admin: 관리자 안내 */}
             {user.role === 'admin' && (
               <div className={styles.card}>
-                <h2 className={styles.cardTitle}>관리자 계정</h2>
+                <h2 className={styles.cardTitle}>{t('mypage.admin_account_title')}</h2>
                 <p className={styles.statusInfoMsg}>
-                  관리자 기능은{' '}
+                  {t('mypage.admin_account_desc')}
                   <Link to="/admin" className={styles.applyLink} style={{ marginLeft: 0 }}>{t('mypage.creator_admin_link')}</Link>
-                  에서 관리하세요.
                 </p>
               </div>
             )}
@@ -697,7 +695,7 @@ export default function MyPage() {
                 <h2 className={styles.cardTitle}>{t('mypage.creator_section_title')}</h2>
 
                 {request === undefined && (
-                  <p className={styles.statusLoading}>불러오는 중...</p>
+                  <p className={styles.statusLoading}>{t('common.loading')}</p>
                 )}
 
                 {request === null && (
@@ -710,7 +708,7 @@ export default function MyPage() {
                 {request !== null && request !== undefined && (
                   <div className={styles.requestDetail}>
                     <div className={styles.statusRow}>
-                      <span className={styles.statusLabel}>상태</span>
+                      <span className={styles.statusLabel}>{t('mypage.creator_status_label')}</span>
                       <span className={`${styles.statusBadge} ${styles[`status_${request.status}`]}`}>
                         {REQUEST_STATUS_LABELS[request.status] ?? request.status}
                       </span>
@@ -740,7 +738,7 @@ export default function MyPage() {
                       </div>
                     )}
                     {request.status === 'pending' && (
-                      <p className={styles.statusInfoMsg}>관리자 검토 후 승인되면 음원을 업로드할 수 있습니다.</p>
+                      <p className={styles.statusInfoMsg}>{t('mypage.creator_pending_msg')}</p>
                     )}
                     {request.status === 'approved' && (
                       <div className={styles.requestDetail}>
@@ -753,10 +751,10 @@ export default function MyPage() {
                         <div className={styles.rejectReasonBox}>
                           <span className={styles.rejectReasonLabel}>{t('mypage.creator_reject_reason')}</span>
                           <span className={styles.rejectReasonText}>
-                            {request.rejectReason || '반려 사유가 입력되지 않았습니다.'}
+                            {request.rejectReason || t('mypage.creator_reject_no_reason')}
                           </span>
                         </div>
-                        <p className={styles.statusInfoMsg}>내용을 보완하여 다시 신청할 수 있습니다.</p>
+                        <p className={styles.statusInfoMsg}>{t('mypage.creator_reject_reapply_hint')}</p>
                         {!showReapply ? (
                           <button className={styles.reapplyBtn} onClick={() => setShowReapply(true)}>
                             {t('mypage.creator_reapply_button')}
@@ -767,14 +765,14 @@ export default function MyPage() {
                               className={styles.reapplyTextarea}
                               value={reapplyMsg}
                               onChange={e => setReapplyMsg(e.target.value)}
-                              placeholder="신청 메시지 (선택사항)"
+                              placeholder={t('mypage.reapply_placeholder')}
                               rows={3}
                               maxLength={500}
                             />
                             {reapplyError && <p className={styles.reapplyError}>{reapplyError}</p>}
                             <div className={styles.reapplyActions}>
                               <button type="submit" className={styles.reapplySubmitBtn} disabled={reapplySubmitting}>
-                                {reapplySubmitting ? '신청 중...' : '신청하기'}
+                                {reapplySubmitting ? t('mypage.reapply_button_loading') : t('mypage.reapply_button')}
                               </button>
                               <button
                                 type="button"
@@ -809,7 +807,7 @@ export default function MyPage() {
                   </div>
 
                   {myTracks === undefined && (
-                    <p className={styles.statusLoading}>불러오는 중...</p>
+                    <p className={styles.statusLoading}>{t('common.loading')}</p>
                   )}
                   {myTracks !== undefined && myTracks.length === 0 && (
                     <div className={styles.uploadEmpty}>
@@ -848,17 +846,17 @@ export default function MyPage() {
                                 </p>
                                 {isDeleted ? (
                                   <div className={styles.myTrackDeletedDetail}>
-                                    <p className={styles.myTrackDeletedNotice}>관리자에 의해 삭제된 음원입니다.</p>
+                                    <p className={styles.myTrackDeletedNotice}>{t('mypage.track_deleted_notice')}</p>
                                     <p className={styles.myTrackDeletedMeta}>
-                                      삭제 일시: {new Date(track.deletedAt).toLocaleString('ko-KR')}
+                                      {t('mypage.track_deleted_at', { date: new Date(track.deletedAt).toLocaleString() })}
                                     </p>
                                     {track.deleteReason && (
-                                      <p className={styles.myTrackDeletedReason}>삭제 사유: {track.deleteReason}</p>
+                                      <p className={styles.myTrackDeletedReason}>{t('mypage.track_deleted_reason', { reason: track.deleteReason })}</p>
                                     )}
                                   </div>
                                 ) : (
                                   <p className={styles.myTrackDate}>
-                                    업로드: {new Date(track.createdAt).toLocaleDateString('ko-KR')}
+                                    {t('mypage.track_uploaded_date', { date: new Date(track.createdAt).toLocaleDateString() })}
                                   </p>
                                 )}
                               </div>
@@ -868,7 +866,7 @@ export default function MyPage() {
                                 <button
                                   className={styles.myTrackPlayBtn}
                                   onClick={() => playToDefault(track)}
-                                  aria-label="재생"
+                                  aria-label={t('player.play_button_title')}
                                 >
                                   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M8 5v14l11-7z" />
@@ -903,7 +901,7 @@ export default function MyPage() {
                           <div className={styles.deleteReqInfo}>
                             <p className={styles.deleteReqTitle}>{r.trackTitle}</p>
                             {r.reason && <p className={styles.deleteReqReason}>"{r.reason}"</p>}
-                            <p className={styles.deleteReqDate}>신청일: {new Date(r.createdAt).toLocaleDateString('ko-KR')}</p>
+                            <p className={styles.deleteReqDate}>{t('mypage.delete_req_date', { date: new Date(r.createdAt).toLocaleDateString() })}</p>
                           </div>
                           <span className={`${styles.statusBadge} ${styles[`status_${r.status}`]}`}>
                             {REQUEST_STATUS_LABELS[r.status] ?? r.status}
@@ -925,33 +923,33 @@ export default function MyPage() {
         <div className={styles.modalOverlay} onClick={() => !editTrackSaving && setEditTrackTarget(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>음원 정보 수정</h3>
+              <h3 className={styles.modalTitle}>{t('mypage.track_edit_modal_title')}</h3>
               <button className={styles.modalClose} onClick={() => setEditTrackTarget(null)} disabled={editTrackSaving}>✕</button>
             </div>
             <div className={styles.modalBody}>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>크리에이터명 (변경 불가)</label>
+                <label className={styles.modalLabel}>{t('mypage.track_edit_artist_label')}</label>
                 <p className={styles.modalReadOnly}>{editTrackTarget.artist}</p>
               </div>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>제목 *</label>
+                <label className={styles.modalLabel}>{t('mypage.track_edit_title_label')}</label>
                 <input className={styles.modalInput} value={editTrackForm.title} onChange={e => setEditTrackForm(f => ({ ...f, title: e.target.value }))} maxLength={100} />
               </div>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>장르</label>
+                <label className={styles.modalLabel}>{t('mypage.track_edit_genre_label')}</label>
                 <select className={styles.modalSelect} value={editTrackForm.genre} onChange={e => setEditTrackForm(f => ({ ...f, genre: e.target.value }))}>
-                  <option value="">선택 안 함</option>
+                  <option value="">{t('signup.no_selection')}</option>
                   {['Pop', 'Hip-Hop', 'Electronic', 'Rock', 'Jazz', 'Classical', 'R&B', 'Lo-fi', 'Other'].map(g => (
                     <option key={g} value={g}>{g}</option>
                   ))}
                 </select>
               </div>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>커버 이미지 URL</label>
+                <label className={styles.modalLabel}>{t('mypage.track_edit_cover_label')}</label>
                 <input className={styles.modalInput} value={editTrackForm.coverUrl} onChange={e => setEditTrackForm(f => ({ ...f, coverUrl: e.target.value }))} placeholder="https://..." />
               </div>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>설명</label>
+                <label className={styles.modalLabel}>{t('mypage.track_edit_desc_label')}</label>
                 <textarea className={styles.modalTextarea} value={editTrackForm.description} onChange={e => setEditTrackForm(f => ({ ...f, description: e.target.value }))} rows={3} maxLength={500} />
               </div>
               {editTrackError && <p className={styles.modalError}>{editTrackError}</p>}
@@ -971,23 +969,23 @@ export default function MyPage() {
         <div className={styles.modalOverlay} onClick={() => !deleteReqSubmitting && setDeleteReqTarget(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>삭제 요청</h3>
+              <h3 className={styles.modalTitle}>{t('mypage.delete_req_modal_title')}</h3>
               <button className={styles.modalClose} onClick={() => setDeleteReqTarget(null)} disabled={deleteReqSubmitting}>✕</button>
             </div>
             <div className={styles.modalBody}>
               <p className={styles.modalConfirmText}>
-                <strong>"{deleteReqTarget.title}"</strong> 음원의 삭제를 관리자에게 요청합니다.
+                <strong>"{deleteReqTarget.title}"</strong> {t('mypage.delete_req_modal_confirm')}
               </p>
               <p className={styles.modalConfirmSub}>
-                관리자 승인 후 삭제 처리됩니다. 직접 삭제는 불가하며, 잘못 올린 경우 새로 업로드해주세요.
+                {t('mypage.delete_req_modal_sub')}
               </p>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>삭제 사유 (선택)</label>
+                <label className={styles.modalLabel}>{t('mypage.delete_req_reason_label')}</label>
                 <textarea
                   className={styles.modalTextarea}
                   value={deleteReqReason}
                   onChange={e => setDeleteReqReason(e.target.value)}
-                  placeholder="삭제 이유를 입력해주세요..."
+                  placeholder={t('mypage.delete_req_reason_placeholder')}
                   rows={3}
                   maxLength={300}
                 />
@@ -996,7 +994,7 @@ export default function MyPage() {
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.modalDeleteBtn} onClick={handleDeleteReqSubmit} disabled={deleteReqSubmitting}>
-                {deleteReqSubmitting ? '요청 중...' : '삭제 요청 제출'}
+                {deleteReqSubmitting ? t('mypage.delete_req_submitting') : t('mypage.delete_req_submit_button')}
               </button>
               <button className={styles.modalCancelBtn} onClick={() => setDeleteReqTarget(null)} disabled={deleteReqSubmitting}>{t('mypage.form_cancel_button')}</button>
             </div>

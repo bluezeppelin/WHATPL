@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useAuth } from '../context/AuthContext';
 import { usePlayer } from '../hooks/usePlayer';
 import { getMyLikedTracks, unlikeTrack } from '../api/likes';
@@ -10,6 +11,7 @@ import { getMyRecentlyPlayed } from '../api/recentlyPlayed';
 import styles from './MyPage.module.css';
 
 const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%231a1a2e'/%3E%3Ccircle cx='100' cy='100' r='40' stroke='%237c5cfc' stroke-width='3' fill='none'/%3E%3Ccircle cx='100' cy='100' r='12' fill='%237c5cfc'/%3E%3C/svg%3E";
+const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
 
 export default function MyMusic() {
   const { t } = useTranslation();
@@ -137,7 +139,7 @@ export default function MyMusic() {
                       <div className={styles.likedInfo}>
                         <p className={styles.likedTitle}>{track.title}</p>
                         <p className={styles.likedArtist}>{track.artist}{track.genre ? ` · ${track.genre}` : ''}</p>
-                        <p className={styles.recentPlayedAt}>{new Date(track.playedAt).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        <p className={styles.recentPlayedAt}>{new Date(track.playedAt).toLocaleString(LOCALE_MAP[i18n.language] || 'ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
                       <div className={styles.likedActions}>
                         <button className={styles.likedPlayBtn} onClick={() => playToDefault(track, 'recentlyPlayed')} aria-label={t('mymusic.recent_play_aria')}>
@@ -241,7 +243,7 @@ export default function MyMusic() {
                       <div className={styles.artistAvatar}>{f.artistName.charAt(0).toUpperCase()}</div>
                       <div className={styles.artistInfo}>
                         <p className={styles.artistName}>{f.artistName}</p>
-                        <p className={styles.artistFollowedAt}>{new Date(f.createdAt).toLocaleDateString('ko-KR')} 구독</p>
+                        <p className={styles.artistFollowedAt}>{t('mymusic.followed_since', { date: new Date(f.createdAt).toLocaleDateString(LOCALE_MAP[i18n.language] || 'ko-KR') })}</p>
                       </div>
                       <button className={styles.unfollowBtn} onClick={() => handleUnfollow(f.artistName)} aria-label={t('mymusic.follow_unfollow_button')}>
                         {t('mymusic.follow_unfollow_button')}
@@ -267,14 +269,14 @@ export default function MyMusic() {
                   )}
                   {myFollowers !== undefined && myFollowers.length > 0 && (
                     <>
-                      <p className={styles.statusInfoMsg} style={{ marginBottom: 12 }}>총 {myFollowers.length}명이 구독 중입니다.</p>
+                      <p className={styles.statusInfoMsg} style={{ marginBottom: 12 }}>{t('mymusic.followers_count_msg', { count: myFollowers.length })}</p>
                       <ul className={styles.artistList}>
                         {myFollowers.map(f => (
                           <li key={f.id} className={styles.artistItem}>
                             <div className={styles.artistAvatar}>{f.name.charAt(0).toUpperCase()}</div>
                             <div className={styles.artistInfo}>
                               <p className={styles.artistName}>{f.name}</p>
-                              <p className={styles.artistFollowedAt}>{new Date(f.subscribedAt).toLocaleDateString('ko-KR')} 구독</p>
+                              <p className={styles.artistFollowedAt}>{t('mymusic.followed_since', { date: new Date(f.subscribedAt).toLocaleDateString(LOCALE_MAP[i18n.language] || 'ko-KR') })}</p>
                             </div>
                           </li>
                         ))}

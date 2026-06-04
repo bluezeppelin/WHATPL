@@ -206,7 +206,7 @@ export default function Admin() {
         try {
           updated = await uploadSiteLogo(brandLogoFile);
         } catch {
-          setBrandError('색상은 저장되었으나 로고 업로드에 실패했습니다. (jpg, png, webp · 최대 2MB)');
+          setBrandError(t('admin.settings_error_logo'));
           applyTheme(updated.theme);
           window.dispatchEvent(new CustomEvent('site-settings-changed', {
             detail: { theme: updated.theme, logoUrl: updated.logoUrl, heroBackgroundUrl: updated.heroBackgroundUrl },
@@ -219,7 +219,7 @@ export default function Admin() {
         try {
           updated = await uploadHeroBackground(heroBgFile);
         } catch {
-          setBrandError('색상/로고는 저장되었으나 배경 이미지 업로드에 실패했습니다. (jpg, png, webp · 최대 5MB)');
+          setBrandError(t('admin.settings_error_bg'));
           applyTheme(updated.theme);
           window.dispatchEvent(new CustomEvent('site-settings-changed', {
             detail: { theme: updated.theme, logoUrl: updated.logoUrl, heroBackgroundUrl: updated.heroBackgroundUrl },
@@ -242,7 +242,7 @@ export default function Admin() {
       setBrandMsg(t('admin.settings_success'));
       setTimeout(() => setBrandMsg(''), 3000);
     } catch (err) {
-      setBrandError(err.response?.data?.error || err.message || '저장에 실패했습니다.');
+      setBrandError(err.response?.data?.error || err.message || t('admin.error_save'));
     } finally {
       setBrandSaving(false);
     }
@@ -259,7 +259,7 @@ export default function Admin() {
       setReauthPw('');
       setReauthVerified(true);
     } catch (err) {
-      setReauthError(err.message || '비밀번호 확인에 실패했습니다.');
+      setReauthError(err.message || t('admin.reauth_error_default'));
     } finally {
       setReauthLoading(false);
     }
@@ -279,9 +279,9 @@ export default function Admin() {
         sessionStorage.removeItem('adminReauthToken');
         sessionStorage.removeItem('adminReauthExpiry');
         setReauthVerified(false);
-        alert('재인증 토큰이 만료되었습니다. 비밀번호를 다시 확인해주세요.');
+        alert(t('admin.reauth_expired_alert'));
       } else {
-        alert(err.message || '영구 삭제에 실패했습니다.');
+        alert(err.message || t('admin.error_save'));
       }
     } finally {
       setHardDeleteConfirming(false);
@@ -295,7 +295,7 @@ export default function Admin() {
       const data = await getCreatorRequests();
       setRequests(data.requests);
     } catch {
-      setError('목록을 불러오지 못했습니다.');
+      setError(t('admin.error_load'));
     } finally {
       setFetching(false);
     }
@@ -308,7 +308,7 @@ export default function Admin() {
       const data = await getAdminUsers({ role: role || undefined, status: status || undefined });
       setMembers(data.users);
     } catch {
-      setMembersError('회원 목록을 불러오지 못했습니다.');
+      setMembersError(t('admin.error_load'));
     } finally {
       setMembersFetching(false);
     }
@@ -321,7 +321,7 @@ export default function Admin() {
       const data = await getAdminDeleteRequests();
       setDeleteReqs(data.requests);
     } catch {
-      setDeleteReqsError('삭제 요청 목록을 불러오지 못했습니다.');
+      setDeleteReqsError(t('admin.error_load'));
     } finally {
       setDeleteReqsFetching(false);
     }
@@ -334,7 +334,7 @@ export default function Admin() {
       const data = await getAdminTracks();
       setTracks(data.tracks);
     } catch {
-      setTracksError('음원 목록을 불러오지 못했습니다.');
+      setTracksError(t('admin.error_load'));
     } finally {
       setTracksFetching(false);
     }
@@ -379,7 +379,7 @@ export default function Admin() {
       await approveCreatorRequest(id);
       loadRequests();
     } catch (err) {
-      alert(err.response?.data?.error || '승인에 실패했습니다.');
+      alert(err.response?.data?.error || t('admin.error_approve'));
     }
   }
 
@@ -389,7 +389,7 @@ export default function Admin() {
       setRejectOpen(prev => ({ ...prev, [id]: false }));
       loadRequests();
     } catch (err) {
-      alert(err.response?.data?.error || '반려에 실패했습니다.');
+      alert(err.response?.data?.error || t('admin.error_reject'));
     }
   }
 
@@ -399,7 +399,7 @@ export default function Admin() {
       loadDeleteReqs();
       loadTracks();
     } catch (err) {
-      alert(err.message || '승인에 실패했습니다.');
+      alert(err.message || t('admin.error_approve'));
     }
   }
 
@@ -409,17 +409,17 @@ export default function Admin() {
       setDrRejectOpen(prev => ({ ...prev, [id]: false }));
       loadDeleteReqs();
     } catch (err) {
-      alert(err.message || '반려에 실패했습니다.');
+      alert(err.message || t('admin.error_reject'));
     }
   }
 
   async function handleDeactivate(member) {
-    if (!window.confirm(`"${member.name} (${member.loginId})" 계정을 비활성화하시겠습니까?\n비활성화된 계정은 로그인할 수 없습니다.`)) return;
+    if (!window.confirm(t('admin.confirm_deactivate', { name: member.name, loginId: member.loginId }))) return;
     try {
       await deactivateUser(member.id);
       loadMembers(memberRoleFilter, memberStatusFilter);
     } catch (err) {
-      alert(err.message || '비활성화에 실패했습니다.');
+      alert(err.message || t('admin.error_deactivate'));
     }
   }
 
@@ -428,7 +428,7 @@ export default function Admin() {
       await activateUser(member.id);
       loadMembers(memberRoleFilter, memberStatusFilter);
     } catch (err) {
-      alert(err.message || '활성화에 실패했습니다.');
+      alert(err.message || t('admin.error_activate'));
     }
   }
 
@@ -457,7 +457,7 @@ export default function Admin() {
       setEditTarget(null);
       loadTracks();
     } catch (err) {
-      setEditError(err.message || '수정에 실패했습니다.');
+      setEditError(err.message || t('admin.error_save'));
     } finally {
       setEditSaving(false);
     }
@@ -475,7 +475,7 @@ export default function Admin() {
       setDeleteTarget(null);
       loadTracks();
     } catch (err) {
-      alert(err.message || '삭제에 실패했습니다.');
+      alert(err.message || t('admin.error_save'));
     } finally {
       setDeleteConfirming(false);
     }
@@ -619,7 +619,7 @@ export default function Admin() {
             <p className={styles.tabDesc}>{t('admin.creator_requests_desc')}</p>
             {error && <p className={styles.errorMsg}>{error}</p>}
             {fetching ? (
-              <p className={styles.loading}>불러오는 중...</p>
+              <p className={styles.loading}>{t('common.loading')}</p>
             ) : requests.length === 0 ? (
               <p className={styles.empty}>{t('admin.creator_requests_empty')}</p>
             ) : (
@@ -673,7 +673,7 @@ export default function Admin() {
             <p className={styles.tabDesc}>{t('admin.delete_requests_desc')}</p>
             {deleteReqsError && <p className={styles.errorMsg}>{deleteReqsError}</p>}
             {deleteReqsFetching ? (
-              <p className={styles.loading}>불러오는 중...</p>
+              <p className={styles.loading}>{t('common.loading')}</p>
             ) : deleteReqs.length === 0 ? (
               <p className={styles.empty}>{t('admin.delete_requests_empty')}</p>
             ) : (
@@ -683,7 +683,7 @@ export default function Admin() {
                     <div className={styles.cardHeader}>
                       <div className={styles.cardInfo}>
                         <span className={styles.artistName}>{r.trackTitle}</span>
-                        <span className={styles.userName}>요청자: {r.artistName} ({r.creatorLoginId})</span>
+                        <span className={styles.userName}>{t('admin.requester')}: {r.artistName} ({r.creatorLoginId})</span>
                       </div>
                       <StatusBadge status={r.status} />
                     </div>
@@ -727,7 +727,7 @@ export default function Admin() {
             <p className={styles.tabDesc}>{t('admin.tracks_desc')}</p>
             {tracksError && <p className={styles.errorMsg}>{tracksError}</p>}
             {tracksFetching ? (
-              <p className={styles.loading}>불러오는 중...</p>
+              <p className={styles.loading}>{t('common.loading')}</p>
             ) : tracks.length === 0 ? (
               <p className={styles.empty}>{t('admin.tracks_empty')}</p>
             ) : (
@@ -748,7 +748,7 @@ export default function Admin() {
                       <div className={styles.trackInfo}>
                         <div className={styles.trackTitleRow}>
                           <p className={styles.trackTitle}>{tr.title}</p>
-                          {isDeleted && <span className={styles.deletedBadge}>삭제됨</span>}
+                          {isDeleted && <span className={styles.deletedBadge}>{t('admin.track_deleted_badge')}</span>}
                         </div>
                         <p className={styles.trackMeta}>
                           {tr.artist}
@@ -825,7 +825,7 @@ export default function Admin() {
             </div>
             {membersError && <p className={styles.errorMsg}>{membersError}</p>}
             {membersFetching ? (
-              <p className={styles.loading}>불러오는 중...</p>
+              <p className={styles.loading}>{t('common.loading')}</p>
             ) : members.length === 0 ? (
               <p className={styles.empty}>{t('admin.members_empty')}</p>
             ) : (
@@ -930,7 +930,7 @@ export default function Admin() {
                   )}
                   <div className={styles.brandLogoFileArea}>
                     <label className={styles.brandFileLabel}>
-                      이미지 선택
+                      {t('admin.settings_logo_button')}
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -1003,7 +1003,7 @@ export default function Admin() {
           <section className={styles.tabContent}>
             <p className={styles.tabDesc}>{t('admin.delete_logs_desc')}</p>
             {hardDeleteLogsFetching ? (
-              <p className={styles.loading}>불러오는 중...</p>
+              <p className={styles.loading}>{t('common.loading')}</p>
             ) : hardDeleteLogs.length === 0 ? (
               <p className={styles.empty}>{t('admin.delete_logs_empty')}</p>
             ) : (
@@ -1042,8 +1042,7 @@ export default function Admin() {
               </span>
             </div>
             <p className={styles.monDesc}>
-              현재 요청을 처리한 백엔드 인스턴스 기준 모니터링입니다.
-              AWS CloudWatch 연동 메트릭(ASG 전체 CPU, ALB 요청 수 등)은 포함되지 않습니다.
+              {t('admin.server_monitor_desc')}
             </p>
             <div className={styles.monMetaRow}>
               <span className={styles.monUpdatedAt}>
@@ -1271,33 +1270,33 @@ export default function Admin() {
         <div className={styles.modalOverlay} onClick={() => !deleteConfirming && setDeleteTarget(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>음원 삭제</h3>
+              <h3 className={styles.modalTitle}>{t('admin.modal_track_delete_title')}</h3>
               <button className={styles.modalClose} onClick={() => setDeleteTarget(null)} disabled={deleteConfirming}>✕</button>
             </div>
             <div className={styles.modalBody}>
               <p className={styles.deleteConfirmText}>
-                <strong>"{deleteTarget.title}"</strong> 트랙을 삭제하시겠습니까?
+                <strong>"{deleteTarget.title}"</strong> {t('admin.modal_track_delete_confirm')}
               </p>
               <p className={styles.deleteConfirmSub}>
-                삭제 후에도 데이터는 보존되며 일반 사용자에게만 숨겨집니다.
+                {t('admin.modal_track_soft_info')}
               </p>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>삭제 사유 (선택)</label>
+                <label className={styles.modalLabel}>{t('admin.modal_delete_reason_label')}</label>
                 <input
                   className={styles.modalInput}
                   value={deleteReason}
                   onChange={e => setDeleteReason(e.target.value)}
-                  placeholder="삭제 이유를 입력해주세요..."
+                  placeholder={t('admin.modal_delete_reason_placeholder')}
                   maxLength={200}
                 />
               </div>
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.modalDeleteBtn} onClick={handleDeleteConfirm} disabled={deleteConfirming}>
-                {deleteConfirming ? '삭제 중...' : t('admin.tracks_soft_delete_button')}
+                {deleteConfirming ? t('admin.deleting') : t('admin.tracks_soft_delete_button')}
               </button>
               <button className={styles.modalCancelBtn} onClick={() => setDeleteTarget(null)} disabled={deleteConfirming}>
-                취소
+                {t('admin.modal_cancel_button')}
               </button>
             </div>
           </div>
@@ -1309,17 +1308,17 @@ export default function Admin() {
         <div className={styles.modalOverlay} onClick={() => !hardDeleteConfirming && setHardDeleteTarget(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>영구 삭제</h3>
+              <h3 className={styles.modalTitle}>{t('admin.modal_hard_delete_title')}</h3>
               <button className={styles.modalClose} onClick={() => setHardDeleteTarget(null)} disabled={hardDeleteConfirming}>✕</button>
             </div>
             <div className={styles.modalBody}>
-              <p className={styles.hardDeleteWarning}>⚠️ 영구 삭제는 되돌릴 수 없습니다.</p>
+              <p className={styles.hardDeleteWarning}>{t('admin.modal_hard_delete_warning')}</p>
               <p className={styles.deleteConfirmText}>
-                <strong>"{hardDeleteTarget.title}"</strong> 트랙과 오디오·커버 파일이 완전히 삭제됩니다.
+                <strong>"{hardDeleteTarget.title}"</strong> {t('admin.modal_hard_delete_track_desc')}
               </p>
               <div className={styles.modalField}>
                 <label className={styles.modalLabel}>
-                  확인을 위해 <strong>DELETE</strong> 를 입력하세요.
+                  {t('admin.modal_hard_delete_confirm_label')}
                 </label>
                 <input
                   className={styles.modalInput}
@@ -1336,10 +1335,10 @@ export default function Admin() {
                 onClick={handleHardDelete}
                 disabled={hardDeleteConfirming || hardDeleteConfirmText !== 'DELETE'}
               >
-                {hardDeleteConfirming ? '삭제 중...' : t('admin.tracks_hard_delete_button')}
+                {hardDeleteConfirming ? t('admin.deleting') : t('admin.tracks_hard_delete_button')}
               </button>
               <button className={styles.modalCancelBtn} onClick={() => setHardDeleteTarget(null)} disabled={hardDeleteConfirming}>
-                취소
+                {t('admin.modal_cancel_button')}
               </button>
             </div>
           </div>
@@ -1351,12 +1350,12 @@ export default function Admin() {
         <div className={styles.modalOverlay} onClick={() => !editSaving && setEditTarget(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>음원 정보 수정</h3>
+              <h3 className={styles.modalTitle}>{t('admin.modal_edit_title')}</h3>
               <button className={styles.modalClose} onClick={() => setEditTarget(null)} disabled={editSaving}>✕</button>
             </div>
             <div className={styles.modalBody}>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>제목</label>
+                <label className={styles.modalLabel}>{t('admin.modal_edit_title_label')}</label>
                 <input
                   className={styles.modalInput}
                   value={editForm.title}
@@ -1365,7 +1364,7 @@ export default function Admin() {
                 />
               </div>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>크리에이터</label>
+                <label className={styles.modalLabel}>{t('admin.modal_edit_artist_label')}</label>
                 <input
                   className={styles.modalInput}
                   value={editForm.artist}
@@ -1374,18 +1373,18 @@ export default function Admin() {
                 />
               </div>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>장르</label>
+                <label className={styles.modalLabel}>{t('admin.modal_edit_genre_label')}</label>
                 <select
                   className={styles.modalSelect}
                   value={editForm.genre}
                   onChange={e => setEditForm(f => ({ ...f, genre: e.target.value }))}
                 >
-                  <option value="">선택 안 함</option>
+                  <option value="">{t('admin.modal_edit_genre_none')}</option>
                   {TRACK_GENRES.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
               </div>
               <div className={styles.modalField}>
-                <label className={styles.modalLabel}>설명</label>
+                <label className={styles.modalLabel}>{t('admin.modal_edit_description_label')}</label>
                 <textarea
                   className={styles.modalTextarea}
                   value={editForm.description}
@@ -1398,10 +1397,10 @@ export default function Admin() {
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.modalSaveBtn} onClick={handleEditSave} disabled={editSaving}>
-                {editSaving ? '저장 중...' : t('admin.tracks_edit_button')}
+                {editSaving ? t('admin.saving') : t('admin.tracks_edit_button')}
               </button>
               <button className={styles.modalCancelBtn} onClick={() => setEditTarget(null)} disabled={editSaving}>
-                취소
+                {t('admin.modal_cancel_button')}
               </button>
             </div>
           </div>

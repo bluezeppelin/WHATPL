@@ -18,6 +18,7 @@ function formatTime(sec) {
 
 /* ─── 카드 내부 컨트롤 (center: play, left: prev, right: next) ─── */
 function CardControl({ ctrlType, ctrlProps }) {
+  const { t } = useTranslation();
   if (!ctrlType) return null;
 
   if (ctrlType === 'play') {
@@ -27,7 +28,7 @@ function CardControl({ ctrlType, ctrlProps }) {
         className={`${styles.cardCtrl} ${styles.cardCtrlCenter}`}
         onClick={onClick}
         disabled={disabled}
-        title={isPlaying ? '일시정지' : '재생'}
+        title={isPlaying ? t('player.pause_button_title') : t('player.play_button_title')}
       >
         {isPlaying ? (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
@@ -50,7 +51,7 @@ function CardControl({ ctrlType, ctrlProps }) {
         className={`${styles.cardCtrl} ${styles.cardCtrlSide}`}
         onClick={onClick}
         disabled={disabled}
-        title="이전"
+        title={t('player.prev_button_title')}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
           <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />
@@ -66,7 +67,7 @@ function CardControl({ ctrlType, ctrlProps }) {
         className={`${styles.cardCtrl} ${styles.cardCtrlSide}`}
         onClick={onClick}
         disabled={disabled}
-        title="다음"
+        title={t('player.next_button_title')}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
           <path d="M6 18l8.5-6L6 6v12z"/>
