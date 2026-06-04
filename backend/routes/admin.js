@@ -32,7 +32,7 @@ async function hardDeleteTrackCompletely(track, deletedBy) {
     title: track.title,
     artist: track.artist,
     deletedBy: deletedBy || null,
-    reason: `hard delete by admin (이전 상태: ${track.status || 'active'})`,
+    reason: `hard delete by admin (previous status: ${track.status || 'active'})`,
   });
 
   await deleteTrack(trackId);
