@@ -126,7 +126,7 @@ export default function PlaylistsPage() {
                 <PlaylistCover covers={pl.covers} />
                 {pl.isDefault && <span className={styles.defaultBadge}>{t('playlists.default_badge')}</span>}
               </div>
-              <p className={styles.cardName}>{pl.name}</p>
+              <p className={styles.cardName}>{pl.isDefault ? t('playlist.default_label') : pl.name}</p>
               <p className={styles.cardCount}>{pl.trackCount}{t('playlists.track_count')}</p>
             </Link>
           ))}

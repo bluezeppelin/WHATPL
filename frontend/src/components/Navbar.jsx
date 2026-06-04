@@ -361,7 +361,9 @@ export default function Navbar({ logoUrl = '' }) {
                     )}
                   </div>
                   <span className={styles.userName}>{user.name}</span>
-                  <span className={styles.roleTag}>{roleLabel}</span>
+                  <span className={styles.roleTag}>
+                    {{ user: t('admin.members_filter_user'), creator: t('admin.members_filter_creator'), admin: t('admin.members_filter_admin') }[user.role] ?? roleLabel}
+                  </span>
                 </button>
 
                 {notifDropOpen && (
