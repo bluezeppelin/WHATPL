@@ -232,6 +232,8 @@
     "reapply_button": "신청하기",
     "reapply_button_loading": "신청 중...",
     "edit_phone_label": "휴대폰 번호",
+    "edit_profile_url_label": "프로필 이미지 URL",
+    "edit_profile_url_placeholder": "이미지 URL",
     "edit_artist_hint": "선택사항입니다. 추후 Creator 회원 전환 시 크리에이터명으로 사용됩니다.",
     "edit_artist_placeholder": "활동할 크리에이터 이름",
     "login_redirect_btn": "로그인 화면으로 이동",

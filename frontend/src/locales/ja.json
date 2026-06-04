@@ -232,6 +232,8 @@
     "reapply_button": "申請する",
     "reapply_button_loading": "申請中...",
     "edit_phone_label": "電話番号",
+    "edit_profile_url_label": "プロフィール画像URL",
+    "edit_profile_url_placeholder": "画像URL",
     "edit_artist_hint": "任意項目です。後でクリエイター申請時にクリエイター名として使用されます。",
     "edit_artist_placeholder": "活動するクリエイター名",
     "login_redirect_btn": "ログイン画面へ",

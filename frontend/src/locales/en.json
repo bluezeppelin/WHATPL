@@ -232,6 +232,8 @@
     "reapply_button": "Apply",
     "reapply_button_loading": "Applying...",
     "edit_phone_label": "Phone Number",
+    "edit_profile_url_label": "Profile Image URL",
+    "edit_profile_url_placeholder": "Image URL",
     "edit_artist_hint": "Optional. Used as your creator name when applying for Creator status.",
     "edit_artist_placeholder": "Your creator name",
     "login_redirect_btn": "Go to Login",

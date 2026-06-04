@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useAuth } from '../context/AuthContext';
+
+const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
+function fmtDate(iso) { return new Date(iso).toLocaleDateString(LOCALE_MAP[i18n.language] || 'ko-KR'); }
 import { useCapsLock, CapsLockWarning } from '../hooks/useCapsLock';
 import { usePlayer } from '../hooks/usePlayer';
 import { updateMe, changePassword, uploadProfileImage, deleteAccount } from '../api/auth';
@@ -440,7 +444,7 @@ export default function MyPage() {
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>{t('mypage.info_role')}</span>
                 <span className={`${styles.roleBadge} ${styles[`role_${user.role}`]}`}>
-                  {roleLabel ?? ROLE_LABELS[user.role] ?? user.role}
+                  {ROLE_LABELS[user.role] ?? user.role}
                 </span>
               </div>
 
@@ -726,14 +730,14 @@ export default function MyPage() {
                     <div className={styles.statusRow}>
                       <span className={styles.statusLabel}>{t('mypage.creator_applied_date')}</span>
                       <span className={styles.statusValue}>
-                        {new Date(request.createdAt).toLocaleDateString('ko-KR')}
+                        {fmtDate(request.createdAt)}
                       </span>
                     </div>
                     {request.reviewedAt && (
                       <div className={styles.statusRow}>
                         <span className={styles.statusLabel}>{t('mypage.creator_reviewed_date')}</span>
                         <span className={styles.statusValue}>
-                          {new Date(request.reviewedAt).toLocaleDateString('ko-KR')}
+                          {fmtDate(request.reviewedAt)}
                         </span>
                       </div>
                     )}

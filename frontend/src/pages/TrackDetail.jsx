@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
+
+const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
 import { getTrack } from '../api/tracks';
 import { deleteAdminTrack } from '../api/adminTracks';
 import { getTrackLikeStatus, likeTrack, unlikeTrack } from '../api/likes';
@@ -13,7 +16,7 @@ import styles from './TrackDetail.module.css';
 const DEFAULT_COVER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%231a1a2e'/%3E%3Ccircle cx='200' cy='200' r='80' stroke='%237c5cfc' stroke-width='4' fill='none'/%3E%3Ccircle cx='200' cy='200' r='24' fill='%237c5cfc'/%3E%3C/svg%3E";
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  return new Date(iso).toLocaleDateString(LOCALE_MAP[i18n.language] || 'ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function formatPlays(n) {
