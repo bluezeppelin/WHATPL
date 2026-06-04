@@ -540,8 +540,8 @@
 .likeHeart {
   font-size: 22px;
   line-height: 1;
-  color: rgba(var(--cover-rgb, 168, 85, 247), 0.75);
-  transition: color 0.2s;
+  color: rgba(255, 255, 255, 0.70);
+  transition: color 0.2s, text-shadow 0.2s;
 }
 .likeBtnActive .likeHeart {
   color: rgb(var(--cover-rgb, 168, 85, 247));
@@ -551,7 +551,7 @@
 .likeCount {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(var(--cover-rgb, 168, 85, 247), 0.80);
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1;
 }
 .likeBtnActive .likeCount {
