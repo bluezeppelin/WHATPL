@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { useAuth } from '../context/AuthContext';
+
+const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
+function fmtDate(iso) { return new Date(iso).toLocaleDateString(LOCALE_MAP[i18n.language] || 'ko-KR'); }
+function fmtDateTime(iso) { return new Date(iso).toLocaleString(LOCALE_MAP[i18n.language] || 'ko-KR'); }
+function fmtTime(iso) { return new Date(iso).toLocaleTimeString(LOCALE_MAP[i18n.language] || 'ko-KR'); }
 import { getCreatorRequests, approveCreatorRequest, rejectCreatorRequest } from '../api/creatorRequests';
 import { getAdminTracks, updateAdminTrack, deleteAdminTrack, getAdminDeleteRequests, approveDeleteRequest, rejectDeleteRequest, hardDeleteTrack, getHardDeleteLogs } from '../api/adminTracks';
 import { getAdminUsers, deactivateUser, activateUser } from '../api/adminUsers';
@@ -628,7 +634,7 @@ export default function Admin() {
                       <StatusBadge status={r.status} />
                     </div>
                     {r.message && <p className={styles.message}>"{r.message}"</p>}
-                    <p className={styles.date}>{t('admin.applied_date')} {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
+                    <p className={styles.date}>{t('admin.applied_date')} {fmtDateTime(r.createdAt)}</p>
                     {r.status === 'pending' && (
                       <div className={styles.actions}>
                         <button className={styles.approveBtn} onClick={() => handleApprove(r.id)}>{t('admin.creator_requests_approve')}</button>
@@ -652,7 +658,7 @@ export default function Admin() {
                       <p className={styles.rejectReason}>{t('admin.reject_reason_label')} {r.rejectReason}</p>
                     )}
                     {r.reviewedAt && (
-                      <p className={styles.reviewedAt}>{t('admin.reviewed_date')} {new Date(r.reviewedAt).toLocaleString('ko-KR')} ({r.reviewedBy})</p>
+                      <p className={styles.reviewedAt}>{t('admin.reviewed_date')} {fmtDateTime(r.reviewedAt)} ({r.reviewedBy})</p>
                     )}
                   </div>
                 ))}
@@ -682,7 +688,7 @@ export default function Admin() {
                       <StatusBadge status={r.status} />
                     </div>
                     {r.reason && <p className={styles.message}>"{r.reason}"</p>}
-                    <p className={styles.date}>{t('admin.applied_date')} {new Date(r.createdAt).toLocaleString('ko-KR')}</p>
+                    <p className={styles.date}>{t('admin.applied_date')} {fmtDateTime(r.createdAt)}</p>
                     {r.status === 'pending' && (
                       <div className={styles.actions}>
                         <button className={styles.approveBtn} onClick={() => handleDrApprove(r.id)}>{t('admin.creator_requests_approve')}</button>
@@ -706,7 +712,7 @@ export default function Admin() {
                       <p className={styles.rejectReason}>{t('admin.reject_reason_label')} {r.rejectReason}</p>
                     )}
                     {r.reviewedAt && (
-                      <p className={styles.reviewedAt}>{t('admin.reviewed_date')} {new Date(r.reviewedAt).toLocaleString('ko-KR')} ({r.reviewedBy})</p>
+                      <p className={styles.reviewedAt}>{t('admin.reviewed_date')} {fmtDateTime(r.reviewedAt)} ({r.reviewedBy})</p>
                     )}
                   </div>
                 ))}
@@ -750,12 +756,12 @@ export default function Admin() {
                         </p>
                         {isDeleted && (
                           <p className={styles.trackDeletedInfo}>
-                            {new Date(tr.deletedAt).toLocaleString('ko-KR')} · {tr.deletedBy}
+                            {fmtDateTime(tr.deletedAt)} · {tr.deletedBy}
                             {tr.deleteReason && ` · "${tr.deleteReason}"`}
                           </p>
                         )}
                         {!isDeleted && tr.uploadedByUserId && (
-                          <p className={styles.trackUploader}>업로더 ID: {tr.uploadedByUserId}</p>
+                          <p className={styles.trackUploader}>{t('admin.uploader_id')} {tr.uploadedByUserId}</p>
                         )}
                       </div>
                       <div className={styles.trackActions}>
@@ -803,7 +809,7 @@ export default function Admin() {
                 ))}
               </div>
               <div className={styles.filterGroup}>
-                <span className={styles.filterLabel}>상태</span>
+                <span className={styles.filterLabel}>{t('admin.members_filter_status')}</span>
                 {[
                   ['', t('admin.members_filter_all_roles')],
                   ['active', t('admin.members_filter_active')],
@@ -826,7 +832,7 @@ export default function Admin() {
               <div className={styles.memberList}>
                 {members.map(m => {
                   const isInactive = (m.status || 'active') === 'inactive';
-                  const roleMap = { user: '일반회원', creator: 'Creator', admin: '관리자' };
+                  const roleMap = { user: t('admin.member_role_user'), creator: t('admin.member_role_creator'), admin: t('admin.member_role_admin') };
                   const canDeactivate = m.role !== 'admin' && m.id !== user.id;
                   return (
                     <div key={m.id} className={`${styles.memberCard} ${isInactive ? styles.memberCardInactive : ''}`}>
@@ -854,9 +860,9 @@ export default function Admin() {
                           {m.artistName && <><span className={styles.memberDot}>·</span><span className={styles.memberArtist}>{m.artistName}</span></>}
                         </div>
                         <div className={styles.memberDates}>
-                          가입일: {new Date(m.createdAt).toLocaleDateString('ko-KR')}
+                          {t('admin.joined_date')} {fmtDate(m.createdAt)}
                           {isInactive && m.deactivatedAt && (
-                            <span className={styles.memberDeactivatedInfo}> · 비활성화: {new Date(m.deactivatedAt).toLocaleString('ko-KR')}</span>
+                            <span className={styles.memberDeactivatedInfo}> · {t('admin.deactivated_date')} {fmtDateTime(m.deactivatedAt)}</span>
                           )}
                         </div>
                       </div>
@@ -884,16 +890,16 @@ export default function Admin() {
             <div className={styles.brandCard}>
 
               <div>
-                <p className={styles.brandSubLabel}>사이트 로고</p>
+                <p className={styles.brandSubLabel}>{t('admin.settings_logo_label')}</p>
                 <div className={styles.brandLogoRow}>
                   {currentLogoUrl ? (
                     <img src={currentLogoUrl} alt="현재 로고" className={styles.brandLogoImg} />
                   ) : (
-                    <div className={styles.brandLogoPlaceholder}>로고 없음</div>
+                    <div className={styles.brandLogoPlaceholder}>{t('admin.settings_logo_none')}</div>
                   )}
                   <div className={styles.brandLogoFileArea}>
                     <label className={styles.brandFileLabel}>
-                      이미지 선택
+                      {t('admin.settings_logo_button')}
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -908,19 +914,19 @@ export default function Admin() {
                       />
                     </label>
                     <p className={styles.brandFileName}>
-                      {brandLogoFileName || 'jpg, png, webp · 최대 2MB'}
+                      {brandLogoFileName || t('admin.settings_logo_hint')}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <p className={styles.brandSubLabel}>배경 이미지</p>
+                <p className={styles.brandSubLabel}>{t('admin.settings_bg_label')}</p>
                 <div className={styles.brandLogoRow}>
                   {currentHeroBgUrl ? (
                     <img src={currentHeroBgUrl} alt="현재 배경 이미지" className={styles.brandHeroBgImg} />
                   ) : (
-                    <div className={styles.brandLogoPlaceholder}>배경 없음</div>
+                    <div className={styles.brandLogoPlaceholder}>{t('admin.settings_bg_none')}</div>
                   )}
                   <div className={styles.brandLogoFileArea}>
                     <label className={styles.brandFileLabel}>
@@ -939,20 +945,20 @@ export default function Admin() {
                       />
                     </label>
                     <p className={styles.brandFileName}>
-                      {heroBgFileName || 'jpg, png, webp · 최대 5MB'}
+                      {heroBgFileName || t('admin.settings_bg_hint')}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <p className={styles.brandSubLabel}>테마 색상</p>
+                <p className={styles.brandSubLabel}>{t('admin.settings_theme_label')}</p>
                 <div className={styles.brandColorGrid}>
                   {[
-                    { key: 'mainColor', label: '메인 컬러' },
-                    { key: 'subColor1', label: '서브 컬러 1' },
-                    { key: 'subColor2', label: '서브 컬러 2' },
-                    { key: 'subColor3', label: '서브 컬러 3' },
+                    { key: 'mainColor', label: t('admin.settings_color_main') },
+                    { key: 'subColor1', label: t('admin.settings_color_sub1') },
+                    { key: 'subColor2', label: t('admin.settings_color_sub2') },
+                    { key: 'subColor3', label: t('admin.settings_color_sub3') },
                   ].map(({ key, label }) => (
                     <div key={key} className={styles.brandColorItem}>
                       <span className={styles.brandColorLabel}>{label}</span>
@@ -975,14 +981,14 @@ export default function Admin() {
                   onClick={handleBrandPreview}
                   disabled={brandSaving}
                 >
-                  미리보기
+                  {t('admin.settings_preview_button')}
                 </button>
                 <button
                   className={styles.brandApplyBtn}
                   onClick={handleBrandApply}
                   disabled={brandSaving}
                 >
-                  {brandSaving ? t('admin.settings_saving') : '적용'}
+                  {brandSaving ? t('admin.settings_saving') : t('admin.settings_apply_button')}
                 </button>
                 {brandMsg && <p className={styles.brandSuccessMsg}>{brandMsg}</p>}
                 {brandError && <p className={styles.brandErrorMsg}>{brandError}</p>}
@@ -1011,7 +1017,7 @@ export default function Admin() {
                     </div>
                     <div className={styles.logRight}>
                       <p className={styles.logBy}>{log.deletedBy}</p>
-                      <p className={styles.logDate}>{new Date(log.deletedAt).toLocaleString('ko-KR')}</p>
+                      <p className={styles.logDate}>{fmtDateTime(log.deletedAt)}</p>
                     </div>
                   </div>
                 ))}
@@ -1042,7 +1048,7 @@ export default function Admin() {
             <div className={styles.monMetaRow}>
               <span className={styles.monUpdatedAt}>
                 {monitorData
-                  ? `UPDATED ${new Date(monitorData.serverTime).toLocaleTimeString('ko-KR')}`
+                  ? `UPDATED ${fmtTime(monitorData.serverTime)}`
                   : monitorLoading ? 'LOADING...' : '--'}
               </span>
               <button
@@ -1150,9 +1156,9 @@ export default function Admin() {
                         ['ERROR RATE', d.requests.errorRate],
                         ['AVG RESPONSE', `${d.requests.avgResponseTime} ms`],
                         ['LAST REQUEST', d.requests.lastRequestAt
-                          ? new Date(d.requests.lastRequestAt).toLocaleTimeString('ko-KR') : '—'],
+                          ? fmtTime(d.requests.lastRequestAt) : '—'],
                         ['LAST ERROR', d.requests.lastErrorAt
-                          ? new Date(d.requests.lastErrorAt).toLocaleTimeString('ko-KR') : '—'],
+                          ? fmtTime(d.requests.lastErrorAt) : '—'],
                       ].map(([k, v]) => (
                         <div key={k} className={styles.monRow}>
                           <span className={styles.monKey}>{k}</span>
@@ -1230,7 +1236,7 @@ export default function Admin() {
                         [...d.recentRequests].reverse().map((req, i) => (
                           <div key={i} className={styles.monLogLine}>
                             <span className={styles.monLogTime}>
-                              [{new Date(req.timestamp).toLocaleTimeString('ko-KR')}]
+                              [{fmtTime(req.timestamp)}]
                             </span>
                             <span className={`${styles.monLogMethod} ${
                               req.method === 'GET' ? styles.monLogGet :

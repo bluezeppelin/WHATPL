@@ -382,7 +382,16 @@
     "applied_date": "申請日:",
     "reviewed_date": "処理日:",
     "reject_reason_label": "却下理由:",
-    "reject_reason_placeholder": "却下理由（任意）"
+    "reject_reason_placeholder": "却下理由（任意）",
+    "members_filter_status": "ステータス",
+    "uploader_id": "アップロード者 ID:",
+    "joined_date": "登録日:",
+    "deactivated_date": "無効化:",
+    "member_role_user": "一般会員",
+    "member_role_creator": "クリエイター",
+    "member_role_admin": "管理者",
+    "settings_logo_none": "ロゴなし",
+    "settings_bg_none": "背景なし"
   },
   "track": {
     "play_button": "再生",

@@ -382,7 +382,16 @@
     "applied_date": "Applied:",
     "reviewed_date": "Reviewed:",
     "reject_reason_label": "Rejection reason:",
-    "reject_reason_placeholder": "Rejection reason (optional)"
+    "reject_reason_placeholder": "Rejection reason (optional)",
+    "members_filter_status": "Status",
+    "uploader_id": "Uploader ID:",
+    "joined_date": "Joined:",
+    "deactivated_date": "Deactivated:",
+    "member_role_user": "Member",
+    "member_role_creator": "Creator",
+    "member_role_admin": "Admin",
+    "settings_logo_none": "No logo",
+    "settings_bg_none": "No background"
   },
   "track": {
     "play_button": "Play",

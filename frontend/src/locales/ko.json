@@ -382,7 +382,16 @@
     "applied_date": "신청일:",
     "reviewed_date": "처리일:",
     "reject_reason_label": "반려 사유:",
-    "reject_reason_placeholder": "반려 사유 (선택)"
+    "reject_reason_placeholder": "반려 사유 (선택)",
+    "members_filter_status": "상태",
+    "uploader_id": "업로더 ID:",
+    "joined_date": "가입일:",
+    "deactivated_date": "비활성화:",
+    "member_role_user": "일반회원",
+    "member_role_creator": "Creator",
+    "member_role_admin": "관리자",
+    "settings_logo_none": "로고 없음",
+    "settings_bg_none": "배경 없음"
   },
   "track": {
     "play_button": "재생",
