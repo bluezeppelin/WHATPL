@@ -138,9 +138,9 @@ export default function CreatorDetail() {
             <p className={styles.profileLabel}>Creator Profile</p>
             <h1 className={styles.artistName}>{creator.artistName}</h1>
             <div className={styles.stats}>
-              <span className={styles.stat}>{t('creator.subscribe_button')} <strong>{subscriberCount.toLocaleString()}</strong></span>
+              <span className={styles.stat}>{t('creator.subscriber_count', { count: subscriberCount.toLocaleString() })}</span>
               <span className={styles.statDivider}>·</span>
-              <span className={styles.stat}><strong>{creator.trackCount}</strong></span>
+              <span className={styles.stat}>{t('creator.track_count', { count: creator.trackCount })}</span>
             </div>
 
             {!isSelf && (

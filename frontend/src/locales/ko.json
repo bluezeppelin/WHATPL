@@ -389,6 +389,8 @@
   "creator": {
     "subscribe_button": "구독",
     "unsubscribe_button": "구독 취소",
+    "subscriber_count": "구독자 {{count}}명",
+    "track_count": "트랙 {{count}}개",
     "empty_state": "아직 공개된 트랙이 없습니다.",
     "not_found": "존재하지 않는 크리에이터입니다.",
     "load_error": "프로필을 불러오는 데 실패했습니다.",

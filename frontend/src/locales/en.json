@@ -389,6 +389,8 @@
   "creator": {
     "subscribe_button": "Follow",
     "unsubscribe_button": "Unfollow",
+    "subscriber_count": "{{count}} followers",
+    "track_count": "{{count}} tracks",
     "empty_state": "No public tracks yet.",
     "not_found": "Creator not found.",
     "load_error": "Failed to load profile.",

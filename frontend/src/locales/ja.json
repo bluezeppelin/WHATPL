@@ -389,6 +389,8 @@
   "creator": {
     "subscribe_button": "フォロー",
     "unsubscribe_button": "フォロー解除",
+    "subscriber_count": "フォロワー {{count}}名",
+    "track_count": "トラック {{count}}曲",
     "empty_state": "まだ公開されたトラックがありません。",
     "not_found": "存在しないクリエイターです。",
     "load_error": "プロフィールの読み込みに失敗しました。",
