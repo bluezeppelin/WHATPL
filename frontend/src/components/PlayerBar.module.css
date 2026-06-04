@@ -480,8 +480,8 @@
 .trackInfo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 300px;
+  gap: 16px;
+  width: 380px;
   flex-shrink: 0;
   align-self: center;
   padding-left: 28px;
@@ -489,9 +489,9 @@
 }
 
 .cover {
-  width: 42px;
-  height: 42px;
-  border-radius: 6px;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
   border: 1px solid rgba(var(--cover-rgb, 168, 85, 247), 0.62);
@@ -503,7 +503,7 @@
 .text { min-width: 0; }
 
 .title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
@@ -513,9 +513,9 @@
 }
 
 .artist {
-  font-size: 12px;
+  font-size: 13px;
   color: #AEB6C8;
-  margin-top: 2px;
+  margin-top: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -538,7 +538,7 @@
 .likeBtn:disabled { cursor: default; opacity: 0.45; }
 
 .likeHeart {
-  font-size: 22px;
+  font-size: 26px;
   line-height: 1;
   color: rgba(255, 255, 255, 0.70);
   transition: color 0.2s, text-shadow 0.2s;
@@ -549,7 +549,7 @@
 }
 
 .likeCount {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.75);
   line-height: 1;
