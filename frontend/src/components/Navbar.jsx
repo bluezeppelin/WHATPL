@@ -32,6 +32,10 @@ export default function Navbar({ logoUrl = '' }) {
   const [notifLoading, setNotifLoading] = useState(false);
   const notifDropRef = useRef(null);
 
+  const [langDropOpen, setLangDropOpen] = useState(false);
+  const langDropRef = useRef(null);
+  const [currentLang, setCurrentLang] = useState(localStorage.getItem('whatpl_language') || 'ko');
+
   useEffect(() => { setLogoFailed(false); }, [logoUrl]);
   useEffect(() => { setAvatarFailed(false); }, [user?.profileImageUrl]);
 
@@ -154,8 +158,27 @@ export default function Navbar({ logoUrl = '' }) {
 
   function handleLangChange(lang) {
     i18n.changeLanguage(lang);
-    localStorage.setItem('lang', lang);
+    localStorage.setItem('whatpl_language', lang);
+    setCurrentLang(lang);
+    setLangDropOpen(false);
   }
+
+  useEffect(() => {
+    if (!langDropOpen) return;
+    function handleOutside(e) {
+      if (langDropRef.current && !langDropRef.current.contains(e.target)) setLangDropOpen(false);
+    }
+    function handleEsc(e) { if (e.key === 'Escape') setLangDropOpen(false); }
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [langDropOpen]);
+
+  const LANG_FLAGS = { ko: '🇰🇷', en: '🇺🇸', ja: '🇯🇵' };
+  const LANG_LABELS = { ko: '한국어', en: 'English', ja: '日本語' };
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && query.trim()) {
@@ -290,6 +313,31 @@ export default function Navbar({ logoUrl = '' }) {
           </Link>
         )}
 
+        {/* 언어 선택 — 플레이리스트와 프로필 사이 */}
+        <div className={styles.langPicker} ref={langDropRef}>
+          <button
+            className={`${styles.langFlagBtn} ${langDropOpen ? styles.langFlagBtnOpen : ''}`}
+            onClick={() => setLangDropOpen(o => !o)}
+            aria-label="언어 선택"
+          >
+            <span className={styles.langFlagEmoji}>{LANG_FLAGS[currentLang]}</span>
+          </button>
+          {langDropOpen && (
+            <div className={styles.langDrop}>
+              {['ko', 'en', 'ja'].map(lang => (
+                <button
+                  key={lang}
+                  className={`${styles.langDropItem} ${currentLang === lang ? styles.langDropItemActive : ''}`}
+                  onClick={() => handleLangChange(lang)}
+                >
+                  <span className={styles.langDropFlag}>{LANG_FLAGS[lang]}</span>
+                  <span className={styles.langDropLabel}>{LANG_LABELS[lang]}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className={styles.authArea}>
           {authLoading ? null : user ? (
             <>
@@ -391,17 +439,6 @@ export default function Navbar({ logoUrl = '' }) {
               </Link>
             </>
           )}
-          <div className={styles.langSelector}>
-            {['ko', 'en', 'ja'].map(lang => (
-              <button
-                key={lang}
-                className={`${styles.langBtn} ${i18n.language === lang ? styles.langBtnActive : ''}`}
-                onClick={() => handleLangChange(lang)}
-              >
-                {lang === 'ko' ? '한' : lang === 'en' ? 'EN' : 'JP'}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
     </nav>
