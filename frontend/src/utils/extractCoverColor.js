@@ -63,16 +63,7 @@ function loadAndExtract(src) {
 export async function extractCoverColor(coverUrl) {
   if (!coverUrl || coverUrl.startsWith('data:')) return null;
 
-  // 1차: S3/CloudFront 직접 추출.
-  // 캐시 분리용 쿼리 파라미터 — 일반 <img>가 crossorigin 없이 먼저 캐싱한
-  // 응답을 재사용하면 canvas가 tainted 되어 실패함. URL을 다르게 만들어
-  // CORS 헤더가 포함된 응답을 별도 캐시 엔트리에 저장하도록 강제.
-  const corsUrl = coverUrl + (coverUrl.includes('?') ? '&' : '?') + '_cors=1';
-  const direct = await loadAndExtract(corsUrl);
-  if (direct) return direct;
-
-  // 2차 폴백: 백엔드 프록시(동일 출처)를 통해 추출.
-  // S3 버킷에 CORS가 없을 때도 동작. 프록시는 우리 버킷 객체만 허용함.
+  // S3 CORS 없이도 동작하는 백엔드 프록시 경로만 사용
   const proxyUrl = `${API_BASE}/api/image-proxy?url=${encodeURIComponent(coverUrl)}`;
   return loadAndExtract(proxyUrl);
 }
