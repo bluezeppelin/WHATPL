@@ -735,6 +735,23 @@
     "link_support": "고객센터",
     "copyright": "© 2026 AWSome. All rights reserved."
   },
+  "validation": {
+    "id_format": "아이디는 영문 소문자로 시작하고, 4~20자의 영문 소문자, 숫자, 언더바(_)만 사용할 수 있습니다.",
+    "id_same_as_pw": "비밀번호는 아이디와 동일하게 설정할 수 없습니다.",
+    "pw_format": "비밀번호는 8~20자이며, 영문과 숫자를 각각 1개 이상 포함해야 합니다.",
+    "pw_no_space": "비밀번호에 공백을 사용할 수 없습니다.",
+    "pw_mismatch": "비밀번호가 일치하지 않습니다.",
+    "pw_same_as_old": "새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.",
+    "email_format": "올바른 이메일 형식을 입력해주세요.",
+    "email_taken": "이미 사용 중인 이메일입니다.",
+    "name_format": "닉네임은 2~20자의 한글, 영문, 숫자, 언더바(_), 점(.)만 사용할 수 있습니다.",
+    "phone_format": "휴대폰 번호 형식이 올바르지 않습니다.",
+    "phone_country_kr": "🇰🇷 대한민국 +82",
+    "phone_country_us": "🇺🇸 미국/캐나다 +1",
+    "phone_country_jp": "🇯🇵 일본 +81",
+    "pw_current_wrong": "현재 비밀번호가 올바르지 않습니다.",
+    "pw_new_mismatch": "새 비밀번호가 일치하지 않습니다."
+  },
   "common": {
     "loading": "불러오는 중...",
     "cancel": "취소",

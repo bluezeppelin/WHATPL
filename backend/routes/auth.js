@@ -12,6 +12,37 @@ const { uploadProfile, getFileUrl } = require('../lib/s3');
 
 const router = express.Router();
 
+// ── 유효성 검사 규칙 ──────────────────────────────
+const ID_REGEX    = /^[a-z][a-z0-9_]{3,19}$/;
+const PW_REGEX    = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_REGEX  = /^[가-힣a-zA-Z0-9_.]{2,20}$/;
+const PHONE_REGEX = /^\+\d{7,15}$/;
+
+function validateId(id) {
+  if (!ID_REGEX.test(id)) return 'ID must start with a lowercase letter and be 4–20 chars (a-z, 0-9, _).';
+  return null;
+}
+function validatePassword(pw, loginId) {
+  if (/\s/.test(pw)) return 'Password cannot contain spaces.';
+  if (!PW_REGEX.test(pw)) return 'Password must be 8–20 characters and include at least one letter and one number.';
+  if (loginId && pw === loginId) return 'Password cannot be the same as your ID.';
+  return null;
+}
+function validateEmail(email) {
+  if (!EMAIL_REGEX.test(email)) return 'Please enter a valid email address.';
+  return null;
+}
+function validateName(name) {
+  if (!NAME_REGEX.test(name.trim())) return 'Name must be 2–20 characters (Korean, English, numbers, _, .).';
+  return null;
+}
+function validatePhone(phone) {
+  if (!phone) return null; // 선택 입력
+  if (!PHONE_REGEX.test(phone)) return 'Invalid phone number format.';
+  return null;
+}
+
 // GET /api/auth/check-id?loginId=
 router.get('/check-id', async (req, res) => {
   const { loginId } = req.query;
@@ -52,6 +83,19 @@ router.post('/signup', (req, res) => {
       }
       if (!termsAgreed || !privacyAgreed) {
         return res.status(400).json({ error: '필수 약관에 동의해야 회원가입할 수 있습니다.' });
+      }
+      const idErr = validateId(loginId);
+      if (idErr) return res.status(400).json({ error: idErr });
+      const pwErr = validatePassword(password, loginId);
+      if (pwErr) return res.status(400).json({ error: pwErr });
+      const emailErr = validateEmail(email);
+      if (emailErr) return res.status(400).json({ error: emailErr });
+      const nameErr = validateName(name);
+      if (nameErr) return res.status(400).json({ error: nameErr });
+      const phoneVal = phone?.trim() || '';
+      if (phoneVal) {
+        const phoneErr = validatePhone(phoneVal);
+        if (phoneErr) return res.status(400).json({ error: phoneErr });
       }
       if (await findByLoginId(loginId)) {
         return res.status(409).json({ error: '이미 사용 중인 아이디입니다.' });
@@ -130,9 +174,19 @@ router.patch('/me', requireAuth, async (req, res) => {
   const { email, name, birthDate, phone, profileImageUrl, favoriteGenre, artistName } = req.body;
   try {
     if (email !== undefined && email !== user.email) {
+      const emailErr = validateEmail(email);
+      if (emailErr) return res.status(400).json({ error: emailErr });
       if (await isEmailTakenByOtherUser(email, user.id)) {
         return res.status(409).json({ error: '이미 사용 중인 이메일입니다.' });
       }
+    }
+    if (name !== undefined) {
+      const nameErr = validateName(name);
+      if (nameErr) return res.status(400).json({ error: nameErr });
+    }
+    if (phone !== undefined && phone.trim()) {
+      const phoneErr = validatePhone(phone.trim());
+      if (phoneErr) return res.status(400).json({ error: phoneErr });
     }
     const trimmedArtistName = artistName !== undefined ? (artistName?.trim() ?? '') : undefined;
     if (trimmedArtistName !== undefined && trimmedArtistName !== '' &&
@@ -182,9 +236,8 @@ router.post('/reset-password', async (req, res) => {
   if (newPassword !== confirmPassword) {
     return res.status(400).json({ message: '새 비밀번호와 비밀번호 확인이 일치하지 않습니다.' });
   }
-  if (newPassword.length < 8) {
-    return res.status(400).json({ message: '새 비밀번호는 8자 이상이어야 합니다.' });
-  }
+  const rpwErr = validatePassword(newPassword, loginId?.trim());
+  if (rpwErr) return res.status(400).json({ message: rpwErr });
   try {
     const user = await findUserByLoginIdAndEmail(loginId.trim(), email.trim());
     if (!user) return res.status(404).json({ message: '입력한 정보와 일치하는 계정을 찾을 수 없습니다.' });
@@ -243,14 +296,15 @@ router.patch('/change-password', requireAuth, async (req, res) => {
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ message: '모든 항목을 입력해주세요.' });
   }
-  if (newPassword.length < 8) {
-    return res.status(400).json({ message: '새 비밀번호는 8자 이상이어야 합니다.' });
-  }
+  const pwErr = validatePassword(newPassword, req.user.loginId);
+  if (pwErr) return res.status(400).json({ message: pwErr });
   try {
     const user = await findById(req.user.id);
     if (!user) return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) return res.status(401).json({ message: '현재 비밀번호가 올바르지 않습니다.' });
+    const sameAsOld = await bcrypt.compare(newPassword, user.passwordHash);
+    if (sameAsOld) return res.status(400).json({ message: '새 비밀번호는 현재 비밀번호와 다르게 설정해야 합니다.' });
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await updateUser(user.id, { passwordHash });
     res.json({ message: '비밀번호가 변경되었습니다.' });

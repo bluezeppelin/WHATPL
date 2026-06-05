@@ -735,6 +735,23 @@
     "link_support": "Support",
     "copyright": "© 2026 AWSome. All rights reserved."
   },
+  "validation": {
+    "id_format": "ID must start with a lowercase letter and be 4–20 characters using only lowercase letters, numbers, or underscores (_).",
+    "id_same_as_pw": "Password cannot be the same as your ID.",
+    "pw_format": "Password must be 8–20 characters and include at least one letter and one number.",
+    "pw_no_space": "Password cannot contain spaces.",
+    "pw_mismatch": "Passwords do not match.",
+    "pw_same_as_old": "New password must be different from your current password.",
+    "email_format": "Please enter a valid email address.",
+    "email_taken": "This email is already in use.",
+    "name_format": "Name must be 2–20 characters using Korean, English, numbers, underscores (_), or dots (.).",
+    "phone_format": "Invalid phone number format.",
+    "phone_country_kr": "🇰🇷 South Korea +82",
+    "phone_country_us": "🇺🇸 US / Canada +1",
+    "phone_country_jp": "🇯🇵 Japan +81",
+    "pw_current_wrong": "Current password is incorrect.",
+    "pw_new_mismatch": "New passwords do not match."
+  },
   "common": {
     "loading": "Loading...",
     "cancel": "Cancel",

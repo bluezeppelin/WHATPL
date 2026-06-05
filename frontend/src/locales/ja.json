@@ -735,6 +735,23 @@
     "link_support": "サポート",
     "copyright": "© 2026 AWSome. All rights reserved."
   },
+  "validation": {
+    "id_format": "IDは小文字英字で始まり、4〜20文字の小文字英字・数字・アンダースコア(_)のみ使用できます。",
+    "id_same_as_pw": "パスワードはIDと同じにできません。",
+    "pw_format": "パスワードは8〜20文字で、英字と数字をそれぞれ1文字以上含む必要があります。",
+    "pw_no_space": "パスワードにスペースは使用できません。",
+    "pw_mismatch": "パスワードが一致しません。",
+    "pw_same_as_old": "新しいパスワードは現在のパスワードと異なる必要があります。",
+    "email_format": "正しいメールアドレスを入力してください。",
+    "email_taken": "このメールアドレスはすでに使用されています。",
+    "name_format": "ニックネームは2〜20文字で、韓国語・英字・数字・アンダースコア(_)・ドット(.)のみ使用できます。",
+    "phone_format": "電話番号の形式が正しくありません。",
+    "phone_country_kr": "🇰🇷 韓国 +82",
+    "phone_country_us": "🇺🇸 米国/カナダ +1",
+    "phone_country_jp": "🇯🇵 日本 +81",
+    "pw_current_wrong": "現在のパスワードが正しくありません。",
+    "pw_new_mismatch": "新しいパスワードが一致しません。"
+  },
   "common": {
     "loading": "読み込み中...",
     "cancel": "キャンセル",

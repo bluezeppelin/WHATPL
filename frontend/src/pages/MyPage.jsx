@@ -3,9 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { useAuth } from '../context/AuthContext';
-
-const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
-function fmtDate(iso) { return new Date(iso).toLocaleDateString(LOCALE_MAP[i18n.language] || 'ko-KR'); }
 import { useCapsLock, CapsLockWarning } from '../hooks/useCapsLock';
 import { usePlayer } from '../hooks/usePlayer';
 import { updateMe, changePassword, uploadProfileImage, deleteAccount } from '../api/auth';
@@ -13,6 +10,9 @@ import { getMyCreatorRequest, createCreatorRequest } from '../api/creatorRequest
 import { getMyUploadedTracks, updateMyUploadedTrack, createTrackDeleteRequest, getMyTrackDeleteRequests } from '../api/myTracks';
 import styles from './MyPage.module.css';
 import { GENRES as BASE_GENRES } from '../constants/genres';
+
+const LOCALE_MAP = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
+function fmtDate(iso) { return new Date(iso).toLocaleDateString(LOCALE_MAP[i18n.language] || 'ko-KR'); }
 
 const GENRES = ['', ...BASE_GENRES];
 
@@ -29,6 +29,23 @@ function InfoRow({ label, value }) {
 
 export default function MyPage() {
   const { t } = useTranslation();
+
+  const VALIDATORS = {
+    password: (pw, loginId) => {
+      if (/\s/.test(pw)) return t('validation.pw_no_space');
+      if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/.test(pw)) return t('validation.pw_format');
+      if (loginId && pw === loginId) return t('validation.id_same_as_pw');
+      return null;
+    },
+    email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? null : t('validation.email_format'),
+    name: (v) => v && /^[가-힣a-zA-Z0-9_.]{2,20}$/.test(v.trim()) ? null : t('validation.name_format'),
+    phone: (v) => {
+      if (!v || !v.trim()) return null;
+      if (!/^\+\d{7,15}$/.test(v.trim())) return t('validation.phone_format');
+      return null;
+    },
+  };
+
   const ROLE_LABELS = { user: t('admin.member_role_user'), creator: t('admin.member_role_creator'), admin: t('admin.member_role_admin') };
   const { user, loading, roleLabel, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -199,6 +216,14 @@ export default function MyPage() {
   async function handleSave(e) {
     e.preventDefault();
     setEditError('');
+    if (editForm.email !== undefined && editForm.email !== user.email) {
+      const emailErr = VALIDATORS.email(editForm.email);
+      if (emailErr) return setEditError(emailErr);
+    }
+    if (editForm.name !== undefined) {
+      const nameErr = VALIDATORS.name(editForm.name);
+      if (nameErr) return setEditError(nameErr);
+    }
     setEditSaving(true);
     try {
       await updateMe(editForm);
@@ -248,7 +273,8 @@ export default function MyPage() {
     setPwError('');
     if (!pwForm.currentPassword) return setPwError(t('mypage.error_pw_current'));
     if (!pwForm.newPassword) return setPwError(t('mypage.error_pw_new'));
-    if (pwForm.newPassword.length < 8) return setPwError(t('mypage.error_pw_length'));
+    const pwErr = VALIDATORS.password(pwForm.newPassword, user.loginId);
+    if (pwErr) return setPwError(pwErr);
     if (!pwForm.confirmPassword) return setPwError(t('mypage.error_pw_confirm'));
     if (pwForm.newPassword !== pwForm.confirmPassword) return setPwError(t('mypage.error_pw_mismatch'));
     setPwSaving(true);
@@ -493,13 +519,15 @@ export default function MyPage() {
                   </div>
                   <div className={styles.editField}>
                     <label className={styles.editLabel}>{t('mypage.edit_phone_label')}</label>
+                    {/* Backend expects +countrycode... format, e.g. +821012345678 */}
                     <input
                       className={styles.editInput}
                       type="tel"
                       value={editForm.phone}
                       onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
-                      placeholder="010-0000-0000"
+                      placeholder="+82 10-1234-5678"
                     />
+                    <p className={styles.editHint}>{t('mypage.edit_phone_hint')}</p>
                   </div>
                   <div className={styles.editField}>
                     <label className={styles.editLabel}>{t('mypage.edit_profile_url_label')}</label>

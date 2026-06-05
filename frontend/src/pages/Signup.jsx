@@ -21,6 +21,25 @@ const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0
 export default function Signup() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const VALIDATORS = {
+    id: (v) => /^[a-z][a-z0-9_]{3,19}$/.test(v) ? null : t('validation.id_format'),
+    password: (pw, id) => {
+      if (/\s/.test(pw)) return t('validation.pw_no_space');
+      if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/.test(pw)) return t('validation.pw_format');
+      if (id && pw === id) return t('validation.id_same_as_pw');
+      return null;
+    },
+    email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? null : t('validation.email_format'),
+    name: (v) => /^[가-힣a-zA-Z0-9_.]{2,20}$/.test(v.trim()) ? null : t('validation.name_format'),
+    phone: (countryCode, number) => {
+      if (!number.trim()) return null; // optional
+      const digits = number.replace(/[\s\-]/g, '');
+      if (!/^\d{6,14}$/.test(digits)) return t('validation.phone_format');
+      return null;
+    },
+  };
+
   const TERMS_TEXT = [
     t('terms.s1_title'), '\n', t('terms.s1_body'), '\n\n',
     t('terms.s2_title'), '\n',
@@ -78,8 +97,8 @@ export default function Signup() {
   const [birthYear, setBirthYear] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
   const [birthDay, setBirthDay] = useState('');
-  const [phoneMid, setPhoneMid] = useState('');
-  const [phoneLast, setPhoneLast] = useState('');
+  const [countryCode, setCountryCode] = useState('+82');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   const [profileFile, setProfileFile] = useState(null);
   const [profilePreview, setProfilePreview] = useState('');
@@ -88,6 +107,8 @@ export default function Signup() {
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+
+  const [fieldErrors, setFieldErrors] = useState({});
 
   function handleGoToLogin() { navigate('/login'); }
 
@@ -133,8 +154,26 @@ export default function Signup() {
     e.preventDefault();
     setError('');
 
+    const newErrors = {};
+    const idErr = VALIDATORS.id(form.loginId);
+    if (idErr) newErrors.loginId = idErr;
+    const pwErr = VALIDATORS.password(form.password, form.loginId);
+    if (pwErr) newErrors.password = pwErr;
+    if (form.password !== form.passwordConfirm) newErrors.passwordConfirm = t('validation.pw_mismatch');
+    const emailErr = VALIDATORS.email(form.email);
+    if (emailErr) newErrors.email = emailErr;
+    const nameErr = VALIDATORS.name(form.name);
+    if (nameErr) newErrors.name = nameErr;
+    if (phoneNumber.trim()) {
+      const pErr = VALIDATORS.phone(countryCode, phoneNumber);
+      if (pErr) newErrors.phone = pErr;
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      return;
+    }
+
     if (idStatus !== 'available') { setError(t('signup.id_check_error')); return; }
-    if (form.password !== form.passwordConfirm) { setError(t('signup.password_mismatch')); return; }
     if (form.artistName.trim() && artistNameStatus !== 'available') { setError(t('signup.artist_check_error')); return; }
 
     let birthDate = '';
@@ -150,13 +189,13 @@ export default function Signup() {
     }
 
     let phone = '';
-    const phoneAnyFilled = phoneMid || phoneLast;
-    const phoneAllFilled = phoneMid && phoneLast;
-    if (phoneAnyFilled && !phoneAllFilled) { setError(t('signup.phone_partial_error')); return; }
-    if (phoneAllFilled) {
-      if (!/^\d{3,4}$/.test(phoneMid)) { setError(t('signup.phone_mid_error')); return; }
-      if (!/^\d{4}$/.test(phoneLast)) { setError(t('signup.phone_last_error')); return; }
-      phone = `010-${phoneMid}-${phoneLast}`;
+    if (phoneNumber.trim()) {
+      const phoneErr = VALIDATORS.phone(countryCode, phoneNumber);
+      if (phoneErr) { setError(phoneErr); return; }
+      // normalize: remove spaces/hyphens, remove leading 0, prepend country code
+      const digits = phoneNumber.replace(/[\s\-]/g, '');
+      const normalized = digits.startsWith('0') ? digits.slice(1) : digits;
+      phone = `${countryCode}${normalized}`;
     }
 
     if (!termsAgreed || !privacyAgreed) { setError(t('signup.agreement_error')); return; }
@@ -215,6 +254,12 @@ export default function Signup() {
               <input
                 className={styles.input} type="text" name="loginId"
                 value={form.loginId} onChange={handleChange}
+                onBlur={() => {
+                  if (form.loginId) {
+                    const err = VALIDATORS.id(form.loginId);
+                    setFieldErrors(prev => ({ ...prev, loginId: err }));
+                  }
+                }}
                 placeholder={t('signup.placeholder_id')} autoComplete="username" required
               />
               <button type="button" className={styles.checkBtn} onClick={handleCheckId}>
@@ -224,6 +269,7 @@ export default function Signup() {
             {idStatus === 'checking' && <p className={styles.info}>{t('signup.checking')}</p>}
             {idStatus === 'available' && <p className={styles.success}>{t('signup.available')}</p>}
             {idStatus === 'taken' && <p className={styles.error}>{t('signup.taken')}</p>}
+            {fieldErrors.loginId && <p className={styles.error}>{fieldErrors.loginId}</p>}
           </div>
 
           <div className={styles.field}>
@@ -231,10 +277,18 @@ export default function Signup() {
             <input
               className={styles.input} type="password" name="password"
               value={form.password} onChange={handleChange}
-              onKeyDown={pwCaps.handler} onKeyUp={pwCaps.handler} onBlur={pwCaps.reset}
+              onKeyDown={pwCaps.handler} onKeyUp={pwCaps.handler}
+              onBlur={(e) => {
+                pwCaps.reset(e);
+                if (form.password) {
+                  const err = VALIDATORS.password(form.password, form.loginId);
+                  setFieldErrors(prev => ({ ...prev, password: err }));
+                }
+              }}
               placeholder={t('signup.placeholder_password')} autoComplete="new-password" required
             />
             <CapsLockWarning on={pwCaps.on} />
+            {fieldErrors.password && <p className={styles.error}>{fieldErrors.password}</p>}
           </div>
 
           <div className={styles.field}>
@@ -242,13 +296,21 @@ export default function Signup() {
             <input
               className={styles.input} type="password" name="passwordConfirm"
               value={form.passwordConfirm} onChange={handleChange}
-              onKeyDown={pwConfirmCaps.handler} onKeyUp={pwConfirmCaps.handler} onBlur={pwConfirmCaps.reset}
+              onKeyDown={pwConfirmCaps.handler} onKeyUp={pwConfirmCaps.handler}
+              onBlur={(e) => {
+                pwConfirmCaps.reset(e);
+                if (form.passwordConfirm) {
+                  const err = form.password !== form.passwordConfirm ? t('validation.pw_mismatch') : null;
+                  setFieldErrors(prev => ({ ...prev, passwordConfirm: err }));
+                }
+              }}
               placeholder={t('signup.placeholder_password_confirm')} autoComplete="new-password" required
             />
             <CapsLockWarning on={pwConfirmCaps.on} />
             {form.passwordConfirm && form.password !== form.passwordConfirm && (
               <p className={styles.error}>{t('signup.password_mismatch')}</p>
             )}
+            {fieldErrors.passwordConfirm && <p className={styles.error}>{fieldErrors.passwordConfirm}</p>}
           </div>
 
           <div className={styles.field}>
@@ -256,8 +318,15 @@ export default function Signup() {
             <input
               className={styles.input} type="email" name="email"
               value={form.email} onChange={handleChange}
+              onBlur={() => {
+                if (form.email) {
+                  const err = VALIDATORS.email(form.email);
+                  setFieldErrors(prev => ({ ...prev, email: err }));
+                }
+              }}
               placeholder={t('signup.placeholder_email')} autoComplete="email" required
             />
+            {fieldErrors.email && <p className={styles.error}>{fieldErrors.email}</p>}
           </div>
 
           <div className={styles.field}>
@@ -265,8 +334,15 @@ export default function Signup() {
             <input
               className={styles.input} type="text" name="name"
               value={form.name} onChange={handleChange}
+              onBlur={() => {
+                if (form.name) {
+                  const err = VALIDATORS.name(form.name);
+                  setFieldErrors(prev => ({ ...prev, name: err }));
+                }
+              }}
               placeholder={t('signup.placeholder_name')} required
             />
+            {fieldErrors.name && <p className={styles.error}>{fieldErrors.name}</p>}
           </div>
 
           <div className={styles.field}>
@@ -293,20 +369,32 @@ export default function Signup() {
           <div className={styles.field}>
             <label className={styles.label}>{t('signup.label_phone')}</label>
             <div className={styles.phoneRow}>
-              <span className={`${styles.input} ${styles.phonePrefix} ${styles.phonePrefixFixed}`}>010</span>
-              <span className={styles.phoneSep}>-</span>
+              <select
+                className={`${styles.input} ${styles.countrySelect}`}
+                value={countryCode}
+                onChange={e => setCountryCode(e.target.value)}
+              >
+                <option value="+82">{t('validation.phone_country_kr')}</option>
+                <option value="+1">{t('validation.phone_country_us')}</option>
+                <option value="+81">{t('validation.phone_country_jp')}</option>
+              </select>
               <input
-                className={`${styles.input} ${styles.phoneMid}`} type="text" inputMode="numeric"
-                value={phoneMid} onChange={e => setPhoneMid(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="1234" maxLength={4}
-              />
-              <span className={styles.phoneSep}>-</span>
-              <input
-                className={`${styles.input} ${styles.phoneLast}`} type="text" inputMode="numeric"
-                value={phoneLast} onChange={e => setPhoneLast(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                placeholder="5678" maxLength={4}
+                className={styles.input}
+                type="text"
+                inputMode="tel"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value.replace(/[^\d\s\-]/g, ''))}
+                onBlur={() => {
+                  if (phoneNumber.trim()) {
+                    const err = VALIDATORS.phone(countryCode, phoneNumber);
+                    setFieldErrors(prev => ({ ...prev, phone: err }));
+                  }
+                }}
+                placeholder="010-1234-5678"
+                maxLength={20}
               />
             </div>
+            {fieldErrors.phone && <p className={styles.error}>{fieldErrors.phone}</p>}
           </div>
 
           <div className={styles.field}>
