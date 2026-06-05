@@ -95,7 +95,7 @@ function GhostCard({ position, ctrlType, ctrlProps }) {
 }
 
 /* ─── 앨범 카드 (컨트롤 overlay 포함) ─── */
-function AlbumCard({ item, ctrlType, ctrlProps, isPlaying }) {
+function AlbumCard({ item, ctrlType, ctrlProps, isPlaying, slideDir }) {
   const { type, track, position } = item;
 
   if (type === 'ghost') {
@@ -103,9 +103,11 @@ function AlbumCard({ item, ctrlType, ctrlProps, isPlaying }) {
   }
 
   const isCenter = position === 'center';
+  const slideClass = slideDir === 'left' ? styles.slideLeft
+    : slideDir === 'right' ? styles.slideRight : '';
 
   return (
-    <div className={`${styles.card} ${styles[`card_${position}`]}`}>
+    <div className={`${styles.card} ${styles[`card_${position}`]} ${slideClass}`}>
       {isCenter ? (
         <>
           <div className={`${styles.discRotate} ${isPlaying ? styles.discSpinning : ''}`}>
@@ -147,6 +149,8 @@ export default function PlayerBar() {
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [slideDir, setSlideDir] = useState(null);
+  const prevIndexRef = useRef(null);
   const [coverColor, setCoverColor] = useState(null);
   const [hasCheckedSession, setHasCheckedSession] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
@@ -240,6 +244,18 @@ export default function PlayerBar() {
     }
     Promise.resolve(restorePlayerSession()).finally(() => setHasCheckedSession(true));
   }, [authLoading, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 방향 감지 → 슬라이드 애니메이션
+  useEffect(() => {
+    if (currentIndex === null || currentIndex === undefined) return;
+    if (prevIndexRef.current === null) { prevIndexRef.current = currentIndex; return; }
+    if (prevIndexRef.current === currentIndex) return;
+    const dir = currentIndex > prevIndexRef.current ? 'left' : 'right';
+    prevIndexRef.current = currentIndex;
+    setSlideDir(dir);
+    const timer = setTimeout(() => setSlideDir(null), 480);
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -396,16 +412,14 @@ export default function PlayerBar() {
           {/* 앨범 카드들 (7장) */}
           {stackItems.map(item => {
             const ctrl = cardCtrlMap[item.position] || {};
-            const cardKey = item.type === 'ghost'
-              ? `ghost_${item.position}`
-              : item.track.id;
             return (
               <AlbumCard
-                key={cardKey}
+                key={item.position}
                 item={item}
                 ctrlType={ctrl.ctrlType}
                 ctrlProps={ctrl.ctrlProps}
                 isPlaying={isPlaying}
+                slideDir={slideDir}
               />
             );
           })}
