@@ -165,7 +165,12 @@
     "error_audio_required": "音声ファイルを選択してください。",
     "error_title_required": "タイトルを入力してください。",
     "error_genre_required": "ジャンルを選択してください。",
-    "error_default": "アップロードに失敗しました。もう一度お試しください。"
+    "error_default": "アップロードに失敗しました。もう一度お試しください。",
+    "copyright_title": "⚠ 著作権・アップロード責任に関するご案内",
+    "copyright_body1": "ご自身で制作した、または使用権を持つ音楽のみアップロードできます。",
+    "copyright_body2": "他者の著作物を無断でアップロードした場合の法的責任は、アップロードしたユーザー本人にあります。",
+    "copyright_body3": "著作権を侵害するコンテンツや権利者からの申告があったコンテンツは、事前通知なく削除され、アカウントの利用が制限される場合があります。",
+    "copyright_check": "上記内容を確認し、このコンテンツをアップロードする権限があることを確認します。"
   },
   "explore": {
     "heading": "音楽を探す",
@@ -234,6 +239,7 @@
     "reapply_button": "申請する",
     "reapply_button_loading": "申請中...",
     "edit_phone_label": "電話番号",
+    "edit_phone_hint": "国番号を含む形式で入力してください。例: +81 90-1234-5678",
     "edit_profile_url_label": "プロフィール画像URL",
     "edit_profile_url_placeholder": "画像URL",
     "edit_artist_hint": "任意項目です。後でクリエイター申請時にクリエイター名として使用されます。",

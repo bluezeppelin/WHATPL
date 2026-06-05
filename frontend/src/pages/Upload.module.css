@@ -462,3 +462,63 @@
   text-decoration: underline;
 }
 
+/* ── 저작권 안내 박스 ── */
+.copyrightBox {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  background: rgba(10, 14, 28, 0.72);
+  border: 1px solid rgba(200, 160, 80, 0.28);
+  border-radius: var(--radius, 12px);
+  backdrop-filter: blur(8px);
+}
+
+.copyrightTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(220, 185, 100, 0.90);
+  margin: 0 0 10px 0;
+  letter-spacing: 0.01em;
+}
+
+.copyrightList {
+  margin: 0 0 14px 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.copyrightList li {
+  font-size: 12px;
+  color: rgba(180, 190, 210, 0.75);
+  line-height: 1.55;
+}
+
+.copyrightEmphasis {
+  color: rgba(220, 185, 100, 0.85) !important;
+  font-weight: 600 !important;
+}
+
+.copyrightCheck {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: rgba(200, 215, 240, 0.85);
+  line-height: 1.5;
+}
+
+.copyrightCheck:hover {
+  color: rgba(220, 235, 255, 1);
+}
+
+.copyrightCheckbox {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent, #7c6af7);
+  cursor: pointer;
+}
+

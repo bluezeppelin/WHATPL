@@ -48,6 +48,7 @@ export default function Upload() {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [copyrightAgreed, setCopyrightAgreed] = useState(false);
 
   const onAudioDrop = (e) => {
     e.preventDefault();
@@ -81,6 +82,7 @@ export default function Upload() {
       if (coverFile) fd.append('cover', coverFile);
       Object.entries(form).forEach(([k, v]) => v && fd.append(k, v));
       await uploadTrack(fd, setProgress);
+      setCopyrightAgreed(false);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.error || t('upload.error_default'));
@@ -301,7 +303,30 @@ export default function Upload() {
             </div>
           )}
 
-          <button type="submit" disabled={uploading || !user.artistName} className={styles.submitBtn}>
+          {/* 저작권 안내 박스 */}
+          <div className={styles.copyrightBox}>
+            <p className={styles.copyrightTitle}>{t('upload.copyright_title')}</p>
+            <ul className={styles.copyrightList}>
+              <li>{t('upload.copyright_body1')}</li>
+              <li className={styles.copyrightEmphasis}>{t('upload.copyright_body2')}</li>
+              <li>{t('upload.copyright_body3')}</li>
+            </ul>
+            <label className={styles.copyrightCheck}>
+              <input
+                type="checkbox"
+                checked={copyrightAgreed}
+                onChange={e => setCopyrightAgreed(e.target.checked)}
+                className={styles.copyrightCheckbox}
+              />
+              <span>{t('upload.copyright_check')}</span>
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            disabled={uploading || !user.artistName || !copyrightAgreed}
+            className={styles.submitBtn}
+          >
             {uploading ? t('upload.button_submit_loading') : t('upload.button_submit')}
           </button>
         </form>

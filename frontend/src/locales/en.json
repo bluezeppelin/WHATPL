@@ -165,7 +165,12 @@
     "error_audio_required": "Please select an audio file.",
     "error_title_required": "Please enter a title.",
     "error_genre_required": "Please select a genre.",
-    "error_default": "Upload failed. Please try again."
+    "error_default": "Upload failed. Please try again.",
+    "copyright_title": "⚠ Copyright & Upload Responsibility Notice",
+    "copyright_body1": "You may only upload music that you have created yourself or have the rights to use.",
+    "copyright_body2": "Any legal liability arising from the unauthorized upload of others' copyrighted works is solely the responsibility of the uploader.",
+    "copyright_body3": "Content that infringes copyright or receives a rights holder's complaint may be removed without prior notice, and account access may be restricted.",
+    "copyright_check": "I have read the above and confirm that I have the right to upload this content."
   },
   "explore": {
     "heading": "Explore",
@@ -234,6 +239,7 @@
     "reapply_button": "Apply",
     "reapply_button_loading": "Applying...",
     "edit_phone_label": "Phone Number",
+    "edit_phone_hint": "Include country code. e.g. +1 213-123-4567",
     "edit_profile_url_label": "Profile Image URL",
     "edit_profile_url_placeholder": "Image URL",
     "edit_artist_hint": "Optional. Used as your creator name when applying for Creator status.",
