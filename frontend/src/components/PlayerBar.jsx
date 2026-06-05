@@ -95,7 +95,7 @@ function GhostCard({ position, ctrlType, ctrlProps }) {
 }
 
 /* ─── 앨범 카드 (컨트롤 overlay 포함) ─── */
-function AlbumCard({ item, ctrlType, ctrlProps, isPlaying, slideDir }) {
+function AlbumCard({ item, ctrlType, ctrlProps, isPlaying }) {
   const { type, track, position } = item;
 
   if (type === 'ghost') {
@@ -103,11 +103,9 @@ function AlbumCard({ item, ctrlType, ctrlProps, isPlaying, slideDir }) {
   }
 
   const isCenter = position === 'center';
-  const slideClass = slideDir === 'left' ? styles.slideLeft
-    : slideDir === 'right' ? styles.slideRight : '';
 
   return (
-    <div className={`${styles.card} ${styles[`card_${position}`]} ${slideClass}`}>
+    <div className={`${styles.card} ${styles[`card_${position}`]}`}>
       {isCenter ? (
         <>
           <div className={`${styles.discRotate} ${isPlaying ? styles.discSpinning : ''}`}>
@@ -409,20 +407,24 @@ export default function PlayerBar() {
             </svg>
           </button>
 
-          {/* 앨범 카드들 (7장) */}
-          {stackItems.map(item => {
-            const ctrl = cardCtrlMap[item.position] || {};
-            return (
-              <AlbumCard
-                key={item.position}
-                item={item}
-                ctrlType={ctrl.ctrlType}
-                ctrlProps={ctrl.ctrlProps}
-                isPlaying={isPlaying}
-                slideDir={slideDir}
-              />
-            );
-          })}
+          {/* 앨범 카드들 (7장) — slideWrapper로 방향 애니메이션 */}
+          <div className={
+            slideDir === 'left' ? styles.slideLeft
+            : slideDir === 'right' ? styles.slideRight : ''
+          }>
+            {stackItems.map(item => {
+              const ctrl = cardCtrlMap[item.position] || {};
+              return (
+                <AlbumCard
+                  key={item.position}
+                  item={item}
+                  ctrlType={ctrl.ctrlType}
+                  ctrlProps={ctrl.ctrlProps}
+                  isPlaying={isPlaying}
+                />
+              );
+            })}
+          </div>
 
           {/* 반복 — farfarRight 카드 바로 오른쪽 */}
           <button

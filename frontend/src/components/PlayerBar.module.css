@@ -231,21 +231,21 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
 }
 
-/* ── 슬라이드 애니메이션 ── */
+/* ── 슬라이드 애니메이션 (wrapper에 적용) ── */
 @keyframes slideFromRight {
-  from { transform: translateX(80px) scale(0.92); opacity: 0.4; }
-  to   { transform: translateX(0) scale(1); opacity: 1; }
+  from { transform: translateX(70px); }
+  to   { transform: translateX(0); }
 }
 @keyframes slideFromLeft {
-  from { transform: translateX(-80px) scale(0.92); opacity: 0.4; }
-  to   { transform: translateX(0) scale(1); opacity: 1; }
+  from { transform: translateX(-70px); }
+  to   { transform: translateX(0); }
 }
 
 .slideLeft {
-  animation: slideFromRight 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  animation: slideFromRight 0.40s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 .slideRight {
-  animation: slideFromLeft 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  animation: slideFromLeft 0.40s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
 /* ── disc 회전 레이어 ── */
