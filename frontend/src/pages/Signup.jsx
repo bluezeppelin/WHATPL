@@ -134,6 +134,13 @@ export default function Signup() {
 
   async function handleCheckId() {
     if (!form.loginId.trim()) return;
+    const formatErr = VALIDATORS.id(form.loginId.trim());
+    if (formatErr) {
+      setFieldErrors(prev => ({ ...prev, loginId: formatErr }));
+      setIdStatus(null);
+      return;
+    }
+    setFieldErrors(prev => ({ ...prev, loginId: null }));
     setIdStatus('checking');
     try {
       const { available } = await checkLoginId(form.loginId.trim());
