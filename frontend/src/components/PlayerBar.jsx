@@ -396,9 +396,12 @@ export default function PlayerBar() {
           {/* 앨범 카드들 (7장) */}
           {stackItems.map(item => {
             const ctrl = cardCtrlMap[item.position] || {};
+            const cardKey = item.type === 'ghost'
+              ? `ghost_${item.position}`
+              : item.track.id;
             return (
               <AlbumCard
-                key={item.position}
+                key={cardKey}
                 item={item}
                 ctrlType={ctrl.ctrlType}
                 ctrlProps={ctrl.ctrlProps}
