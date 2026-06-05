@@ -231,14 +231,26 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
 }
 
-/* ── 슬라이드 애니메이션 (wrapper에 적용) ── */
+/* ── 카드 슬라이드 wrapper ── */
+.cardWrap {
+  position: absolute;
+  inset: 0;
+}
+
+/* ── 슬라이드 애니메이션 wrapper ── */
 @keyframes slideFromRight {
-  from { transform: translateX(70px); }
+  from { transform: translateX(72px); }
   to   { transform: translateX(0); }
 }
 @keyframes slideFromLeft {
-  from { transform: translateX(-70px); }
+  from { transform: translateX(-72px); }
   to   { transform: translateX(0); }
+}
+
+.slideLeft,
+.slideRight {
+  position: absolute;
+  inset: 0;
 }
 
 .slideLeft {

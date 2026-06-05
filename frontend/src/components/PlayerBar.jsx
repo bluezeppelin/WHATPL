@@ -408,10 +408,10 @@ export default function PlayerBar() {
           </button>
 
           {/* 앨범 카드들 (7장) — slideWrapper로 방향 애니메이션 */}
-          <div className={
+          <div className={`${styles.cardWrap} ${
             slideDir === 'left' ? styles.slideLeft
             : slideDir === 'right' ? styles.slideRight : ''
-          }>
+          }`}>
             {stackItems.map(item => {
               const ctrl = cardCtrlMap[item.position] || {};
               return (
