@@ -15,7 +15,7 @@ export function PlayerProvider({ children }) {
   const [currentPlaylist, setCurrentPlaylist] = useState(DEFAULT_PLAYLIST);
   // 실제로 새 곡을 재생할 때만 증가 → PlayerBar가 이 값으로 오디오 재시작을 판단
   const [playKey, setPlayKey] = useState(0);
-  const [repeatMode, setRepeatMode] = useState('none'); // 'none' | 'all' | 'one'
+  const [repeatMode, setRepeatMode] = useState('all'); // 'none' | 'all' | 'one'
   const [shuffle, setShuffle] = useState(false);
   const audioRef = useRef(null);
   const shuffleHistoryRef = useRef([]);
@@ -208,7 +208,7 @@ export function PlayerProvider({ children }) {
       setCurrentIndex(currentIdx);
       setCurrentTrack(session.track);
       setIsPlaying(false);
-      setRepeatMode(session.repeatMode || 'none');
+      setRepeatMode(session.repeatMode || 'all');
       setShuffle(session.shuffle || false);
     } catch {}
   }, []);
