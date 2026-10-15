@@ -327,11 +327,6 @@ npm run seed:admins
 
 실행 전 `ADMIN_INITIAL_PASSWORD` 또는 계정별 `ADMIN_HYUNSU_PASSWORD`, `ADMIN_JUYEON_PASSWORD`, `ADMIN_INHO_PASSWORD`, `ADMIN_WONJUN_PASSWORD`를 설정해야 합니다. 이미 있는 계정은 비밀번호를 바꾸지 않고 admin 권한만 유지합니다.
 
-| loginId | 이름 |
-|---------|------|
-| admin_hyunsu | 조현수 |
-| admin_juyeon | 박주연 |
-| admin_inho | 최인호 |
-| admin_wonjun | 최원준 |
+관리자 계정 정보(ID · 비밀번호)는 저장소에 포함하지 않으며, 비밀번호는 환경 변수로만 지정합니다.
 
 > 초기 비밀번호는 생성 후 반드시 변경하세요. admin 계정은 음원 업로드와 회원 탈퇴가 불가하며, 관리자 콘솔(`/admin`)을 사용합니다.
