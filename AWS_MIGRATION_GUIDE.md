@@ -468,27 +468,13 @@ CREATE TABLE hard_delete_logs (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- ──────────────────────────────────────────
--- 초기 admin 데이터 삽입
+-- 초기 admin 계정
 -- ──────────────────────────────────────────
-INSERT INTO users (id, login_id, password_hash, email, name, role, status, terms_agreed, privacy_agreed,
-                   agreed_at, created_at, updated_at)
-VALUES
-  ('f813fa12-7dab-4f96-8d81-a8f207fe1418', 'admin_hyunsu',
-   '$2b$10$zg4wUdfoBgNWRhFqzw1st.BwQUCIG29Zl7zouPJzYo5CYGVJ3bS4q',
-   'admin_hyunsu@naver.com', '조현수', 'admin', 'active', 1, 1,
-   '2026-05-27 02:36:43', '2026-05-27 02:36:43', '2026-05-27 07:25:47'),
-  ('e50a988b-98bf-4ccc-af4a-b81ed07d70ed', 'admin_juyeon',
-   '$2b$10$n/Q1VYEt9DL/QKH/7dbXe.qFhVR.2I7MVl9eWkwQ8CgR4ct2A.1am',
-   'admin_juyeon@google.com', '박주연', 'admin', 'active', 1, 1,
-   '2026-05-27 02:36:43', '2026-05-27 02:36:43', '2026-05-27 03:33:24'),
-  ('046f1c80-5e37-4481-9b7c-4922f34c5678', 'admin_inho',
-   '$2b$10$Xo7GpWGUpZE2SeGo.hqL0uG8YjKt4/NaZvZdq2oIEIEIj/MWLOM7S',
-   'admin_inho@google.com', '최인호', 'admin', 'active', 1, 1,
-   '2026-05-27 02:36:43', '2026-05-27 02:36:43', '2026-05-27 03:33:37'),
-  ('49c5e3eb-f9b5-4094-b88a-8e4b8b3a5efb', 'admin_wonjun',
-   '$2b$10$I3nCz.8e2xHGj76uLJ0pL.XyK0FxE2jO..KP2U/TzPqthwOkbzPsu',
-   'admin_wonjun@google.com', '최원준', 'admin', 'active', 1, 1,
-   '2026-05-27 02:36:43', '2026-05-27 02:36:43', '2026-05-27 03:33:51');
+-- 계정 정보는 저장소에 포함하지 않습니다.
+-- 스키마 생성 후 backend에서 아래 명령으로 생성합니다.
+--   npm run seed:admins
+-- 초기 비밀번호는 환경 변수(ADMIN_INITIAL_PASSWORD 등)로 지정하며,
+-- 배포 후 반드시 변경합니다.
 ```
 
 ---
