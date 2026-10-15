@@ -1,4 +1,4 @@
-# WHATPL — AWS 배포 가이드
+# AWS_MIGRATION_GUIDE.md
 
 > **현재 상태**: Node.js + Express 백엔드 / React + Vite 프론트엔드 / JSON 파일 DB / 로컬 파일 저장  
 > **목표 상태**: EC2(백엔드) + RDS MySQL(DB) + S3(파일) + CloudFront(CDN) + S3/Amplify(프론트)
