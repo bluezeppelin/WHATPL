@@ -1791,7 +1791,7 @@ CLOUDFRONT_DOMAIN=d1234abcd.cloudfront.net
 ### 기능 테스트
 
 ```
-1. admin_hyunsu, admin_juyeon, admin_inho, admin_wonjun 로그인
+1. seed:admins로 생성한 관리자 계정으로 로그인
 2. 관리자 콘솔(/admin) 접근
 3. /upload 접근 → "관리자 계정은 업로드 불가" 메시지 표시
 4. 네비바에 + 업로드 버튼 미노출 (admin 기준)
@@ -1812,7 +1812,7 @@ curl https://your-domain.com/health
 # DB 연결 확인 (admin 로그인 시도로 간접 확인)
 curl -X POST https://your-domain.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"loginId":"admin_hyunsu","password":"your-password"}'
+  -d '{"loginId":"<관리자 ID>","password":"<비밀번호>"}'
 ```
 
 ---
@@ -1828,7 +1828,7 @@ Phase 1 — AWS 인프라 구축
 
 Phase 2 — DB 스키마 + 초기 데이터
   5. RDS에 SQL 스키마 실행 (5장)
-  6. admin 4명 INSERT
+  6. npm run seed:admins로 관리자 계정 생성
   7. site/ 이미지 S3에 업로드
 
 Phase 3 — 백엔드 코드 수정
@@ -1845,6 +1845,6 @@ Phase 4 — 배포
 
 Phase 5 — 검증
   16. 헬스체크 + 기능 테스트
-  17. admin 로그인 4개 모두 확인
+  17. 관리자 계정 로그인 확인
   18. 음원 업로드/재생/삭제 전체 플로우 확인
 ```
